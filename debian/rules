@@ -183,6 +183,11 @@ endif
 	convert debian/$(sxname)/usr/share/icons/hicolor/32x32/apps/virtualbox.png \
 	    debian/$(sxname)/usr/share/pixmaps/virtualbox.xpm
 
+	install -m 644 -p -D debian/apport-hook-dkms.py \
+	    debian/$(pdkms)/usr/share/apport/package-hooks/$(pdkms).py
+	install -m 644 -p -D debian/apport-hook-dkms.py \
+	    debian/$(gdkms)/usr/share/apport/package-hooks/$(gdkms).py
+
 override_dh_fixperms:
 	dh_fixperms
 

@@ -1,5 +1,4 @@
 debian/virtualbox.files/*.sh /usr/share/virtualbox
-debian/virtualbox.files/source_virtualbox.py /usr/share/apport/package-hooks
 
 out/bin/components /usr/lib/virtualbox
 out/bin/VBoxREM* /usr/lib/virtualbox
