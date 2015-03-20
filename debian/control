@@ -22,9 +22,9 @@ Build-Depends: bzip2,
                imagemagick,
                kbuild (>= 1:0.1.9998svn2695),
                libasound2-dev,
-               libcap-dev,
+               libcap-dev [!kfreebsd-any],
                libcurl4-gnutls-dev,
-               libdevmapper-dev,
+               libdevmapper-dev [!kfreebsd-any],
                libdrm-dev,
                libgl1-mesa-dev,
                libglu1-mesa-dev,
@@ -76,7 +76,7 @@ Vcs-Git: git://anonscm.debian.org/pkg-virtualbox/virtualbox.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-virtualbox/virtualbox.git
 
 Package: virtualbox-qt
-Architecture: amd64 i386
+Architecture: amd64 i386 kfreebsd-any
 Pre-Depends: dpkg (>= 1.15.6~)
 Depends: virtualbox (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Description: x86 virtualization solution - Qt based user interface
@@ -87,7 +87,7 @@ Description: x86 virtualization solution - Qt based user interface
  This package provides the Qt based graphical user interface for VirtualBox.
 
 Package: virtualbox
-Architecture: amd64 i386
+Architecture: amd64 i386 kfreebsd-any
 Pre-Depends: dpkg (>= 1.15.6~)
 Depends: adduser, ${misc:Depends}, ${python:Depends}, ${shlibs:Depends}
 Recommends: virtualbox-dkms (= ${source:Version}) | virtualbox-source (= ${source:Version}),
@@ -117,7 +117,7 @@ Description: x86 virtualization solution - base binaries
 Package: virtualbox-dbg
 Section: contrib/debug
 Priority: extra
-Architecture: amd64 i386
+Architecture: amd64 i386 kfreebsd-any
 Pre-Depends: dpkg (>= 1.15.6~)
 Depends: virtualbox (= ${binary:Version}) | virtualbox-guest-utils (= ${binary:Version}),
          ${misc:Depends}
@@ -196,7 +196,7 @@ Description: x86 virtualization solution - guest addition module source
 
 Package: virtualbox-guest-x11
 Section: contrib/x11
-Architecture: amd64 i386
+Architecture: amd64 i386 kfreebsd-any
 Pre-Depends: dpkg (>= 1.15.6~)
 Depends: virtualbox-guest-utils (= ${binary:Version}),
          ${misc:Depends},
@@ -213,7 +213,7 @@ Description: x86 virtualization solution - X11 guest utilities
  They provide closer integration and improve the interactive performance.
 
 Package: virtualbox-guest-utils
-Architecture: amd64 i386
+Architecture: amd64 i386 kfreebsd-any
 Pre-Depends: dpkg (>= 1.15.6~)
 Depends: adduser, pciutils, ${misc:Depends}, ${shlibs:Depends}
 Recommends: virtualbox-guest-dkms (= ${source:Version}) | virtualbox-guest-source (= ${source:Version}),
