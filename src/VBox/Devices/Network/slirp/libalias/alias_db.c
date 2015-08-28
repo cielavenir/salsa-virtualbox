@@ -820,9 +820,9 @@ GetSocket(struct libalias *la, u_short port_net, struct alias_link *pLnk, int li
             sin.sin_port = so->so_fport;
             ret = connect(so->s, (struct sockaddr *)&sin, sizeof(sin));
             if (   ret < 0
-                && errno == EINPROGRESS
-                && errno == EAGAIN
-                && errno == EWOULDBLOCK)
+                && errno != EINPROGRESS
+                && errno != EAGAIN
+                && errno != EWOULDBLOCK)
             {
                 closesocket(so->s);
                 RTMemFree(so);
@@ -833,7 +833,7 @@ GetSocket(struct libalias *la, u_short port_net, struct alias_link *pLnk, int li
             /* tcp_{snd,rcv}space -> pData->tcp_{snd,rcv}space */
             sbreserve(la->pData, &so->so_snd, la->tcp_sndspace);
             sbreserve(la->pData, &so->so_rcv, la->tcp_rcvspace);
-	}
+        }
         else if (link_type == LINK_UDP)
             insque(la->pData, so, &la->udb);
         else
@@ -1007,6 +1007,7 @@ void slirpDeleteLinkSocket(void *pvLnk)
     {
         struct libalias *la = lnk->la;
         la->sockCount--;
+        lnk->pSo->so_pvLnk = NULL; /* forget me, please ! */
         lnk->pSo = NULL;
     }
 }

@@ -781,7 +781,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
     {
         case VRDE_SCARD_FN_ESTABLISHCONTEXT:
         {
-            Assert(cbData == sizeof(VRDESCARDESTABLISHCONTEXTRSP));
+            Assert(cbData == sizeof(VRDESCARDESTABLISHCONTEXTRSP) || RT_FAILURE(rcRequest));
             VRDESCARDESTABLISHCONTEXTRSP *pRsp = (VRDESCARDESTABLISHCONTEXTRSP *)pvData;
             UCRREMOTE *pRemote = (UCRREMOTE *)pvUser;
 
@@ -805,7 +805,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_LISTREADERS:
         {
-            Assert(cbData == sizeof(VRDESCARDLISTREADERSRSP));
+            Assert(cbData == sizeof(VRDESCARDLISTREADERSRSP) || RT_FAILURE(rcRequest));
             VRDESCARDLISTREADERSRSP *pRsp = (VRDESCARDLISTREADERSRSP *)pvData;
             UCRREMOTE *pRemote = (UCRREMOTE *)pvUser;
 
@@ -838,7 +838,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_RELEASECONTEXT:
         {
-            Assert(cbData == sizeof(VRDESCARDRELEASECONTEXTRSP));
+            Assert(cbData == sizeof(VRDESCARDRELEASECONTEXTRSP) || RT_FAILURE(rcRequest));
             VRDESCARDRELEASECONTEXTRSP *pRsp = (VRDESCARDRELEASECONTEXTRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -852,7 +852,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_GETSTATUSCHANGE:
         {
-            Assert(cbData == sizeof(VRDESCARDGETSTATUSCHANGERSP));
+            Assert(cbData == sizeof(VRDESCARDGETSTATUSCHANGERSP) || RT_FAILURE(rcRequest));
             VRDESCARDGETSTATUSCHANGERSP *pRsp = (VRDESCARDGETSTATUSCHANGERSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -861,7 +861,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
             LogFlowFunc(("GETSTATUSCHANGE\n"));
 
             uint32_t rcCard;
-            if (RT_FAILURE(rc))
+            if (RT_FAILURE(rcRequest))
             {
                 rcCard = VRDE_SCARD_E_NO_SMARTCARD;
             }
@@ -910,7 +910,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_CANCEL:
         {
-            Assert(cbData == sizeof(VRDESCARDCANCELRSP));
+            Assert(cbData == sizeof(VRDESCARDCANCELRSP) || RT_FAILURE(rcRequest));
             VRDESCARDCANCELRSP *pRsp = (VRDESCARDCANCELRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -921,7 +921,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_CONNECT:
         {
-            Assert(cbData == sizeof(VRDESCARDCONNECTRSP));
+            Assert(cbData == sizeof(VRDESCARDCONNECTRSP) || RT_FAILURE(rcRequest));
             VRDESCARDCONNECTRSP *pRsp = (VRDESCARDCONNECTRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -932,7 +932,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
             uint32_t u32ActiveProtocol = 0;
             uint32_t rcCard;
 
-            if (RT_FAILURE(rc))
+            if (RT_FAILURE(rcRequest))
             {
                 rcCard = VRDE_SCARD_E_NO_SMARTCARD;
             }
@@ -960,7 +960,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_RECONNECT:
         {
-            Assert(cbData == sizeof(VRDESCARDRECONNECTRSP));
+            Assert(cbData == sizeof(VRDESCARDRECONNECTRSP) || RT_FAILURE(rcRequest));
             VRDESCARDRECONNECTRSP *pRsp = (VRDESCARDRECONNECTRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -971,7 +971,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_DISCONNECT:
         {
-            Assert(cbData == sizeof(VRDESCARDDISCONNECTRSP));
+            Assert(cbData == sizeof(VRDESCARDDISCONNECTRSP) || RT_FAILURE(rcRequest));
             VRDESCARDDISCONNECTRSP *pRsp = (VRDESCARDDISCONNECTRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -983,7 +983,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
             uint32_t rcCard;
 
-            if (RT_FAILURE(rc))
+            if (RT_FAILURE(rcRequest))
             {
                 rcCard = VRDE_SCARD_E_NO_SMARTCARD;
             }
@@ -1001,7 +1001,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_BEGINTRANSACTION:
         {
-            Assert(cbData == sizeof(VRDESCARDBEGINTRANSACTIONRSP));
+            Assert(cbData == sizeof(VRDESCARDBEGINTRANSACTIONRSP) || RT_FAILURE(rcRequest));
             VRDESCARDBEGINTRANSACTIONRSP *pRsp = (VRDESCARDBEGINTRANSACTIONRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -1012,7 +1012,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_ENDTRANSACTION:
         {
-            Assert(cbData == sizeof(VRDESCARDENDTRANSACTIONRSP));
+            Assert(cbData == sizeof(VRDESCARDENDTRANSACTIONRSP) || RT_FAILURE(rcRequest));
             VRDESCARDENDTRANSACTIONRSP *pRsp = (VRDESCARDENDTRANSACTIONRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -1023,7 +1023,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_STATE:
         {
-            Assert(cbData == sizeof(VRDESCARDSTATERSP));
+            Assert(cbData == sizeof(VRDESCARDSTATERSP) || RT_FAILURE(rcRequest));
             VRDESCARDSTATERSP *pRsp = (VRDESCARDSTATERSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -1034,7 +1034,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_STATUS:
         {
-            Assert(cbData == sizeof(VRDESCARDSTATUSRSP));
+            Assert(cbData == sizeof(VRDESCARDSTATUSRSP) || RT_FAILURE(rcRequest));
             VRDESCARDSTATUSRSP *pRsp = (VRDESCARDSTATUSRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -1051,7 +1051,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
             uint32_t rcCard;
 
-            if (RT_FAILURE(rc))
+            if (RT_FAILURE(rcRequest))
             {
                 rcCard = VRDE_SCARD_E_NO_SMARTCARD;
             }
@@ -1085,7 +1085,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_TRANSMIT:
         {
-            Assert(cbData == sizeof(VRDESCARDTRANSMITRSP));
+            Assert(cbData == sizeof(VRDESCARDTRANSMITRSP) || RT_FAILURE(rcRequest));
             VRDESCARDTRANSMITRSP *pRsp = (VRDESCARDTRANSMITRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -1099,7 +1099,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
             uint32_t rcCard;
 
-            if (RT_FAILURE(rc))
+            if (RT_FAILURE(rcRequest))
             {
                 rcCard = VRDE_SCARD_E_NO_SMARTCARD;
             }
@@ -1129,7 +1129,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_CONTROL:
         {
-            Assert(cbData == sizeof(VRDESCARDCONTROLRSP));
+            Assert(cbData == sizeof(VRDESCARDCONTROLRSP) || RT_FAILURE(rcRequest));
             VRDESCARDCONTROLRSP *pRsp = (VRDESCARDCONTROLRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -1142,7 +1142,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
             uint32_t rcCard;
 
-            if (RT_FAILURE(rc))
+            if (RT_FAILURE(rcRequest))
             {
                 rcCard = VRDE_SCARD_E_NO_SMARTCARD;
             }
@@ -1169,7 +1169,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_GETATTRIB:
         {
-            Assert(cbData == sizeof(VRDESCARDGETATTRIBRSP));
+            Assert(cbData == sizeof(VRDESCARDGETATTRIBRSP) || RT_FAILURE(rcRequest));
             VRDESCARDGETATTRIBRSP *pRsp = (VRDESCARDGETATTRIBRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -1182,7 +1182,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
             uint32_t rcCard;
 
-            if (RT_FAILURE(rc))
+            if (RT_FAILURE(rcRequest))
             {
                 rcCard = VRDE_SCARD_E_NO_SMARTCARD;
             }
@@ -1209,7 +1209,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
         case VRDE_SCARD_FN_SETATTRIB:
         {
-            Assert(cbData == sizeof(VRDESCARDSETATTRIBRSP));
+            Assert(cbData == sizeof(VRDESCARDSETATTRIBRSP) || RT_FAILURE(rcRequest));
             VRDESCARDSETATTRIBRSP *pRsp = (VRDESCARDSETATTRIBRSP *)pvData;
             UCRREQCTX *pCtx = (UCRREQCTX *)pvUser;
 
@@ -1219,7 +1219,7 @@ int UsbCardReader::VRDEResponse(int rcRequest, void *pvUser, uint32_t u32Functio
 
             uint32_t rcCard;
 
-            if (RT_FAILURE(rc))
+            if (RT_FAILURE(rcRequest))
             {
                 rcCard = VRDE_SCARD_E_NO_SMARTCARD;
             }

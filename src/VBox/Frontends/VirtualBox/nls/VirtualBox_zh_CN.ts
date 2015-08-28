@@ -4207,7 +4207,7 @@
     <message numerus="yes">
         <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
         <translatorcomment>TODO</translatorcomment>
-        <translation type="unfinished">
+        <translation type="obsolete">
             <numerusform>&lt;p&gt;虚拟机 &lt;b&gt;%1&lt;/b&gt; 当前处于保存状态。&lt;/p&gt;&lt;p&gt;如果您继续，将放弃已导出虚拟机的运行时状态。注意，现有的虚拟机不会更改。&lt;/p&gt;</numerusform>
         </translation>
     </message>
@@ -4439,6 +4439,17 @@
         <source>Ok</source>
         <comment>extension pack</comment>
         <translation>确定</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Failed to initialize COM because the VirtualBox global configuration directory &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; is not accessible. Please check the permissions of this directory and of its parent directory.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
+        <comment>This text is never used with n == 0.  Feel free to drop the %n where possible, we only included it because of problems with Qt Linguist (but the user can see how many machines are in the list and doesn&apos;t need to be told).</comment>
+        <translation type="unfinished">
+            <numerusform>&lt;p&gt;虚拟机 &lt;b&gt;%1&lt;/b&gt; 当前处于保存状态。&lt;/p&gt;&lt;p&gt;如果您继续，将放弃已导出虚拟机的运行时状态。注意，现有的虚拟机不会更改。&lt;/p&gt;</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -6377,7 +6388,7 @@
     </message>
     <message>
         <source>and</source>
-        <translation>及</translation>
+        <translation type="obsolete">及</translation>
     </message>
     <message>
         <source>MB</source>

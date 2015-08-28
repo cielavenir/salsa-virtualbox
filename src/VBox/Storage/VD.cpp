@@ -914,7 +914,10 @@ static int vdReadHelperEx(PVBOXHDD pDisk, PVDIMAGE pImage, PVDIMAGE pImageParent
             else
                 cbBufClear += cbThisRead;
 
-            rc = VINF_SUCCESS;
+            if (pImage->uOpenFlags & VD_OPEN_FLAGS_INFORM_ABOUT_ZERO_BLOCKS)
+                rc = VINF_VD_NEW_ZEROED_BLOCK;
+            else
+                rc = VINF_SUCCESS;
         }
         else if (RT_SUCCESS(rc))
         {
@@ -3691,10 +3694,13 @@ static void vdIOIntIoCtxCompleted(void *pvUser, PVDIOCTX pIoCtx, int rcReq,
     pIoCtx->fBlocked = false;
     ASMAtomicSubU32(&pIoCtx->cbTransferLeft, cbCompleted);
 
-    /* Clear the pointer to next transfer function in case we have nothing to transfer anymore.
-     * @todo: Find a better way to prevent vdIoCtxContinue from calling the read/write helper again. */
+    /* Set next transfer function if the current one finished.
+     * @todo: Find a better way to prevent vdIoCtxContinue from calling the current helper again. */
     if (!pIoCtx->cbTransferLeft)
-        pIoCtx->pfnIoCtxTransfer = NULL;
+    {
+        pIoCtx->pfnIoCtxTransfer = pIoCtx->pfnIoCtxTransferNext;
+        pIoCtx->pfnIoCtxTransferNext = NULL;
+    }
 
     vdIoCtxContinue(pIoCtx, rcReq);
 
@@ -4455,10 +4461,10 @@ VBOXDDU_DECL(int) VDOpen(PVBOXHDD pDisk, const char *pszBackend,
                             &pDisk->VDIIOIntCallbacks, &pImage->VDIo, &pImage->pVDIfsImage);
         AssertRC(rc);
 
-        pImage->uOpenFlags = uOpenFlags & (VD_OPEN_FLAGS_HONOR_SAME | VD_OPEN_FLAGS_IGNORE_FLUSH);
+        pImage->uOpenFlags = uOpenFlags & (VD_OPEN_FLAGS_HONOR_SAME | VD_OPEN_FLAGS_IGNORE_FLUSH | VD_OPEN_FLAGS_INFORM_ABOUT_ZERO_BLOCKS);
         pImage->VDIo.fIgnoreFlush = (uOpenFlags & VD_OPEN_FLAGS_IGNORE_FLUSH) != 0;
         rc = pImage->Backend->pfnOpen(pImage->pszFilename,
-                                      uOpenFlags & ~(VD_OPEN_FLAGS_HONOR_SAME | VD_OPEN_FLAGS_IGNORE_FLUSH),
+                                      uOpenFlags & ~(VD_OPEN_FLAGS_HONOR_SAME | VD_OPEN_FLAGS_IGNORE_FLUSH | VD_OPEN_FLAGS_INFORM_ABOUT_ZERO_BLOCKS),
                                       pDisk->pVDIfsDisk,
                                       pImage->pVDIfsImage,
                                       pDisk->enmType,
@@ -4473,7 +4479,7 @@ VBOXDDU_DECL(int) VDOpen(PVBOXHDD pDisk, const char *pszBackend,
                      || rc == VERR_SHARING_VIOLATION
                      || rc == VERR_FILE_LOCK_FAILED))
                 rc = pImage->Backend->pfnOpen(pImage->pszFilename,
-                                                (uOpenFlags & ~VD_OPEN_FLAGS_HONOR_SAME)
+                                                (uOpenFlags & ~(VD_OPEN_FLAGS_HONOR_SAME | VD_OPEN_FLAGS_INFORM_ABOUT_ZERO_BLOCKS))
                                                | VD_OPEN_FLAGS_READONLY,
                                                pDisk->pVDIfsDisk,
                                                pImage->pVDIfsImage,
@@ -6615,6 +6621,8 @@ VBOXDDU_DECL(int) VDResize(PVBOXHDD pDisk, uint64_t cbSize,
     {
         if (pCbProgress && pCbProgress->pfnProgress)
             pCbProgress->pfnProgress(pIfProgress->pvUser, 100);
+
+        pDisk->cbSize = cbSize;
     }
 
     LogFlowFunc(("returns %Rrc\n", rc));
@@ -7750,7 +7758,9 @@ VBOXDDU_DECL(int) VDSetOpenFlags(PVBOXHDD pDisk, unsigned nImage,
         AssertPtrBreakStmt(pImage, rc = VERR_VD_IMAGE_NOT_FOUND);
 
         rc = pImage->Backend->pfnSetOpenFlags(pImage->pBackendData,
-                                              uOpenFlags);
+                                              uOpenFlags & ~(VD_OPEN_FLAGS_HONOR_SAME | VD_OPEN_FLAGS_IGNORE_FLUSH | VD_OPEN_FLAGS_INFORM_ABOUT_ZERO_BLOCKS));
+        if (RT_SUCCESS(rc))
+            pImage->uOpenFlags = uOpenFlags & (VD_OPEN_FLAGS_HONOR_SAME | VD_OPEN_FLAGS_IGNORE_FLUSH | VD_OPEN_FLAGS_INFORM_ABOUT_ZERO_BLOCKS);
     } while (0);
 
     if (RT_UNLIKELY(fLockWrite))

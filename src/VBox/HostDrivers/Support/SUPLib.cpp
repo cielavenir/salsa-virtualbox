@@ -96,11 +96,12 @@ static bool                     g_fPreInited = false;
  * via the pre-init mechanism from the hardened executable stub.  */
 SUPLIBDATA                      g_supLibData =
 {
-    SUP_HDEVICE_NIL
+    SUP_HDEVICE_NIL,
+    /*.fUnrestricted        = */    true
 #if   defined(RT_OS_DARWIN)
-    , NULL
+    ,/* .uConnection        = */    NULL
 #elif defined(RT_OS_LINUX)
-    , false
+    ,/* .fSysMadviseWorks   = */    false
 #endif
 };
 
@@ -210,6 +211,8 @@ DECLEXPORT(int) supR3PreInit(PSUPPREINITDATA pPreInitData, uint32_t fFlags)
 
 SUPR3DECL(int) SUPR3Init(PSUPDRVSESSION *ppSession)
 {
+    bool const fUnrestricted = true;
+
     /*
      * Perform some sanity checks.
      * (Got some trouble with compile time member alignment assertions.)
@@ -227,7 +230,18 @@ SUPR3DECL(int) SUPR3Init(PSUPDRVSESSION *ppSession)
     if (ppSession)
         *ppSession = g_pSession;
     if (g_cInits++ > 0)
+    {
+#if 0
+        if (fUnrestricted && !g_supLibData.fUnrestricted)
+        {
+            g_cInits--;
+            if (ppSession)
+                *ppSession = NIL_RTR0PTR;
+            return VERR_VM_DRIVER_NOT_ACCESSIBLE; /** @todo different status code? */
+        }
+#endif
         return VINF_SUCCESS;
+    }
 
     /*
      * Check for fake mode.
@@ -250,7 +264,8 @@ SUPR3DECL(int) SUPR3Init(PSUPDRVSESSION *ppSession)
     /*
      * Open the support driver.
      */
-    int rc = suplibOsInit(&g_supLibData, g_fPreInited);
+    SUPINITOP enmWhat = kSupInitOp_Driver;
+    int rc = suplibOsInit(&g_supLibData, g_fPreInited, fUnrestricted, &enmWhat, NULL);
     if (RT_SUCCESS(rc))
     {
         /*
@@ -266,8 +281,8 @@ SUPR3DECL(int) SUPR3Init(PSUPDRVSESSION *ppSession)
         CookieReq.Hdr.rc = VERR_INTERNAL_ERROR;
         strcpy(CookieReq.u.In.szMagic, SUPCOOKIE_MAGIC);
         CookieReq.u.In.u32ReqVersion = SUPDRV_IOC_VERSION;
-        const uint32_t uMinVersion = (SUPDRV_IOC_VERSION & 0xffff0000) == 0x00170000
-                                   ? 0x00170002
+        const uint32_t uMinVersion = (SUPDRV_IOC_VERSION & 0xffff0000) == 0x00190000
+                                   ? 0x00190001
                                    : SUPDRV_IOC_VERSION & 0xffff0000;
         CookieReq.u.In.u32MinVersion = uMinVersion;
         rc = suplibOsIOCtl(&g_supLibData, SUP_IOCTL_COOKIE, &CookieReq, SUP_IOCTL_COOKIE_SIZE);
@@ -1436,6 +1451,26 @@ SUPR3DECL(int) SUPR3LowFree(void *pv, size_t cPages)
 }
 
 
+SUPR3DECL(int) SUPR3HardenedVerifyInit(void)
+{
+#ifdef RT_OS_WINDOWS
+    if (g_cInits == 0)
+        return suplibOsHardenedVerifyInit();
+#endif
+    return VINF_SUCCESS;
+}
+
+
+SUPR3DECL(int) SUPR3HardenedVerifyTerm(void)
+{
+#ifdef RT_OS_WINDOWS
+    if (g_cInits == 0)
+        return suplibOsHardenedVerifyTerm();
+#endif
+    return VINF_SUCCESS;
+}
+
+
 SUPR3DECL(int) SUPR3HardenedVerifyFile(const char *pszFilename, const char *pszMsg, PRTFILE phFile)
 {
     /*
@@ -1511,7 +1546,7 @@ SUPR3DECL(int) SUPR3HardenedVerifySelf(const char *pszArgv0, bool fInternal, PRT
     /*
      * Verify that the image file and parent directories are sane.
      */
-    rc = supR3HardenedVerifyFile(szExecPath, RTHCUINTPTR_MAX, pErrInfo);
+    rc = supR3HardenedVerifyFile(szExecPath, RTHCUINTPTR_MAX, false /*fMaybe3rdParty*/, pErrInfo);
     if (RT_FAILURE(rc))
         return rc;
 #endif
@@ -1554,7 +1589,7 @@ SUPR3DECL(int) SUPR3HardenedVerifyPlugIn(const char *pszFilename, PRTERRINFO pEr
      * Only do the actual check in hardened builds.
      */
 #ifdef VBOX_WITH_HARDENING
-    int rc = supR3HardenedVerifyFile(pszFilename, RTHCUINTPTR_MAX, pErrInfo);
+    int rc = supR3HardenedVerifyFile(pszFilename, RTHCUINTPTR_MAX, true /*fMaybe3rdParty*/, pErrInfo);
     if (RT_FAILURE(rc) && !RTErrInfoIsSet(pErrInfo))
         LogRel(("supR3HardenedVerifyFile: Verification of \"%s\" failed, rc=%Rrc\n", pszFilename, rc));
     return rc;
@@ -1574,7 +1609,7 @@ SUPR3DECL(int) SUPR3LoadModule(const char *pszFilename, const char *pszModule, v
     {
         rc = supLoadModule(pszFilename, pszModule, NULL, ppvImageBase);
         if (RT_FAILURE(rc))
-            RTErrInfoSetF(pErrInfo, rc, "supLoadModule returned %Rrc", rc);
+            RTErrInfoSetF(pErrInfo, rc, "SUPR3LoadModule: supLoadModule returned %Rrc", rc);
     }
     return rc;
 }
@@ -1822,7 +1857,10 @@ static int supLoadModule(const char *pszFilename, const char *pszModule, const c
     RTLDRMOD hLdrMod;
     rc = RTLdrOpen(pszFilename, 0, RTLDRARCH_HOST, &hLdrMod);
     if (!RT_SUCCESS(rc))
+    {
+        LogRel(("SUP: RTLdrOpen failed for %s (%s)\n", pszModule, pszFilename, rc));
         return rc;
+    }
 
     SUPLDRCALCSIZEARGS CalcArgs;
     CalcArgs.cbStrings = 0;
@@ -1890,21 +1928,27 @@ static int supLoadModule(const char *pszFilename, const char *pszModule, const c
                     RTUINTPTR ModuleTerm = 0;
                     if (fIsVMMR0)
                     {
-                        rc = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase, "VMMR0EntryInt", &VMMR0EntryInt);
+                        rc = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase,
+                                              UINT32_MAX, "VMMR0EntryInt", &VMMR0EntryInt);
                         if (RT_SUCCESS(rc))
-                            rc = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase, "VMMR0EntryFast", &VMMR0EntryFast);
+                            rc = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase,
+                                                  UINT32_MAX, "VMMR0EntryFast", &VMMR0EntryFast);
                         if (RT_SUCCESS(rc))
-                            rc = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase, "VMMR0EntryEx", &VMMR0EntryEx);
+                            rc = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase,
+                                                  UINT32_MAX, "VMMR0EntryEx", &VMMR0EntryEx);
                     }
                     else if (pszSrvReqHandler)
-                        rc = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase, pszSrvReqHandler, &SrvReqHandler);
+                        rc = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase,
+                                              UINT32_MAX, pszSrvReqHandler, &SrvReqHandler);
                     if (RT_SUCCESS(rc))
                     {
-                        int rc2 = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase, "ModuleInit", &ModuleInit);
+                        int rc2 = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase,
+                                                   UINT32_MAX, "ModuleInit", &ModuleInit);
                         if (RT_FAILURE(rc2))
                             ModuleInit = 0;
 
-                        rc2 = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase, "ModuleTerm", &ModuleTerm);
+                        rc2 = RTLdrGetSymbolEx(hLdrMod, &pLoadReq->u.In.abImage[0], (uintptr_t)OpenReq.u.Out.pvImageBase,
+                                               UINT32_MAX, "ModuleTerm", &ModuleTerm);
                         if (RT_FAILURE(rc2))
                             ModuleTerm = 0;
                     }
@@ -1967,6 +2011,8 @@ static int supLoadModule(const char *pszFilename, const char *pszModule, const c
                                 rc = suplibOsIOCtl(&g_supLibData, SUP_IOCTL_LDR_LOAD, pLoadReq, SUP_IOCTL_LDR_LOAD_SIZE(cbImageWithTabs));
                                 if (RT_SUCCESS(rc))
                                     rc = pLoadReq->Hdr.rc;
+                                else
+                                    LogRel(("SUP: SUP_IOCTL_LDR_LOAD ioctl for %s (%s) failed rc=%Rrc\n", pszModule, pszFilename, rc));
                             }
                             else
                                 rc = VINF_SUCCESS;
@@ -1991,9 +2037,17 @@ static int supLoadModule(const char *pszFilename, const char *pszModule, const c
                                 RTLdrClose(hLdrMod);
                                 return VINF_SUCCESS;
                             }
+                            else
+                                LogRel(("SUP: Loading failed for %s (%s) rc=%Rrc\n", pszModule, pszFilename, rc));
                         }
+                        else
+                            LogRel(("SUP: RTLdrEnumSymbols failed for %s (%s) rc=%Rrc\n", pszModule, pszFilename, rc));
                     }
+                    else
+                        LogRel(("SUP: Failed to get entry points for %s (%s) rc=%Rrc\n", pszModule, pszFilename, rc));
                 }
+                else
+                    LogRel(("SUP: RTLdrGetBits failed for %s (%s). rc=%Rrc\n", pszModule, pszFilename, rc));
                 RTMemTmpFree(pLoadReq);
             }
             else
@@ -2125,7 +2179,9 @@ static int supR3HardenedLdrLoadIt(const char *pszFilename, PRTLDRMOD phLdrMod, u
     /*
      * Verify the image file.
      */
-    int rc = supR3HardenedVerifyFixedFile(pszFilename, false /* fFatal */);
+    int rc = SUPR3HardenedVerifyInit();
+    if (RT_FAILURE(rc))
+        rc = supR3HardenedVerifyFixedFile(pszFilename, false /* fFatal */);
     if (RT_FAILURE(rc))
     {
         LogRel(("supR3HardenedLdrLoadIt: Verification of \"%s\" failed, rc=%Rrc\n", pszFilename, rc));
@@ -2231,8 +2287,6 @@ SUPR3DECL(int) SUPR3HardenedLdrLoadAppPriv(const char *pszFilename, PRTLDRMOD ph
 
 SUPR3DECL(int) SUPR3HardenedLdrLoadPlugIn(const char *pszFilename, PRTLDRMOD phLdrMod, PRTERRINFO pErrInfo)
 {
-    int rc;
-
     /*
      * Validate input.
      */
@@ -2246,7 +2300,7 @@ SUPR3DECL(int) SUPR3HardenedLdrLoadPlugIn(const char *pszFilename, PRTLDRMOD phL
     /*
      * Verify the image file.
      */
-    rc = supR3HardenedVerifyFile(pszFilename, RTHCUINTPTR_MAX, pErrInfo);
+    int rc = supR3HardenedVerifyFile(pszFilename, RTHCUINTPTR_MAX, true /*fMaybe3rdParty*/, pErrInfo);
     if (RT_FAILURE(rc))
     {
         if (!RTErrInfoIsSet(pErrInfo))

@@ -3301,9 +3301,9 @@ static int patmCreateTrampoline(PVM pVM, RTRCPTR pInstrGC, PPATMPATCHREC pPatchR
 
         for (i=0;i<pPatchPage->cCount;i++)
         {
-            if (pPatchPage->aPatch[i])
+            if (pPatchPage->papPatch[i])
             {
-                pPatchToJmp = pPatchPage->aPatch[i];
+                pPatchToJmp = pPatchPage->papPatch[i];
 
                 if (    (pPatchToJmp->flags & PATMFL_DUPLICATE_FUNCTION)
                     &&  pPatchToJmp->uState == PATCH_ENABLED)
@@ -3457,9 +3457,9 @@ VMMR3DECL(int) PATMR3DuplicateFunctionRequest(PVM pVM, PCPUMCTX pCtx)
 
         for (i=0;i<pPatchPage->cCount;i++)
         {
-            if (pPatchPage->aPatch[i])
+            if (pPatchPage->papPatch[i])
             {
-                PPATCHINFO pPatch = pPatchPage->aPatch[i];
+                PPATCHINFO pPatch = pPatchPage->papPatch[i];
 
                 if (    (pPatch->flags & PATMFL_DUPLICATE_FUNCTION)
                     &&  pPatch->uState == PATCH_ENABLED)
@@ -4535,19 +4535,20 @@ int patmAddPatchToPage(PVM pVM, RTRCUINTPTR pPage, PPATCHINFO pPatch)
         if (pPatchPage->cCount == pPatchPage->cMaxPatches)
         {
             uint32_t    cMaxPatchesOld = pPatchPage->cMaxPatches;
-            PPATCHINFO *paPatchOld     = pPatchPage->aPatch;
+            PPATCHINFO *papPatchOld    = pPatchPage->papPatch;
 
             pPatchPage->cMaxPatches += PATMPATCHPAGE_PREALLOC_INCREMENT;
-            rc = MMHyperAlloc(pVM, sizeof(PPATCHINFO)*pPatchPage->cMaxPatches, 0, MM_TAG_PATM_PATCH, (void **)&pPatchPage->aPatch);
+            rc = MMHyperAlloc(pVM, sizeof(pPatchPage->papPatch[0]) * pPatchPage->cMaxPatches, 0, MM_TAG_PATM_PATCH,
+                              (void **)&pPatchPage->papPatch);
             if (RT_FAILURE(rc))
             {
                 Log(("Out of memory!!!!\n"));
                 return VERR_NO_MEMORY;
             }
-            memcpy(pPatchPage->aPatch, paPatchOld, cMaxPatchesOld*sizeof(PPATCHINFO));
-            MMHyperFree(pVM, paPatchOld);
+            memcpy(pPatchPage->papPatch, papPatchOld, cMaxPatchesOld * sizeof(pPatchPage->papPatch[0]));
+            MMHyperFree(pVM, papPatchOld);
         }
-        pPatchPage->aPatch[pPatchPage->cCount] = pPatch;
+        pPatchPage->papPatch[pPatchPage->cCount] = pPatch;
         pPatchPage->cCount++;
     }
     else
@@ -4564,14 +4565,15 @@ int patmAddPatchToPage(PVM pVM, RTRCUINTPTR pPage, PPATCHINFO pPatch)
         pPatchPage->cCount      = 1;
         pPatchPage->cMaxPatches = PATMPATCHPAGE_PREALLOC_INCREMENT;
 
-        rc = MMHyperAlloc(pVM, sizeof(PPATCHINFO)*PATMPATCHPAGE_PREALLOC_INCREMENT, 0, MM_TAG_PATM_PATCH, (void **)&pPatchPage->aPatch);
+        rc = MMHyperAlloc(pVM, sizeof(pPatchPage->papPatch[0]) * PATMPATCHPAGE_PREALLOC_INCREMENT, 0, MM_TAG_PATM_PATCH,
+                          (void **)&pPatchPage->papPatch);
         if (RT_FAILURE(rc))
         {
             Log(("Out of memory!!!!\n"));
             MMHyperFree(pVM, pPatchPage);
             return VERR_NO_MEMORY;
         }
-        pPatchPage->aPatch[0] = pPatch;
+        pPatchPage->papPatch[0] = pPatch;
 
         fInserted = RTAvloU32Insert(&pVM->patm.s.PatchLookupTreeHC->PatchTreeByPage, &pPatchPage->Core);
         Assert(fInserted);
@@ -4595,7 +4597,9 @@ int patmAddPatchToPage(PVM pVM, RTRCUINTPTR pPage, PPATCHINFO pPatch)
             pPatchPage->pLowestAddrGC = (RTRCPTR)pGuestToPatchRec->Core.Key;
 
             offset = pPatchPage->pLowestAddrGC & PAGE_OFFSET_MASK;
-            /* If we're too close to the page boundary, then make sure an instruction from the previous page doesn't cross the boundary itself. */
+            /* If we're too close to the page boundary, then make sure an
+               instruction from the previous page doesn't cross the
+               boundary itself. */
             if (offset && offset < MAX_INSTR_SIZE)
             {
                 /* Get the closest guest instruction (from above) */
@@ -4662,22 +4666,19 @@ int patmRemovePatchFromPage(PVM pVM, RTRCUINTPTR pPage, PPATCHINFO pPatch)
         uint32_t i;
 
         /* Used by multiple patches */
-        for (i=0;i<pPatchPage->cCount;i++)
+        for (i = 0; i < pPatchPage->cCount; i++)
         {
-            if (pPatchPage->aPatch[i] == pPatch)
+            if (pPatchPage->papPatch[i] == pPatch)
             {
-                pPatchPage->aPatch[i] = 0;
-                break;
+                /* close the gap between the remaining pointers. */
+                uint32_t cNew = --pPatchPage->cCount;
+                if (i < cNew)
+                    pPatchPage->papPatch[i] = pPatchPage->papPatch[cNew];
+                pPatchPage->papPatch[cNew] = NULL;
+                return VINF_SUCCESS;
             }
         }
-        /* close the gap between the remaining pointers. */
-        if (i < pPatchPage->cCount - 1)
-        {
-            memcpy(&pPatchPage->aPatch[i], &pPatchPage->aPatch[i+1], sizeof(PPATCHINFO)*(pPatchPage->cCount - (i+1)));
-        }
-        AssertMsg(i < pPatchPage->cCount, ("Unable to find patch %RHv in page %RRv\n", pPatch, pPage));
-
-        pPatchPage->cCount--;
+        AssertMsgFailed(("Unable to find patch %RHv in page %RRv\n", pPatch, pPage));
     }
     else
     {
@@ -4689,8 +4690,8 @@ int patmRemovePatchFromPage(PVM pVM, RTRCUINTPTR pPage, PPATCHINFO pPatch)
         pPatchNode = (PPATMPATCHPAGE)RTAvloU32Remove(&pVM->patm.s.PatchLookupTreeHC->PatchTreeByPage, pPage);
         Assert(pPatchNode && pPatchNode == pPatchPage);
 
-        Assert(pPatchPage->aPatch);
-        rc = MMHyperFree(pVM, pPatchPage->aPatch);
+        Assert(pPatchPage->papPatch);
+        rc = MMHyperFree(pVM, pPatchPage->papPatch);
         AssertRC(rc);
         rc = MMHyperFree(pVM, pPatchPage);
         AssertRC(rc);
@@ -4812,13 +4813,13 @@ loop_start:
 
             for (i=0;i<pPatchPage->cCount;i++)
             {
-                if (pPatchPage->aPatch[i])
+                if (pPatchPage->papPatch[i])
                 {
-                    PPATCHINFO pPatch = pPatchPage->aPatch[i];
+                    PPATCHINFO pPatch = pPatchPage->papPatch[i];
                     RTRCPTR pPatchInstrGC;
                     //unused: bool    fForceBreak = false;
 
-                    Assert(pPatchPage->aPatch[i]->flags & PATMFL_CODE_MONITORED);
+                    Assert(pPatchPage->papPatch[i]->flags & PATMFL_CODE_MONITORED);
                     /** @todo inefficient and includes redundant checks for multiple pages. */
                     for (uint32_t j=0; j<cbWrite; j++)
                     {
@@ -4909,7 +4910,7 @@ invalid_write_loop_start:
                 {
                     for (i=0;i<pPatchPage->cCount;i++)
                     {
-                        PPATCHINFO pPatch = pPatchPage->aPatch[i];
+                        PPATCHINFO pPatch = pPatchPage->papPatch[i];
 
                         if (pPatch->cInvalidWrites > PATM_MAX_INVALID_WRITES)
                         {
@@ -4961,9 +4962,9 @@ VMMR3DECL(int) PATMR3FlushPage(PVM pVM, RTRCPTR addr)
         /* From top to bottom as the array is modified by PATMR3MarkDirtyPatch. */
         for (i=(int)pPatchPage->cCount-1;i>=0;i--)
         {
-            if (pPatchPage->aPatch[i])
+            if (pPatchPage->papPatch[i])
             {
-                PPATCHINFO pPatch = pPatchPage->aPatch[i];
+                PPATCHINFO pPatch = pPatchPage->papPatch[i];
 
                 Log(("PATMR3FlushPage %RRv remove patch at %RRv\n", addr, pPatch->pPrivInstrGC));
                 PATMR3MarkDirtyPatch(pVM, pPatch);

@@ -208,8 +208,10 @@ static DECLCALLBACK(int) Thread(RTTHREAD hThreadSelf, void *pvUser)
 }
 
 
-
-int main(int argc, char **argv)
+/**
+ *  Entry point.
+ */
+extern "C" DECLEXPORT(int) TrustedMain(int argc, char **argv, char **envp)
 {
     RTR3InitAndSUPLib();
     RTPrintf(TESTCASE ": TESTING...\n");
@@ -312,3 +314,15 @@ int main(int argc, char **argv)
 
     return !!g_cErrors;
 }
+
+
+#if !defined(VBOX_WITH_HARDENING) || !defined(RT_OS_WINDOWS)
+/**
+ * Main entry point.
+ */
+int main(int argc, char **argv, char **envp)
+{
+    return TrustedMain(argc, argv, envp);
+}
+#endif
+

@@ -5635,7 +5635,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message numerus="yes">
         <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
-        <translation type="unfinished">
+        <translation type="obsolete">
             <numerusform>&lt;p&gt;가상 머신 &lt;b&gt;%1&lt;/b&gt;의 실행 상태가 저장되어 있습니다.&lt;/p&gt;&lt;p&gt;머신을 내보내더라도 저장된 실행 상태는 내보내지 않을 것입니다. 기존 머신의 실행 상태는 변경되지 않습니다.&lt;/p&gt;</numerusform>
         </translation>
     </message>
@@ -5878,6 +5878,17 @@ p, li { white-space: pre-wrap; }
         <source>Ok</source>
         <comment>extension pack</comment>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Failed to initialize COM because the VirtualBox global configuration directory &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; is not accessible. Please check the permissions of this directory and of its parent directory.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
+        <comment>This text is never used with n == 0.  Feel free to drop the %n where possible, we only included it because of problems with Qt Linguist (but the user can see how many machines are in the list and doesn&apos;t need to be told).</comment>
+        <translation type="unfinished">
+            <numerusform>&lt;p&gt;가상 머신 &lt;b&gt;%1&lt;/b&gt;의 실행 상태가 저장되어 있습니다.&lt;/p&gt;&lt;p&gt;머신을 내보내더라도 저장된 실행 상태는 내보내지 않을 것입니다. 기존 머신의 실행 상태는 변경되지 않습니다.&lt;/p&gt;</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -9158,7 +9169,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>and</source>
-        <translation>그리고</translation>
+        <translation type="obsolete">그리고</translation>
     </message>
     <message>
         <source>MB</source>

@@ -285,7 +285,7 @@ static int slirpVerifyAndFreeSocket(PNATState pData, struct socket *pSocket)
     {
         pSocket->fUnderPolling = 0;
         sofree(pData, pSocket);
-        /* so is PHANTOM, now */
+        /* pSocket is PHANTOM, now */
         return 1;
     }
     return 0;
@@ -525,7 +525,19 @@ static int get_dns_addr_domain(PNATState pData, bool fVerbose,
             pDns->de_addr.s_addr = tmp_addr.s_addr;
             if ((pDns->de_addr.s_addr & RT_H2N_U32_C(IN_CLASSA_NET)) == RT_N2H_U32_C(INADDR_LOOPBACK & IN_CLASSA_NET))
             {
-                pDns->de_addr.s_addr = RT_H2N_U32(RT_N2H_U32(pData->special_addr.s_addr) | CTL_ALIAS);
+                if ((pDns->de_addr.s_addr) == RT_N2H_U32_C(INADDR_LOOPBACK))
+                    pDns->de_addr.s_addr = RT_H2N_U32(RT_N2H_U32(pData->special_addr.s_addr) | CTL_ALIAS);
+                else
+                {
+                    /* Modern Ubuntu register 127.0.1.1 as DNS server */
+                    LogRel(("NAT: DNS server %RTnaipv4 registration detected, switching to the host resolver.\n",
+                            pDns->de_addr.s_addr));
+                    RTMemFree(pDns);
+                    /* Releasing fetched DNS information. */
+                    slirp_release_dns_list(pData);
+                    pData->fUseHostResolver = 1;
+                    return VINF_SUCCESS;
+                }
             }
             TAILQ_INSERT_HEAD(&pData->pDnsList, pDns, de_list);
             cNameserversFound++;
@@ -1076,6 +1088,11 @@ done:
 }
 
 
+/**
+ * This function do Connection or sending tcp sequence to.
+ * @returns if true operation completed
+ * @note: functions call tcp_input that potentially could lead to tcp_drop
+ */
 static bool slirpConnectOrWrite(PNATState pData, struct socket *so, bool fConnectOnly)
 {
     int ret;
@@ -1368,12 +1385,18 @@ void slirp_select_poll(PNATState pData, struct pollfd *polls, int ndfs)
 #endif
             )
         {
-            if(!slirpConnectOrWrite(pData, so, false))
+            int fConnectOrWriteSuccess = slirpConnectOrWrite(pData, so, false);
+            /* slirpConnectOrWrite could return true even if tcp_input called tcp_drop,
+             * so we should be ready to such situations.
+             */
+            if (slirpVerifyAndFreeSocket(pData, so))
+                CONTINUE(tcp);
+            else if (!fConnectOrWriteSuccess)
             {
-                if (!slirpVerifyAndFreeSocket(pData, so))
-                    so->fUnderPolling = 0;
+                so->fUnderPolling = 0;
                 CONTINUE(tcp);
             }
+            /* slirpConnectionOrWrite succeeded and socket wasn't dropped */
         }
 
         /*

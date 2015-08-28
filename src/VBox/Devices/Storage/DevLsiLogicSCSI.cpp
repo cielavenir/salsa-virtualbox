@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2006-2009 Oracle Corporation
+ * Copyright (C) 2006-2012 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -5229,12 +5229,12 @@ static DECLCALLBACK(int) lsilogicConstruct(PPDMDEVINS pDevIns, int iInstance, PC
     if (fBootable)
     {
         if (pThis->enmCtrlType == LSILOGICCTRLTYPE_SCSI_SPI)
-            rc = PDMDevHlpIOPortRegister(pDevIns, LSILOGIC_ISA_IO_PORT, 3, NULL,
+            rc = PDMDevHlpIOPortRegister(pDevIns, LSILOGIC_ISA_IO_PORT, 4, NULL,
                                          lsilogicIsaIOPortWrite, lsilogicIsaIOPortRead,
                                          lsilogicIsaIOPortWriteStr, lsilogicIsaIOPortReadStr,
                                          "LsiLogic BIOS");
         else if (pThis->enmCtrlType == LSILOGICCTRLTYPE_SCSI_SAS)
-            rc = PDMDevHlpIOPortRegister(pDevIns, LSILOGIC_SAS_ISA_IO_PORT, 3, NULL,
+            rc = PDMDevHlpIOPortRegister(pDevIns, LSILOGIC_SAS_ISA_IO_PORT, 4, NULL,
                                          lsilogicIsaIOPortWrite, lsilogicIsaIOPortRead,
                                          lsilogicIsaIOPortWriteStr, lsilogicIsaIOPortReadStr,
                                          "LsiLogic SAS BIOS");
@@ -5345,7 +5345,8 @@ const PDMDEVREG g_DeviceLsiLogicSAS =
     "LSI Logic SAS1068 controller.\n",
     /* fFlags */
     PDM_DEVREG_FLAGS_DEFAULT_BITS | PDM_DEVREG_FLAGS_RC | PDM_DEVREG_FLAGS_R0 |
-    PDM_DEVREG_FLAGS_FIRST_SUSPEND_NOTIFICATION | PDM_DEVREG_FLAGS_FIRST_POWEROFF_NOTIFICATION,
+    PDM_DEVREG_FLAGS_FIRST_SUSPEND_NOTIFICATION | PDM_DEVREG_FLAGS_FIRST_POWEROFF_NOTIFICATION |
+    PDM_DEVREG_FLAGS_FIRST_RESET_NOTIFICATION,
     /* fClass */
     PDM_DEVREG_CLASS_STORAGE,
     /* cMaxInstances */

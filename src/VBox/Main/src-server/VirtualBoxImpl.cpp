@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (C) 2006-2012 Oracle Corporation
+ * Copyright (C) 2006-2013 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -218,7 +218,7 @@ struct VirtualBox::Data
 
     // VirtualBox main settings file
     const Utf8Str                       strSettingsFilePath;
-    settings::MainConfigFile            *pMainConfigFile;
+    settings::MainConfigFile           *pMainConfigFile;
 
     // constant pseudo-machine ID for global media registry
     const Guid                          uuidMediaRegistry;
@@ -2470,8 +2470,8 @@ struct SnapshotEvent : public VirtualBox::CallbackEvent
 
     virtual HRESULT prepareEventDesc(IEventSource* aSource, VBoxEventDesc& aEvDesc)
     {
-        return aEvDesc.init(aSource, VBoxEventType_OnSnapshotTaken,
-                            machineId.toUtf16().raw(), snapshotId.toUtf16().raw());
+        return aEvDesc.init(aSource, mWhat, machineId.toUtf16().raw(),
+                            snapshotId.toUtf16().raw());
     }
 
     Guid machineId;
@@ -2533,6 +2533,8 @@ struct GuestPropertyEvent : public VirtualBox::CallbackEvent
 void VirtualBox::onGuestPropertyChange(const Guid &aMachineId, IN_BSTR aName,
                                        IN_BSTR aValue, IN_BSTR aFlags)
 {
+    LogRelFlow(("aMachineId=%RTuuid, aName=%ls, aValue=%ls, aFlags=%ls\n",
+                aMachineId.raw(), aName, aValue, aFlags));
     postEvent(new GuestPropertyEvent(this, aMachineId, aName, aValue, aFlags));
 }
 
@@ -4468,34 +4470,53 @@ DECLCALLBACK(int) VirtualBox::AsyncEventHandler(RTTHREAD thread, void *pvUser)
 
     AssertReturn(pvUser, VERR_INVALID_POINTER);
 
-    com::Initialize();
+    HRESULT hr = com::Initialize();
+    if (FAILED(hr))
+        return VERR_COM_UNEXPECTED;
 
-    // create an event queue for the current thread
-    EventQueue *eventQ = new EventQueue();
-    AssertReturn(eventQ, VERR_NO_MEMORY);
+    int rc = VINF_SUCCESS;
 
-    // return the queue to the one who created this thread
-    *(static_cast <EventQueue **>(pvUser)) = eventQ;
-    // signal that we're ready
-    RTThreadUserSignal(thread);
+    try
+    {
+        /* Create an event queue for the current thread. */
+        EventQueue *pEventQueue = new EventQueue();
+        AssertPtr(pEventQueue);
 
-    /*
-     * In case of spurious wakeups causing VERR_TIMEOUTs and/or other return codes
-     * we must not stop processing events and delete the "eventQ" object. This must
-     * be done ONLY when we stop this loop via interruptEventQueueProcessing().
-     * See #5724.
-     */
-    while (eventQ->processEventQueue(RT_INDEFINITE_WAIT) != VERR_INTERRUPTED)
-        /* nothing */ ;
+        /* Return the queue to the one who created this thread. */
+        *(static_cast <EventQueue **>(pvUser)) = pEventQueue;
 
-    delete eventQ;
+        /* signal that we're ready. */
+        RTThreadUserSignal(thread);
+
+        /*
+         * In case of spurious wakeups causing VERR_TIMEOUTs and/or other return codes
+         * we must not stop processing events and delete the pEventQueue object. This must
+         * be done ONLY when we stop this loop via interruptEventQueueProcessing().
+         * See #5724.
+         */
+        for (;;)
+        {
+            rc = pEventQueue->processEventQueue(RT_INDEFINITE_WAIT);
+            if (rc == VERR_INTERRUPTED)
+            {
+                LogFlow(("Event queue processing ended with rc=%Rrc\n", rc));
+                rc = VINF_SUCCESS; /* Set success when exiting. */
+                break;
+            }
+        }
+
+        delete pEventQueue;
+    }
+    catch (std::bad_alloc &ba)
+    {
+        rc = VERR_NO_MEMORY;
+        NOREF(ba);
+    }
 
     com::Shutdown();
 
-
-    LogFlowFuncLeave();
-
-    return 0;
+    LogFlowFuncLeaveRC(rc);
+    return rc;
 }
 
 

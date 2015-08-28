@@ -33,7 +33,7 @@
 # define RTALLOC_USE_EFENCE 1
 #endif
 
-/*#define RTMEMALLOC_USE_TRACKER*/
+/* #define RTMEMALLOC_USE_TRACKER */
 /* Don't enable the tracker when building the minimal IPRT. */
 #ifdef RT_MINI
 # undef RTMEMALLOC_USE_TRACKER

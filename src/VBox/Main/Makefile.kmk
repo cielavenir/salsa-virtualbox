@@ -272,7 +272,7 @@ VBoxSVC_LIBS.solaris = \
 	devinfo \
 	socket \
         $(LIB_VMM)
-        
+
 VBoxSVC_INTERMEDIATES = \
 	$(VBOX_MAIN_PREREQS) \
 	$(VBOX_XML_SCHEMADEFS_H) \
@@ -566,17 +566,26 @@ VBoxC_LDFLAGS.darwin = \
 ifdef VBOX_USE_VCC80
  VBoxC_LDFLAGS.win = /MANIFEST
 endif
+VBoxC_LDFLAGS.win += \
+	/DELAYLOAD:VBoxVMM.dll \
+	/DELAYLOAD:user32.dll
 
 VBoxC_LIBS += \
 	$(LIB_VMM) \
 	$(LIB_REM)
 
+VBoxC_LIBS.win += \
+	$(PATH_TOOL_$(VBOX_VCC_TOOL)_LIB)/delayimp.lib
 ifdef VBOX_WITH_NETFLT
  VBoxC_LIBS.win += \
  	$(PATH_STAGE_LIB)/VBoxDrvCfg$(VBOX_SUFF_LIB) \
  	$(PATH_STAGE_LIB)/WinNetConfig$(VBOX_SUFF_LIB) \
  	$(PATH_TOOL_$(VBOX_VCC_TOOL)_LIB)/comsupp.lib \
  	$(PATH_SDK_WINPSDK_LIB)/WbemUuid.Lib
+ VBoxC_LDFLAGS.win += \
+  	/DELAYLOAD:newdev.dll \
+  	/DELAYLOAD:setupapi.dll \
+  	/DELAYLOAD:iphlpapi.dll
 endif
 
 ifdef VBOX_WITH_CROGL
@@ -695,6 +704,7 @@ VBoxCOM_SOURCES         = \
 	glue/string.cpp \
 	glue/AutoLock.cpp \
 	glue/EventQueue.cpp \
+	glue/NativeEventQueue.cpp \
 	glue/ErrorInfo.cpp \
 	glue/errorprint.cpp \
 	glue/VirtualBoxErrorInfo.cpp

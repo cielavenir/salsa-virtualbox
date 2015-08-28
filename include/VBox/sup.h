@@ -620,6 +620,8 @@ typedef enum SUPINITOP
     kSupInitOp_Driver,
     /** IPRT init related. */
     kSupInitOp_IPRT,
+    /** Miscellaneous. */
+    kSupInitOp_Misc,
     /** Place holder. */
     kSupInitOp_End
 } SUPINITOP;
@@ -628,7 +630,9 @@ typedef enum SUPINITOP
  * Trusted error entry point, optional.
  *
  * This is exported as "TrustedError" by the dynamic libraries which contains
- * the "real" application binary for which the hardened stub is built.
+ * the "real" application binary for which the hardened stub is built. The
+ * hardened main() must specify SUPSECMAIN_FLAGS_TRUSTED_ERROR when calling
+ * SUPR3HardenedMain.
  *
  * @param   pszWhere        Where the error occurred (function name).
  * @param   enmWhat         Which operation went wrong.
@@ -662,10 +666,12 @@ typedef FNSUPTRUSTEDERROR *PFNSUPTRUSTEDERROR;
  */
 DECLHIDDEN(int) SUPR3HardenedMain(const char *pszProgName, uint32_t fFlags, int argc, char **argv, char **envp);
 
-/** @name SUPR3SecureMain flags.
+/** @name SUPR3HardenedMain flags.
  * @{ */
 /** Don't open the device. (Intended for VirtualBox without -startvm.) */
 #define SUPSECMAIN_FLAGS_DONT_OPEN_DEV      RT_BIT_32(0)
+/** The hardened DLL has a "TrustedError" function (see FNSUPTRUSTEDERROR). */
+#define SUPSECMAIN_FLAGS_TRUSTED_ERROR      RT_BIT_32(1)
 /** @} */
 
 /**
@@ -1014,6 +1020,28 @@ SUPR3DECL(int) SUPR3UnloadVMM(void);
 SUPR3DECL(int) SUPR3GipGetPhys(PRTHCPHYS pHCPhys);
 
 /**
+ * Initializes only the bits relevant for the SUPR3HardenedVerify* APIs.
+ *
+ * This is for users that don't necessarily need to initialize the whole of
+ * SUPLib.  There is no harm in calling this one more time.
+ *
+ * @returns VBox status code.
+ * @remarks Currently not counted, so only call once.
+ */
+SUPR3DECL(int) SUPR3HardenedVerifyInit(void);
+
+/**
+ * Reverses the effect of SUPR3HardenedVerifyInit if SUPR3InitEx hasn't been
+ * called.
+ *
+ * Ignored if the support library was initialized using SUPR3Init or
+ * SUPR3InitEx.
+ *
+ * @returns VBox status code.
+ */
+SUPR3DECL(int) SUPR3HardenedVerifyTerm(void);
+
+/**
  * Verifies the integrity of a file, and optionally opens it.
  *
  * The integrity check is for whether the file is suitable for loading into
@@ -1323,6 +1351,63 @@ SUPR0DECL(int) SUPR0IdcComponentDeregisterFactory(PSUPDRVIDCHANDLE pHandle, PCSU
 
 /** @} */
 #endif
+
+/** @name Trust Anchors and Certificates
+ * @{ */
+
+/**
+ * Trust anchor table entry (in generated Certificates.cpp).
+ */
+typedef struct SUPTAENTRY
+{
+    /** Pointer to the raw bytes. */
+    const unsigned char    *pch;
+    /** Number of bytes. */
+    unsigned                cb;
+} SUPTAENTRY;
+/** Pointer to a trust anchor table entry. */
+typedef SUPTAENTRY const *PCSUPTAENTRY;
+
+/** Macro for simplifying generating the trust anchor tables. */
+#define SUPTAENTRY_GEN(a_abTA)      { &a_abTA[0], sizeof(a_abTA) }
+
+/** All certificates we know. */
+extern SUPTAENTRY const             g_aSUPAllTAs[];
+/** Number of entries in g_aSUPAllTAs. */
+extern unsigned const               g_cSUPAllTAs;
+
+/** Software publisher certificate roots (Authenticode). */
+extern SUPTAENTRY const             g_aSUPSpcRootTAs[];
+/** Number of entries in g_aSUPSpcRootTAs. */
+extern unsigned const               g_cSUPSpcRootTAs;
+
+/** Kernel root certificates used by Windows. */
+extern SUPTAENTRY const             g_aSUPNtKernelRootTAs[];
+/** Number of entries in g_aSUPNtKernelRootTAs. */
+extern unsigned const               g_cSUPNtKernelRootTAs;
+
+/** Timestamp root certificates trusted by Windows. */
+extern SUPTAENTRY const             g_aSUPTimestampTAs[];
+/** Number of entries in g_aSUPTimestampTAs. */
+extern unsigned const               g_cSUPTimestampTAs;
+
+/** TAs we trust (the build certificate, Oracle VirtualBox). */
+extern SUPTAENTRY const             g_aSUPTrustedTAs[];
+/** Number of entries in g_aSUPTrustedTAs. */
+extern unsigned const               g_cSUPTrustedTAs;
+
+/** Supplemental certificates, like cross signing certificates. */
+extern SUPTAENTRY const             g_aSUPSupplementalTAs[];
+/** Number of entries in g_aSUPTrustedTAs. */
+extern unsigned const               g_cSUPSupplementalTAs;
+
+/** The build certificate. */
+extern const unsigned char          g_abSUPBuildCert[];
+/** The size of the build certificate. */
+extern const unsigned               g_cbSUPBuildCert;
+
+/** @} */
+
 
 /** @} */
 

@@ -49,6 +49,7 @@ private:
     kstat_ctl_t *mKC;
     kstat_t     *mSysPages;
     kstat_t     *mZFSCache;
+    uint32_t     mCpus;
 };
 
 CollectorHAL *createHAL()
@@ -62,7 +63,8 @@ CollectorHAL *createHAL()
 CollectorSolaris::CollectorSolaris()
     : mKC(0),
       mSysPages(0),
-      mZFSCache(0)
+      mZFSCache(0),
+      mCpus(0)
 {
     if ((mKC = kstat_open()) == 0)
     {
@@ -80,6 +82,7 @@ CollectorSolaris::CollectorSolaris()
     {
         Log(("kstat_lookup(system_pages) -> %d\n", errno));
     }
+    /* Notice that mCpus member will be initialized by HostCpuLoadRaw::init() */
 }
 
 CollectorSolaris::~CollectorSolaris()
@@ -119,6 +122,8 @@ int CollectorSolaris::getRawHostCpuLoad(uint64_t *user, uint64_t *kernel, uint64
         Log(("no cpu stats found!\n"));
         return VERR_INTERNAL_ERROR;
     }
+    else
+        mCpus = cpus;
 
     if (user)   *user   = tmpUser;
     if (kernel) *kernel = tmpKernel;
@@ -144,8 +149,18 @@ int CollectorSolaris::getRawProcessCpuLoad(RTPROCESS process, uint64_t *user, ui
         {
             //Assert((pid_t)process == pstatus.pr_pid);
             //Log(("user=%u kernel=%u total=%u\n", prusage.pr_utime.tv_sec, prusage.pr_stime.tv_sec, prusage.pr_tstamp.tv_sec));
-            *user = (uint64_t)prusage.pr_utime.tv_sec * 1000000000 + prusage.pr_utime.tv_nsec;
-            *kernel = (uint64_t)prusage.pr_stime.tv_sec * 1000000000 + prusage.pr_stime.tv_nsec;
+            /*
+             * The CPU time spent must be adjusted by the number of cores for compatibility with
+             * other platforms (see @bugref{6345}).
+             */
+            Assert(mCpus);
+            if (mCpus)
+            {
+                *user = ((uint64_t)prusage.pr_utime.tv_sec * 1000000000 + prusage.pr_utime.tv_nsec) / mCpus;
+                *kernel = ((uint64_t)prusage.pr_stime.tv_sec * 1000000000 + prusage.pr_stime.tv_nsec) / mCpus;
+            }
+            else
+                *user = *kernel = 0;
             *total = (uint64_t)prusage.pr_tstamp.tv_sec * 1000000000 + prusage.pr_tstamp.tv_nsec;
             //Log(("user=%llu kernel=%llu total=%llu\n", *user, *kernel, *total));
         }

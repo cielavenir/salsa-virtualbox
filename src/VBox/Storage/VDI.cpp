@@ -2519,8 +2519,6 @@ static int vdiResize(void *pBackendData, uint64_t cbSize,
             void *pvBuf = NULL, *pvZero = NULL;
             do
             {
-                VDIIMAGEBLOCKPOINTER uBlock = 0;
-
                 /* Allocate data buffer. */
                 pvBuf = RTMemAllocZ(pImage->cbTotalBlockData);
                 if (!pvBuf)
@@ -2542,7 +2540,7 @@ static int vdiResize(void *pBackendData, uint64_t cbSize,
                     /* Search the index in the block table. */
                     for (unsigned idxBlock = 0; idxBlock < cBlocksOld; idxBlock++)
                     {
-                        if (pImage->paBlocks[idxBlock] == uBlock)
+                        if (!pImage->paBlocks[idxBlock])
                         {
                             /* Read data and append to the end of the image. */
                             rc = vdiFileReadSync(pImage, offStartDataNew, pvBuf, pImage->cbTotalBlockData, NULL);
@@ -2588,7 +2586,6 @@ static int vdiResize(void *pBackendData, uint64_t cbSize,
                     if (RT_FAILURE(rc))
                         break;
 
-                    uBlock++;
                     offStartDataNew += pImage->cbTotalBlockData;
                 }
             } while (0);

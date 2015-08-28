@@ -5,7 +5,7 @@
  *      (plus static gSOAP server code) to implement the actual webservice
  *      server, to which clients can connect.
  *
- * Copyright (C) 2006-2012 Oracle Corporation
+ * Copyright (C) 2007-2014 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -25,8 +25,8 @@
 #include <VBox/com/string.h>
 #include <VBox/com/ErrorInfo.h>
 #include <VBox/com/errorprint.h>
-#include <VBox/com/EventQueue.h>
 #include <VBox/com/listeners.h>
+#include <VBox/com/NativeEventQueue.h>
 #include <VBox/VBoxAuth.h>
 #include <VBox/version.h>
 #include <VBox/log.h>
@@ -910,7 +910,7 @@ void doQueuesLoop()
     soap_init(&soap);
 
 #ifdef WITH_OPENSSL
-    if (g_fSSL && soap_ssl_server_context(&soap, SOAP_SSL_DEFAULT, g_pcszKeyFile,
+    if (g_fSSL && soap_ssl_server_context(&soap, SOAP_SSL_REQUIRE_SERVER_AUTHENTICATION | SOAP_TLSv1, g_pcszKeyFile,
                                          g_pcszPassword, g_pcszCACert, g_pcszCAPath,
                                          g_pcszDHFile, g_pcszRandFile, g_pcszSID))
     {
@@ -1319,7 +1319,7 @@ int main(int argc, char *argv[])
             return RTMsgErrorExit(RTEXITCODE_FAILURE, "Cannot start watchdog thread: %Rrc", rc);
     }
 
-    com::EventQueue *pQ = com::EventQueue::getMainEventQueue();
+    com::NativeEventQueue *pQ = com::NativeEventQueue::getMainEventQueue();
     for (;;)
     {
         // we have to process main event queue
@@ -1760,7 +1760,11 @@ int WebServiceSession::authenticate(const char *pcszUsername,
             RTLDRMOD hlibAuth = 0;
             do
             {
-                rc = RTLdrLoad(filename.c_str(), &hlibAuth);
+                if (RTPathHavePath(filename.c_str()))
+                    rc = RTLdrLoad(filename.c_str(), &hlibAuth);
+                else
+                    rc = RTLdrLoadAppPriv(filename.c_str(), &hlibAuth);
+
                 if (RT_FAILURE(rc))
                 {
                     WEBDEBUG(("%s() Failed to load external authentication library. Error code: %Rrc\n", __FUNCTION__, rc));

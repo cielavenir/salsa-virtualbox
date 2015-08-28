@@ -452,7 +452,7 @@ int vbsfMappingsQuerySymlinksCreate(PSHFLCLIENTDATA pClient, SHFLROOT root, bool
 }
 
 int vbsfMapFolder(PSHFLCLIENTDATA pClient, PSHFLSTRING pszMapName,
-                  RTUTF16 pwszDelimiter, bool fCaseSensitive, SHFLROOT *pRoot)
+                  RTUTF16 wcDelimiter, bool fCaseSensitive, SHFLROOT *pRoot)
 {
     MAPPING *pFolderMapping = NULL;
 
@@ -465,13 +465,18 @@ int vbsfMapFolder(PSHFLCLIENTDATA pClient, PSHFLSTRING pszMapName,
         Log(("vbsfMapFolder %ls\n", pszMapName->String.ucs2));
     }
 
+    AssertMsgReturn(wcDelimiter == '/' || wcDelimiter == '\\',
+                    ("Invalid path delimiter: %#x\n", wcDelimiter),
+                    VERR_INVALID_PARAMETER);
     if (pClient->PathDelimiter == 0)
     {
-        pClient->PathDelimiter = pwszDelimiter;
+        pClient->PathDelimiter = wcDelimiter;
     }
     else
     {
-        Assert(pwszDelimiter == pClient->PathDelimiter);
+        AssertMsgReturn(wcDelimiter == pClient->PathDelimiter,
+                        ("wcDelimiter=%#x PathDelimiter=%#x", wcDelimiter, pClient->PathDelimiter),
+                        VERR_INVALID_PARAMETER);
     }
 
     if (BIT_FLAG(pClient->fu32Flags, SHFL_CF_UTF8))

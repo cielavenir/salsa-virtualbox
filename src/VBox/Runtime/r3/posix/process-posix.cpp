@@ -142,3 +142,14 @@ RTR3DECL(uint64_t) RTProcGetAffinityMask(void)
     return 1;
 }
 
+
+RTR3DECL(int) RTProcQueryParent(RTPROCESS hProcess, PRTPROCESS phParent)
+{
+    if (hProcess == RTProcSelf())
+    {
+        *phParent = getppid();
+        return VINF_SUCCESS;
+    }
+    return VERR_NOT_SUPPORTED;
+}
+

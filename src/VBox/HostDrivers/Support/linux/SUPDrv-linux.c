@@ -1,4 +1,4 @@
-/* $Rev: 74561 $ */
+/* $Rev: 95893 $ */
 /** @file
  * VBoxDrv - The VirtualBox Support Driver - Linux specifics.
  */
@@ -102,7 +102,7 @@ static long VBoxDrvLinuxIOCtl(struct file *pFilp, unsigned int uCmd, unsigned lo
 #else
 static int  VBoxDrvLinuxIOCtl(struct inode *pInode, struct file *pFilp, unsigned int uCmd, unsigned long ulArg);
 #endif
-static int  VBoxDrvLinuxIOCtlSlow(struct file *pFilp, unsigned int uCmd, unsigned long ulArg);
+static int  VBoxDrvLinuxIOCtlSlow(struct file *pFilp, unsigned int uCmd, unsigned long ulArg, PSUPDRVSESSION pSession);
 static int  VBoxDrvLinuxErr2LinuxErr(int);
 #ifdef VBOX_WITH_SUSPEND_NOTIFICATION
 static int  VBoxDrvProbe(struct platform_device *pDev);
@@ -223,7 +223,11 @@ static struct platform_device gPlatformDevice =
 DECLINLINE(RTUID) vboxdrvLinuxUid(void)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 29)
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
+    return from_kuid(current_user_ns(), current->cred->uid);
+# else
     return current->cred->uid;
+# endif
 #else
     return current->uid;
 #endif
@@ -232,7 +236,11 @@ DECLINLINE(RTUID) vboxdrvLinuxUid(void)
 DECLINLINE(RTGID) vboxdrvLinuxGid(void)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 29)
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
+    return from_kgid(current_user_ns(), current->cred->gid);
+# else
     return current->cred->gid;
+# endif
 #else
     return current->gid;
 #endif
@@ -241,7 +249,11 @@ DECLINLINE(RTGID) vboxdrvLinuxGid(void)
 DECLINLINE(RTUID) vboxdrvLinuxEuid(void)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 29)
+# if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)
+    return from_kuid(current_user_ns(), current->cred->euid);
+# else
     return current->cred->euid;
+# endif
 #else
     return current->euid;
 #endif
@@ -308,13 +320,9 @@ static int __init VBoxDrvLinuxInit(void)
         rc = RTR0Init(0);
         if (RT_SUCCESS(rc))
         {
-#ifdef RT_ARCH_AMD64
-# ifdef CONFIG_DEBUG_SET_MODULE_RONX
-            rc = RTR0MemExecInit(1572864 /* 1.5MB */);
-# else
+#if defined(RT_ARCH_AMD64) && LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 23)
             rc = RTR0MemExecDonate(&g_abExecMemory[0], sizeof(g_abExecMemory));
             printk(KERN_DEBUG "VBoxDrv: dbg - g_abExecMemory=%p\n", (void *)&g_abExecMemory[0]);
-# endif
 #endif
             Log(("VBoxDrv::ModuleInit\n"));
 
@@ -439,7 +447,7 @@ static int VBoxDrvLinuxCreate(struct inode *pInode, struct file *pFilp)
     /*
      * Call common code for the rest.
      */
-    rc = supdrvCreateSession(&g_DevExt, true /* fUser */, &pSession);
+    rc = supdrvCreateSession(&g_DevExt, true /* fUser */, true /* fUnrestricted */, &pSession);
     if (!rc)
     {
         pSession->Uid = vboxdrvLinuxUid();
@@ -465,7 +473,7 @@ static int VBoxDrvLinuxClose(struct inode *pInode, struct file *pFilp)
 {
     Log(("VBoxDrvLinuxClose: pFilp=%p pSession=%p pid=%d/%d %s\n",
          pFilp, pFilp->private_data, RTProcSelf(), current->pid, current->comm));
-    supdrvCloseSession(&g_DevExt, (PSUPDRVSESSION)pFilp->private_data);
+    supdrvSessionRelease((PSUPDRVSESSION)pFilp->private_data);
     pFilp->private_data = NULL;
     return 0;
 }
@@ -537,27 +545,31 @@ static long VBoxDrvLinuxIOCtl(struct file *pFilp, unsigned int uCmd, unsigned lo
 static int VBoxDrvLinuxIOCtl(struct inode *pInode, struct file *pFilp, unsigned int uCmd, unsigned long ulArg)
 #endif
 {
+    PSUPDRVSESSION pSession = (PSUPDRVSESSION)pFilp->private_data;
+
     /*
      * Deal with the two high-speed IOCtl that takes it's arguments from
      * the session and iCmd, and only returns a VBox status code.
      */
 #ifdef HAVE_UNLOCKED_IOCTL
-    if (RT_LIKELY(   uCmd == SUP_IOCTL_FAST_DO_RAW_RUN
-                  || uCmd == SUP_IOCTL_FAST_DO_HWACC_RUN
-                  || uCmd == SUP_IOCTL_FAST_DO_NOP))
-        return supdrvIOCtlFast(uCmd, ulArg, &g_DevExt, (PSUPDRVSESSION)pFilp->private_data);
-    return VBoxDrvLinuxIOCtlSlow(pFilp, uCmd, ulArg);
+    if (RT_LIKELY(   (   uCmd == SUP_IOCTL_FAST_DO_RAW_RUN
+                      || uCmd == SUP_IOCTL_FAST_DO_HWACC_RUN
+                      || uCmd == SUP_IOCTL_FAST_DO_NOP)
+                  && pSession->fUnrestricted == true))
+        return supdrvIOCtlFast(uCmd, ulArg, &g_DevExt, pSession);
+    return VBoxDrvLinuxIOCtlSlow(pFilp, uCmd, ulArg, pSession);
 
 #else   /* !HAVE_UNLOCKED_IOCTL */
 
     int rc;
     unlock_kernel();
-    if (RT_LIKELY(   uCmd == SUP_IOCTL_FAST_DO_RAW_RUN
-                  || uCmd == SUP_IOCTL_FAST_DO_HWACC_RUN
-                  || uCmd == SUP_IOCTL_FAST_DO_NOP))
-        rc = supdrvIOCtlFast(uCmd, ulArg, &g_DevExt, (PSUPDRVSESSION)pFilp->private_data);
+    if (RT_LIKELY(   (   uCmd == SUP_IOCTL_FAST_DO_RAW_RUN
+                      || uCmd == SUP_IOCTL_FAST_DO_HWACC_RUN
+                      || uCmd == SUP_IOCTL_FAST_DO_NOP)
+                  && pSession->fUnrestricted == true))
+        rc = supdrvIOCtlFast(uCmd, ulArg, &g_DevExt, pSession);
     else
-        rc = VBoxDrvLinuxIOCtlSlow(pFilp, uCmd, ulArg);
+        rc = VBoxDrvLinuxIOCtlSlow(pFilp, uCmd, ulArg, pSession);
     lock_kernel();
     return rc;
 #endif  /* !HAVE_UNLOCKED_IOCTL */
@@ -570,8 +582,9 @@ static int VBoxDrvLinuxIOCtl(struct inode *pInode, struct file *pFilp, unsigned 
  * @param   pFilp       Associated file pointer.
  * @param   uCmd        The function specified to ioctl().
  * @param   ulArg       The argument specified to ioctl().
+ * @param   pSession    The session instance.
  */
-static int VBoxDrvLinuxIOCtlSlow(struct file *pFilp, unsigned int uCmd, unsigned long ulArg)
+static int VBoxDrvLinuxIOCtlSlow(struct file *pFilp, unsigned int uCmd, unsigned long ulArg, PSUPDRVSESSION pSession)
 {
     int                 rc;
     SUPREQHDR           Hdr;
@@ -603,7 +616,7 @@ static int VBoxDrvLinuxIOCtlSlow(struct file *pFilp, unsigned int uCmd, unsigned
         Log(("VBoxDrvLinuxIOCtl: too big cbBuf=%#x; uCmd=%#x\n", cbBuf, uCmd));
         return -E2BIG;
     }
-    if (RT_UNLIKELY(cbBuf != _IOC_SIZE(uCmd) && _IOC_SIZE(uCmd)))
+    if (RT_UNLIKELY(_IOC_SIZE(uCmd) ? cbBuf != _IOC_SIZE(uCmd) : Hdr.cbIn < sizeof(Hdr)))
     {
         Log(("VBoxDrvLinuxIOCtl: bad ioctl cbBuf=%#x _IOC_SIZE=%#x; uCmd=%#x.\n", cbBuf, _IOC_SIZE(uCmd), uCmd));
         return -EINVAL;
@@ -620,11 +633,13 @@ static int VBoxDrvLinuxIOCtlSlow(struct file *pFilp, unsigned int uCmd, unsigned
         RTMemFree(pHdr);
         return -EFAULT;
     }
+    if (Hdr.cbIn < cbBuf)
+        RT_BZERO((uint8_t *)pHdr + Hdr.cbIn, cbBuf - Hdr.cbIn);
 
     /*
      * Process the IOCtl.
      */
-    rc = supdrvIOCtl(uCmd, &g_DevExt, (PSUPDRVSESSION)pFilp->private_data, pHdr);
+    rc = supdrvIOCtl(uCmd, &g_DevExt, pSession, pHdr, cbBuf);
 
     /*
      * Copy ioctl data and output buffer back to user space.
@@ -691,6 +706,25 @@ int VBOXCALL SUPDrvLinuxIDC(uint32_t uReq, PSUPDRVIDCREQHDR pReq)
 }
 
 EXPORT_SYMBOL(SUPDrvLinuxIDC);
+
+
+void VBOXCALL supdrvOSCleanupSession(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession)
+{
+    NOREF(pDevExt);
+    NOREF(pSession);
+}
+
+
+void VBOXCALL supdrvOSSessionHashTabInserted(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession, void *pvUser)
+{
+    NOREF(pDevExt); NOREF(pSession); NOREF(pvUser);
+}
+
+
+void VBOXCALL supdrvOSSessionHashTabRemoved(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession, void *pvUser)
+{
+    NOREF(pDevExt); NOREF(pSession); NOREF(pvUser);
+}
 
 
 /**

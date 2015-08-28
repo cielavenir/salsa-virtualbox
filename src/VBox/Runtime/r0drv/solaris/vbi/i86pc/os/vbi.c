@@ -73,15 +73,6 @@ extern void contig_free(void *, size_t);
 static void (*p_contig_free)(void *, size_t) = contig_free;
 
 /*
- * We have to use dl_lookup to find kflt_init() and thereby use kernel pages from
- * the freelists if we no longer get user pages from freelist and cachelists.
- */
-/* Introduced in v9 */
-static int use_kflt = 0;
-static page_t *vbi_page_get_fromlist(uint_t freelist, caddr_t virtAddr, size_t pgsize);
-
-
-/*
  * Workarounds for running on old versions of solaris with different cross call
  * interfaces. If we find xc_init_cpu() in the kernel, then just use the defined
  * interfaces for xc_call() from the include file where the xc_call()
@@ -143,6 +134,11 @@ static int vbi_verbose = 0;
 
 /* Introduced in v8 */
 static int vbi_is_initialized = 0;
+
+/* Introduced in v10 */
+static vnode_t vbipagevp;
+static u_offset_t offvp = 0;
+static kmutex_t offmtx;
 
 /* Which offsets will be used */
 static int off_cpu_runrun       = -1;
@@ -251,20 +247,6 @@ vbi_init(void)
 	}
 
 	/*
-	 * Use kernel page freelist flags to get pages from kernel page freelists
-	 * while allocating physical pages, once the userpages are exhausted.
-	 * snv_161+, see @bugref{5632}.
-	 */
-	if (kobj_getsymvalue("kflt_init", 1) != NULL)
-	{
-		int *p_kflt_disable = (int*)kobj_getsymvalue("kflt_disable", 1);	/* amd64 only, on 32-bit kflt's are disabled. */
-		if (p_kflt_disable && *p_kflt_disable == 0)
-		{
-			use_kflt = 1;
-		}
-	}
-
-	/*
 	 * CTF probing for fluid, private members.
 	 */
 	int err = 0;
@@ -298,9 +280,16 @@ vbi_init(void)
 	if (err)
 		return (EINVAL);
 
+	mutex_init(&offmtx, NULL /* desc */, MUTEX_DRIVER, NULL /* arg */);
 	vbi_is_initialized = 1;
 
 	return (0);
+}
+
+/* Introduced in v10 */
+void vbi_term(void)
+{
+	mutex_destroy(&offmtx);
 }
 
 #if 0
@@ -1286,78 +1275,103 @@ vbi_phys_free(void *va, size_t size)
 
 
 /*
- * This is revision 8 of the interface.
+ * This is revision 10 of the interface.
  */
-static vnode_t vbipagevp;
+page_t *
+vbi_page_alloc(caddr_t virtaddr)
+{
+	/*
+	 * allocate one _4K page and prepare it for use with VirtualBox.
+	 */
+	u_offset_t offpage;
+	seg_t kernseg;
+
+	mutex_enter(&offmtx);
+	AssertCompile(sizeof(u_offset_t) == sizeof(uint64_t));
+	offvp = P2ROUNDUP(offvp, PAGESIZE) + PAGESIZE;
+	offpage = offvp;
+	mutex_exit(&offmtx);
+
+	kernseg.s_as = &kas;
+	page_t *ppage = page_create_va(&vbipagevp, offpage, PAGESIZE, PG_WAIT | PG_NORELOC, &kernseg, virtaddr);
+	if (ppage)
+	{
+		/*
+		 * lock this page into memory "long term" to prevent this page from being pageed out 
+		 * when we drop the page lock temporarily (during free). 
+		 */
+		page_pp_lock(ppage, 0 /* COW */, 1 /* Kernel */);
+		page_io_unlock(ppage);
+		page_downgrade(ppage);
+		Assert(PAGE_LOCKED_SE(ppage, SE_SHARED));
+	}
+	return ppage;
+}
+
+
+void
+vbi_page_destroy(page_t *ppage)
+{
+	/*
+	 * Exclusive lock the pages before destroying.
+	 */
+	u_offset_t offpage = ppage->p_offset;
+
+	if (!page_tryupgrade(ppage))
+	{
+		page_unlock(ppage);
+		page_t *pfoundpage = page_lookup(&vbipagevp, offpage, SE_EXCL);
+
+		/*
+		 * Since we allocated the pages as PG_NORELOC we should only get back the exact page always.
+		 */
+		AssertReleaseMsg(pfoundpage == ppage, ("page_lookup failed %p:%llx returned %p, expected %p\n",
+											   &vbipagevp, offpage, pfoundpage, ppage));
+	}
+	Assert(PAGE_LOCKED_SE(ppage, SE_EXCL));
+	page_pp_unlock(ppage, 0 /* COW */, 1 /* Kernel */);
+	page_destroy(ppage, 0 /* move to free list*/);
+}
+
 
 page_t **
 vbi_pages_alloc(uint64_t *phys, size_t size)
 {
-	/*
-	 * the page freelist and cachelist both hold pages that are not mapped into any address space.
-	 * the cachelist is not really free pages but when memory is exhausted they'll be moved to the
-	 * free lists.
-	 * it's the total of the free+cache list that we see on the 'free' column in vmstat.
-	 */
 	page_t **pp_pages = NULL;
-	pgcnt_t npages = (size + PAGESIZE - 1) >> PAGESHIFT;
+	size_t npages = (size + PAGESIZE - 1) >> PAGESHIFT;
 
 	/* reserve available memory for pages */
 	int rc = page_resv(npages, KM_NOSLEEP);
 	if (rc)
 	{
-		/* create the pages */
-		rc = page_create_wait(npages, 0 /* flags */);
-		if (rc)
+		/* alloc space for page_t pointer array */
+		size_t pp_size = npages * sizeof(page_t *);
+		pp_pages = kmem_zalloc(pp_size, KM_SLEEP);
+		if (pp_pages)
 		{
-			/* alloc space for page_t pointer array */
-			size_t pp_size = npages * sizeof(page_t *);
-			pp_pages = kmem_zalloc(pp_size, KM_SLEEP);
-			if (pp_pages)
+			/*
+			 * get pages from kseg, the 'virtAddr' here is only for colouring but unfortunately
+			 * we don't have the 'virtAddr' to which this memory may be mapped.
+			 */
+			caddr_t virtAddr = NULL;
+			for (size_t i = 0; i < npages; i++, virtAddr += PAGESIZE)
 			{
-				/*
-				 * get pages from kseg, the 'virtAddr' here is only for colouring but unfortunately
-				 * we don't have the 'virtAddr' to which this memory may be mapped.
-				 */
-				caddr_t virtAddr = NULL;
-				for (int64_t i = 0; i < npages; i++, virtAddr += PAGESIZE)
+				page_t *ppage = vbi_page_alloc(virtAddr);
+				if (!ppage)
 				{
-					/* get a page from the freelists */
-					page_t *ppage = vbi_page_get_fromlist(1 /* freelist */, virtAddr, PAGESIZE);
-					if (!ppage)
-					{
-						/* try from the cachelists */
-						ppage = vbi_page_get_fromlist(2 /* cachelist */, virtAddr, PAGESIZE);
-						if (!ppage)
-						{
-							/* damn */
-							page_create_putback(npages - i);
-							while (--i >= 0)
-								page_free(pp_pages[i], 0 /* don't need, move to tail */);
-							kmem_free(pp_pages, pp_size);
-							page_unresv(npages);
-							return NULL;
-						}
-
-						/* remove association with the vnode for pages from the cachelist */
-						if (!PP_ISAGED(ppage))
-							page_hashout(ppage, NULL /* mutex */);
-					}
-
-					PP_CLRFREE(ppage);		/* Page is not free */
-					PP_CLRAGED(ppage);		/* Page is not hashed in */
-					pp_pages[i] = ppage;
+					/* damn */
+					for (size_t k = 0; k < i; k++)
+						vbi_page_destroy(pp_pages[k]);
+					kmem_free(pp_pages, pp_size);
+					page_unresv(npages);
+					return NULL;
 				}
-
-				/*
-				 * we now have the pages locked exclusively, before they are mapped in
-				 * we must downgrade the lock.
-				 */
-				*phys = (uint64_t)page_pptonum(pp_pages[0]) << PAGESHIFT;
-				return pp_pages;
+				pp_pages[i] = ppage;
 			}
 
-			page_create_putback(npages);
+			if (phys)
+				*phys = (uint64_t)page_pptonum(pp_pages[0]) << PAGESHIFT;
+			return pp_pages;
 		}
 
 		page_unresv(npages);
@@ -1370,217 +1384,24 @@ vbi_pages_alloc(uint64_t *phys, size_t size)
 void
 vbi_pages_free(page_t **pp_pages, size_t size)
 {
-	pgcnt_t npages = (size + PAGESIZE - 1) >> PAGESHIFT;
+	size_t npages = (size + PAGESIZE - 1) >> PAGESHIFT;
 	size_t pp_size = npages * sizeof(page_t *);
-	for (pgcnt_t i = 0; i < npages; i++)
-	{
-		/* we need to exclusive lock the pages before freeing them */
-		int rc = page_tryupgrade(pp_pages[i]);
-		if (!rc)
-		{
-			page_unlock(pp_pages[i]);
-			while (!page_lock(pp_pages[i], SE_EXCL, NULL /* mutex */, P_RECLAIM))
-				;
-		}
 
-		page_free(pp_pages[i], 0 /* don't need, move to tail */);
-	}
+	for (size_t i = 0; i < npages; i++)
+		vbi_page_destroy(pp_pages[i]);
 
 	kmem_free(pp_pages, pp_size);
 	page_unresv(npages);
 }
 
 
-int
-vbi_pages_premap(page_t **pp_pages, size_t size, uint64_t *pphysaddrs)
-{
-	if (!pphysaddrs)
-		return -1;
-
-	pgcnt_t npages = (size + PAGESIZE - 1) >> PAGESHIFT;
-	for (pgcnt_t i = 0; i < npages; i++)
-	{
-		/*
-		 * prepare pages for mapping into kernel/user space, we need to
-		 * downgrade the exclusive page lock to a shared lock if the
-		 * pages is locked exclusively.
-		 */
-		if (page_tryupgrade(pp_pages[i]) == 1)
-			page_downgrade(pp_pages[i]);
-		pphysaddrs[i] = vbi_page_to_pa(pp_pages, i);
-	}
-
-	return 0;
-}
-
-
 uint64_t
-vbi_page_to_pa(page_t **pp_pages, pgcnt_t i)
+vbi_page_to_pa(page_t **pp_pages, size_t i)
 {
 	pfn_t pfn = page_pptonum(pp_pages[i]);
 	if (pfn == PFN_INVALID)
 		panic("vbi_page_to_pa: page_pptonum() failed\n");
 	return (uint64_t)pfn << PAGESHIFT;
-}
-
-
-static page_t *
-vbi_page_get_fromlist(uint_t freelist, caddr_t virtAddr, size_t pgsize)
-{
-	/* pgsize only applies when using the freelist */
-	seg_t kernseg;
-	kernseg.s_as = &kas;
-	page_t *ppage = NULL;
-	if (freelist == 1)
-	{
-		ppage = page_get_freelist(&vbipagevp, 0 /* offset */, &kernseg, virtAddr,
-							pgsize, 0 /* flags */, NULL /* local group */);
-		if (!ppage && use_kflt)
-		{
-			ppage = page_get_freelist(&vbipagevp, 0 /* offset */, &kernseg, virtAddr,
-						pgsize, 0x0200 /* PG_KFLT */, NULL /* local group */);
-		}
-	}
-	else
-	{
-		/* cachelist */
-		ppage = page_get_cachelist(&vbipagevp, 0 /* offset */, &kernseg, virtAddr,
-							0 /* flags */, NULL /* local group */);
-		if (!ppage && use_kflt)
-		{
-			ppage = page_get_cachelist(&vbipagevp, 0 /* offset */, &kernseg, virtAddr,
-						0x0200 /* PG_KFLT */, NULL /* local group */);
-		}
-	}
-	return ppage;
-}
-
-
-/*
- * Large page code.
- */
-
-page_t *
-vbi_large_page_alloc(uint64_t *pphys, size_t pgsize)
-{
-	pgcnt_t const npages = pgsize >> PAGESHIFT;
-	page_t *pproot, *pp, *pplist;
-	pgcnt_t ipage;
-	caddr_t vaddr;
-	seg_t kernseg;
-	int rc;
-
-	/*
-	 * Reserve available memory for a large page and create it.
-	 */
-	rc = page_resv(npages, KM_NOSLEEP);
-	if (!rc)
-		return NULL;
-
-	rc = page_create_wait(npages, 0 /* flags */);
-	if (!rc) {
-		page_unresv(npages);
-		return NULL;
-	}
-
-	/*
-	 * Get a page off the free list.  We set vaddr to 0 since we don't know
-	 * where the memory is going to be mapped.
-	 */
-	vaddr = NULL;
-	kernseg.s_as = &kas;
-	pproot = vbi_page_get_fromlist(1 /* freelist */, vaddr, pgsize);
-	if (!pproot)
-	{
-		page_create_putback(npages);
-		page_unresv(npages);
-		return NULL;
-	}
-	AssertMsg(!(page_pptonum(pproot) & (npages - 1)), ("%p:%lx npages=%lx\n", pproot, page_pptonum(pproot), npages));
-
-	/*
-	 * Mark all the sub-pages as non-free and not-hashed-in.
-	 * It is paramount that we destroy the list (before freeing it).
-	 */
-	pplist = pproot;
-	for (ipage = 0; ipage < npages; ipage++) {
-		pp = pplist;
-		AssertPtr(pp);
-		AssertMsg(page_pptonum(pp) == ipage + page_pptonum(pproot),
-			("%p:%lx %lx+%lx\n", pp, page_pptonum(pp), ipage, page_pptonum(pproot)));
-		page_sub(&pplist, pp);
-		AssertMsg(PP_ISFREE(pp), ("%p\n", pp));
-		AssertMsg(pp->p_szc == pproot->p_szc, ("%p - %d expected %d \n", pp, pp->p_szc, pproot->p_szc));
-
-		PP_CLRFREE(pp);
-		PP_CLRAGED(pp);
-	}
-
-	*pphys = (uint64_t)page_pptonum(pproot) << PAGESHIFT;
-	AssertMsg(!(*pphys & (pgsize - 1)), ("%llx %zx\n", *pphys, pgsize));
-	return pproot;
-}
-
-void
-vbi_large_page_free(page_t *pproot, size_t pgsize)
-{
-	pgcnt_t const npages = pgsize >> PAGESHIFT;
-	pgcnt_t ipage;
-
-	Assert(page_get_pagecnt(pproot->p_szc) == npages);
-	AssertMsg(!(page_pptonum(pproot) & (npages - 1)), ("%p:%lx npages=%lx\n", pproot, page_pptonum(pproot), npages));
-
-	/*
-	 * We need to exclusively lock the sub-pages before freeing
-	 * the large one.
-	 */
-	for (ipage = 0; ipage < npages; ipage++) {
-		page_t *pp = page_nextn(pproot, ipage);
-		AssertMsg(page_pptonum(pp) == ipage + page_pptonum(pproot),
-			("%p:%lx %lx+%lx\n", pp, page_pptonum(pp), ipage, page_pptonum(pproot)));
-		AssertMsg(!PP_ISFREE(pp), ("%p\n", pp));
-
-		int rc = page_tryupgrade(pp);
-		if (!rc) {
-			page_unlock(pp);
-			while (!page_lock(pp, SE_EXCL, NULL /* mutex */, P_RECLAIM)) {
-				/*nothing*/;
-			}
-		}
-	}
-
-	/*
-	 * Free the large page and unreserve the memory.
-	 */
-	page_free_pages(pproot);
-	page_unresv(npages);
-}
-
-int
-vbi_large_page_premap(page_t *pproot, size_t pgsize)
-{
-	pgcnt_t const npages = pgsize >> PAGESHIFT;
-	pgcnt_t ipage;
-
-	Assert(page_get_pagecnt(pproot->p_szc) == npages);
-	AssertMsg(!(page_pptonum(pproot) & (npages - 1)), ("%p:%lx npages=%lx\n", pproot, page_pptonum(pproot), npages));
-
-	/*
-	 * We need to downgrade the sub-pages from exclusive to shared locking
-	 * because otherwise we cannot <you go figure>.
-	 */
-	for (ipage = 0; ipage < npages; ipage++) {
-	    page_t *pp = page_nextn(pproot, ipage);
-	    AssertMsg(page_pptonum(pp) == ipage + page_pptonum(pproot),
-		    ("%p:%lx %lx+%lx\n", pp, page_pptonum(pp), ipage, page_pptonum(pproot)));
-	    AssertMsg(!PP_ISFREE(pp), ("%p\n", pp));
-
-	    if (page_tryupgrade(pp) == 1)
-		    page_downgrade(pp);
-	    AssertMsg(!PP_ISFREE(pp), ("%p\n", pp));
-	}
-
-	return 0;
 }
 
 
@@ -1592,5 +1413,5 @@ vbi_large_page_premap(page_t *pproot, size_t pgsize)
  * NOTE! We'll start care about this if anything in here ever makes it into
  *       the solaris kernel proper.
  */
-uint_t vbi_revision_level = 9;
+uint_t vbi_revision_level = 10;
 

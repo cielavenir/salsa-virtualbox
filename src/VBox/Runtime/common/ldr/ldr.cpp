@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2006-2007 Oracle Corporation
+ * Copyright (C) 2006-2013 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -41,31 +41,6 @@
 
 
 /**
- * Checks if a library is loadable or not.
- *
- * This may attempt load and unload the library.
- *
- * @returns true/false accordingly.
- * @param   pszFilename     Image filename.
- */
-RTDECL(bool) RTLdrIsLoadable(const char *pszFilename)
-{
-    /*
-     * Try to load the library.
-     */
-    RTLDRMOD hLib;
-    int rc = RTLdrLoad(pszFilename, &hLib);
-    if (RT_SUCCESS(rc))
-    {
-        RTLdrClose(hLib);
-        return true;
-    }
-    return false;
-}
-RT_EXPORT_SYMBOL(RTLdrIsLoadable);
-
-
-/**
  * Gets the address of a named exported symbol.
  *
  * @returns iprt status code.
@@ -96,7 +71,7 @@ RTDECL(int) RTLdrGetSymbol(RTLDRMOD hLdrMod, const char *pszSymbol, void **ppvVa
     else
     {
         RTUINTPTR Value = 0;
-        rc = pMod->pOps->pfnGetSymbolEx(pMod, NULL, 0, pszSymbol, &Value);
+        rc = pMod->pOps->pfnGetSymbolEx(pMod, NULL, 0, UINT32_MAX, pszSymbol, &Value);
         if (RT_SUCCESS(rc))
         {
             *ppvValue = (void *)(uintptr_t)Value;
@@ -119,6 +94,17 @@ RT_EXPORT_SYMBOL(RTLdrGetSymbol);
  * @returns iprt status code.
  * @param   hLdrMod         The loader module handle.
  */
+RTDECL(PFNRT) RTLdrGetFunction(RTLDRMOD hLdrMod, const char *pszSymbol)
+{
+    PFNRT pfn;
+    int rc = RTLdrGetSymbol(hLdrMod, pszSymbol, (void **)&pfn);
+    if (RT_SUCCESS(rc))
+        return pfn;
+    return NULL;
+}
+RT_EXPORT_SYMBOL(RTLdrGetFunction);
+
+
 RTDECL(int) RTLdrClose(RTLDRMOD hLdrMod)
 {
     LogFlow(("RTLdrClose: hLdrMod=%RTldrm\n", hLdrMod));
@@ -126,6 +112,8 @@ RTDECL(int) RTLdrClose(RTLDRMOD hLdrMod)
     /*
      * Validate input.
      */
+    if (hLdrMod == NIL_RTLDRMOD)
+        return VINF_SUCCESS;
     AssertMsgReturn(rtldrIsValid(hLdrMod), ("hLdrMod=%p\n", hLdrMod), VERR_INVALID_HANDLE);
     PRTLDRMODINTERNAL pMod = (PRTLDRMODINTERNAL)hLdrMod;
     //AssertMsgReturn(pMod->eState == LDR_STATE_OPENED, ("eState=%d\n", pMod->eState), VERR_WRONG_ORDER);

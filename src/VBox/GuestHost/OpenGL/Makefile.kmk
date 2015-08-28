@@ -43,7 +43,7 @@ VBoxOGLcrutil_TEMPLATE      = VBOXCROGLR3GUESTDLL
 if defined(VBOX_SIGNING_MODE) && defined(VBOX_WITH_WDDM)
  VBoxOGLcrutil_NOINST.win = true
 endif
-VBoxOGLcrutil_SDKS.win      = DXSDK
+VBoxOGLcrutil_SDKS.win      = $(VBOX_WINPSDK) $(VBOX_WINDDK)
 VBoxOGLcrutil_INTERMEDIATES = $(VBOX_PATH_CROGL_GENFILES)/cr_opcodes.h
 if1of ($(KBUILD_TARGET), linux solaris freebsd)
  VBoxOGLcrutil_INCS += \
@@ -81,11 +81,17 @@ VBoxOGLcrutil_SOURCES.win.x86 = \
 	util/util.def \
 	util/util.rc
 VBoxOGLcrutil_LIBS.win = \
-	$(PATH_SDK_DXSDK_LIB)/ddraw.lib \
-	$(PATH_SDK_DXSDK_LIB)/dxguid.lib
+	$(PATH_SDK_W2K3DDK_LIB)/ddraw.lib \
+	$(PATH_SDK_W2K3DDK_LIB)/dxguid.lib \
+	$(PATH_SDK_W2K3DDK_LIB)/shlwapi.lib
 VBoxOGLcrutil_LIBS = \
 	$(VBOX_LIB_IPRT_GUEST_R3_SHARED) \
 	$(VBOX_LIB_VBGL_R3_SHARED)
+
+# Needed by GDEbuger
+ifdef CR_NO_GL_SYSTEM_PATH
+VBoxOGLcrutil_DEFS       += CR_NO_GL_SYSTEM_PATH
+endif 
 ifdef VBOX_WITH_CRHGSMI
 VBoxOGLcrutil_DEFS.win    += VBOX_WITH_CRHGSMI
 VBoxOGLcrutil_LIBS.win    += $(VBOX_PATH_ADDITIONS_LIB)/VBoxCrHgsmi$(VBOX_SUFF_LIB)
@@ -97,7 +103,7 @@ VBoxOGLcrutil_CLEAN = \
 VBoxOGLcrutil_pixel.c_CFLAGS.win.x86     += -Od
 VBoxOGLhostcrutil_pixel.c_CFLAGS.win.x86 += -Od
 
-if defined(VBOX_WITH_WDDM) && !defined(VBOX_WITHOUT_ADDITIONS)
+if defined(VBOX_WITH_WDDM) && defined(VBOX_WITH_ADDITIONS)
 #
 # VBoxOGLcrutil-x86 - x86 VBoxOGLcrutil version built for amd64 build
 #
@@ -108,8 +114,8 @@ VBoxOGLcrutil-x86_BLD_TRG_ARCH = x86
 VBoxOGLcrutil-x86_LIBS = $(VBOX_LIB_IPRT_GUEST_R3_SHARED_X86) \
 	$(VBOX_LIB_VBGL_R3_SHARED_X86)
 VBoxOGLcrutil-x86_LIBS.win = \
-	$(PATH_SDK_DXSDK_LIB.x86)/ddraw.lib \
-	$(PATH_SDK_DXSDK_LIB.x86)/dxguid.lib
+	$(PATH_SDK_W2K3DDK_LIB.x86)/ddraw.lib \
+	$(PATH_SDK_W2K3DDK_LIB.x86)/dxguid.lib
 ifdef VBOX_WITH_CRHGSMI
 # VBOX_WITH_CRHGSMI define is inherited from VBoxOGLcrutil
 VBoxOGLcrutil-x86_LIBS.win    += $(VBOX_PATH_ADDITIONS_LIB)/VBoxCrHgsmi-x86$(VBOX_SUFF_LIB)
@@ -241,7 +247,7 @@ VBoxOGLcrpacker_CLEAN = \
 	$(VBOX_PATH_CROGL_GENFILES)/cr_opcodes.h \
 	$(VBOX_PATH_CROGL_GENFILES)/state/cr_currentpointers.h
 
-if defined(VBOX_WITH_WDDM) && !defined(VBOX_WITHOUT_ADDITIONS)
+if defined(VBOX_WITH_WDDM) && defined(VBOX_WITH_ADDITIONS)
 #
 # VBoxOGLcrpacker-x86 - x86 VBoxOGLcrpacker version built for amd64 build
 #
@@ -320,7 +326,7 @@ VBoxOGLspuload_CLEAN = \
 	$(VBOX_PATH_CROGL_GENFILES)/spu_dispatch_table.h
 
 
-if defined(VBOX_WITH_WDDM) && !defined(VBOX_WITHOUT_ADDITIONS)
+if defined(VBOX_WITH_WDDM) && defined(VBOX_WITH_ADDITIONS)
 #
 # VBoxOGLspuload-x86 - x86 VBoxOGLspuload version built for amd64 build
 #
@@ -449,7 +455,7 @@ VBoxOGLcrstate_CFLAGS +=
 endif
 
 
-if defined(VBOX_WITH_WDDM) && !defined(VBOX_WITHOUT_ADDITIONS)
+if defined(VBOX_WITH_WDDM) && defined(VBOX_WITH_ADDITIONS)
 #
 # VBoxOGLcrstate-x86 - x86 VBoxOGLcrstate version built for amd64 build
 #
@@ -570,7 +576,7 @@ VBoxOGLerrorspu_CLEAN = \
 VBoxOGLerrorspu_LIBS = \
 	$(VBOX_LIB_OGL_CRUTIL)
 
-if defined(VBOX_WITH_WDDM) && !defined(VBOX_WITHOUT_ADDITIONS)
+if defined(VBOX_WITH_WDDM) && defined(VBOX_WITH_ADDITIONS)
 #
 # VBoxOGLerrorspu-x86 - x86 VBoxOGLerrorspu version built for amd64 build
 #

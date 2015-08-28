@@ -697,6 +697,9 @@ static int pdmacFileAioMgrNormalRangeLock(PPDMACEPFILEMGR pAioMgr,
                                           RTFOFF offStart, size_t cbRange,
                                           PPDMACTASKFILE pTask)
 {
+    LogFlowFunc(("pAioMgr=%#p pEndpoint=%#p offStart=%RTfoff cbRange=%zu pTask=%#p\n",
+                 pAioMgr, pEndpoint, offStart, cbRange, pTask));
+
     AssertMsg(!pdmacFileAioMgrNormalIsRangeLocked(pEndpoint, offStart, cbRange, pTask),
               ("Range is already locked offStart=%RTfoff cbRange=%u\n",
                offStart, cbRange));
@@ -727,6 +730,9 @@ static PPDMACTASKFILE pdmacFileAioMgrNormalRangeLockFree(PPDMACEPFILEMGR pAioMgr
                                                          PPDMACFILERANGELOCK pRangeLock)
 {
     PPDMACTASKFILE pTasksWaitingHead;
+
+    LogFlowFunc(("pAioMgr=%#p pEndpoint=%#p pRangeLock=%#p\n",
+                 pAioMgr, pEndpoint, pRangeLock));
 
     AssertPtr(pRangeLock);
     Assert(pRangeLock->cRefs == 1);
@@ -1006,6 +1012,7 @@ static int pdmacFileAioMgrNormalProcessTaskList(PPDMACTASKFILE pTaskHead,
                     rc = RTFileAioReqPrepareFlush(hReq, pEndpoint->hFile, pCurr);
                     if (RT_FAILURE(rc))
                     {
+                        LogRel(("AIOMgr: Preparing flush failed with %Rrc, disabling async flushes\n", rc));
                         pEndpoint->fAsyncFlushSupported = false;
                         pdmacFileAioMgrNormalRequestFree(pAioMgr, hReq);
                         rc = VINF_SUCCESS; /* Fake success */
@@ -1357,10 +1364,16 @@ static void pdmacFileAioMgrNormalReqCompleteRc(PPDMACEPFILEMGR pAioMgr, RTFILEAI
 
         if (pTask->enmTransferType == PDMACTASKFILETRANSFER_FLUSH)
         {
-            LogFlow(("Async flushes are not supported for this endpoint, disabling\n"));
+            LogRel(("AIOMgr: Flush failed with %Rrc, disabling async flushes\n", rc));
             pEndpoint->fAsyncFlushSupported = false;
             AssertMsg(pEndpoint->pFlushReq == pTask, ("Failed flush request doesn't match active one\n"));
             /* The other method will take over now. */
+
+            pEndpoint->pFlushReq = NULL;
+            /* Call completion callback */
+            LogFlow(("Flush task=%#p completed with %Rrc\n", pTask, VINF_SUCCESS));
+            pTask->pfnCompleted(pTask, pTask->pvUser, VINF_SUCCESS);
+            pdmacFileTaskFree(pEndpoint, pTask);
         }
         else
         {
@@ -1499,8 +1512,8 @@ static void pdmacFileAioMgrNormalReqCompleteRc(PPDMACEPFILEMGR pAioMgr, RTFILEAI
 
                 /* Write it now. */
                 pTask->fPrefetch = false;
-                size_t cbToTransfer = RT_ALIGN_Z(pTask->DataSeg.cbSeg, 512);
                 RTFOFF offStart = pTask->Off & ~(RTFOFF)(512-1);
+                size_t cbToTransfer = RT_ALIGN_Z(pTask->DataSeg.cbSeg + (pTask->Off - offStart), 512);
 
                 /* Grow the file if needed. */
                 if (RT_UNLIKELY((uint64_t)(pTask->Off + pTask->DataSeg.cbSeg) > pEndpoint->cbFile))

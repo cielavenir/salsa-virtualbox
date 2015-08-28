@@ -784,7 +784,7 @@ static int VMXR0InjectEvent(PVM pVM, PVMCPU pVCpu, PCPUMCTX pCtx, uint32_t intIn
             {
                 uint32_t intInfo2;
 
-                intInfo2  = (iGate == X86_XCPT_GP) ? (uint32_t)X86_XCPT_DF : iGate;
+                intInfo2  = (iGate == X86_XCPT_GP) ? (uint32_t)X86_XCPT_DF : (uint32_t)X86_XCPT_GP;
                 intInfo2 |= (1 << VMX_EXIT_INTERRUPTION_INFO_VALID_SHIFT);
                 intInfo2 |= VMX_EXIT_INTERRUPTION_INFO_ERROR_CODE_VALID;
                 intInfo2 |= (VMX_EXIT_INTERRUPTION_INFO_TYPE_HWEXCPT << VMX_EXIT_INTERRUPTION_INFO_TYPE_SHIFT);
@@ -4112,6 +4112,10 @@ ResumeExecution:
     case VMX_EXIT_VMWRITE:              /* 25 Guest software executed VMWRITE. */
     case VMX_EXIT_VMXOFF:               /* 26 Guest software executed VMXOFF. */
     case VMX_EXIT_VMXON:                /* 27 Guest software executed VMXON. */
+    case VMX_EXIT_INVEPT:               /* 50 Guest software executed INVEPT. */
+    case VMX_EXIT_INVVPID:              /* 53 Guest software executed INVVPID. */
+    case VMX_EXIT_INVPCID:              /* 58 Guest software executed INVPCID. */
+    case VMX_EXIT_VMFUNC:               /* 59 Guest software executed VMFUNC. */
         /** @todo inject #UD immediately */
         rc = VERR_EM_INTERPRETER;
         break;
@@ -4701,7 +4705,7 @@ VMMR0DECL(int) VMXR0Execute64BitsHandler(PVM pVM, PVMCPU pVCpu, PCPUMCTX pCtx, R
 
 #ifdef VBOX_WITH_VMMR0_DISABLE_LAPIC_NMI
     RTCPUID idHostCpu = RTMpCpuId();
-    CPUMR0SetLApic(pVM, idHostCpu);
+    CPUMR0SetLApic(pVCpu, idHostCpu);
 #endif
 
     pCpu = HWACCMR0GetCurrentCpu();

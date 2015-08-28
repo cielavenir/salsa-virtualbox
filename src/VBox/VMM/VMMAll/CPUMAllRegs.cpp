@@ -890,8 +890,8 @@ VMMDECL(int) CPUMQueryGuestMsr(PVMCPU pVCpu, uint32_t idMsr, uint64_t *puValue)
 
         default:
             /* In X2APIC specification this range is reserved for APIC control. */
-            if (    idMsr >= MSR_IA32_APIC_START
-                &&  idMsr <  MSR_IA32_APIC_END)
+            if (    idMsr >= MSR_IA32_X2APIC_START
+                &&  idMsr <= MSR_IA32_X2APIC_END)
             {
                 rc = PDMApicReadMSR(pVCpu->CTX_SUFF(pVM), pVCpu->idCpu, idMsr, puValue);
                 if (RT_SUCCESS(rc))
@@ -1057,8 +1057,8 @@ VMMDECL(int) CPUMSetGuestMsr(PVMCPU pVCpu, uint32_t idMsr, uint64_t uValue)
 
         default:
             /* In X2APIC specification this range is reserved for APIC control. */
-            if (    idMsr >= MSR_IA32_APIC_START
-                &&  idMsr <  MSR_IA32_APIC_END)
+            if (    idMsr >= MSR_IA32_X2APIC_START
+                &&  idMsr <= MSR_IA32_X2APIC_END)
             {
                 rc = PDMApicWriteMSR(pVCpu->CTX_SUFF(pVM), pVCpu->idCpu, idMsr, uValue);
                 if (rc != VINF_SUCCESS)

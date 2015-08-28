@@ -164,6 +164,7 @@
 #ifdef VBOX_STRICT
 # include <iprt/crc.h>
 #endif
+#include <iprt/critsect.h>
 #include <iprt/list.h>
 #include <iprt/mem.h>
 #include <iprt/memobj.h>
@@ -171,6 +172,19 @@
 #include <iprt/semaphore.h>
 #include <iprt/string.h>
 #include <iprt/time.h>
+
+
+/*******************************************************************************
+*   Defined Constants And Macros                                               *
+*******************************************************************************/
+/** @def VBOX_USE_CRIT_SECT_FOR_GIANT
+ * Use a critical section instead of a fast mutex for the giant GMM lock.
+ *
+ * @remarks This is primarily a way of avoiding the deadlock checks in the
+ *          windows driver verifier. */
+#if defined(RT_OS_WINDOWS) || defined(DOXYGEN_RUNNING)
+# define VBOX_USE_CRIT_SECT_FOR_GIANT
+#endif
 
 
 /*******************************************************************************
@@ -475,9 +489,15 @@ typedef struct GMM
     uint32_t            u32Magic;
     /** The number of threads waiting on the mutex. */
     uint32_t            cMtxContenders;
+#ifdef VBOX_USE_CRIT_SECT_FOR_GIANT
+    /** The critical section protecting the GMM.
+     * More fine grained locking can be implemented later if necessary. */
+    RTCRITSECT          GiantCritSect;
+#else
     /** The fast mutex protecting the GMM.
      * More fine grained locking can be implemented later if necessary. */
     RTSEMFASTMUTEX      hMtx;
+#endif
 #ifdef VBOX_STRICT
     /** The current mutex owner. */
     RTNATIVETHREAD      hMtxOwner;
@@ -755,7 +775,11 @@ GMMR0DECL(int) GMMR0Init(void)
     RTListInit(&pGMM->ChunkList);
     ASMBitSet(&pGMM->bmChunkId[0], NIL_GMM_CHUNKID);
 
+#ifdef VBOX_USE_CRIT_SECT_FOR_GIANT
+    int rc = RTCritSectInit(&pGMM->GiantCritSect);
+#else
     int rc = RTSemFastMutexCreate(&pGMM->hMtx);
+#endif
     if (RT_SUCCESS(rc))
     {
         unsigned iMtx;
@@ -813,7 +837,11 @@ GMMR0DECL(int) GMMR0Init(void)
          */
         while (iMtx-- > 0)
             RTSemFastMutexDestroy(pGMM->aChunkMtx[iMtx].hMtx);
+#ifdef VBOX_USE_CRIT_SECT_FOR_GIANT
+        RTCritSectDelete(&pGMM->GiantCritSect);
+#else
         RTSemFastMutexDestroy(pGMM->hMtx);
+#endif
     }
 
     pGMM->u32Magic = 0;
@@ -848,8 +876,12 @@ GMMR0DECL(void) GMMR0Term(void)
     /* Destroy the fundamentals. */
     g_pGMM = NULL;
     pGMM->u32Magic    = ~GMM_MAGIC;
+#ifdef VBOX_USE_CRIT_SECT_FOR_GIANT
+    RTCritSectDelete(&pGMM->GiantCritSect);
+#else
     RTSemFastMutexDestroy(pGMM->hMtx);
     pGMM->hMtx        = NIL_RTSEMFASTMUTEX;
+#endif
 
     /* Free any chunks still hanging around. */
     RTAvlU32Destroy(&pGMM->pChunks, gmmR0TermDestroyChunk, pGMM);
@@ -930,7 +962,11 @@ GMMR0DECL(void) GMMR0InitPerVMData(PGVM pGVM)
 static int gmmR0MutexAcquire(PGMM pGMM)
 {
     ASMAtomicIncU32(&pGMM->cMtxContenders);
+#ifdef VBOX_USE_CRIT_SECT_FOR_GIANT
+    int rc = RTCritSectEnter(&pGMM->GiantCritSect);
+#else
     int rc = RTSemFastMutexRequest(pGMM->hMtx);
+#endif
     ASMAtomicDecU32(&pGMM->cMtxContenders);
     AssertRC(rc);
 #ifdef VBOX_STRICT
@@ -951,8 +987,12 @@ static int gmmR0MutexRelease(PGMM pGMM)
 #ifdef VBOX_STRICT
     pGMM->hMtxOwner = NIL_RTNATIVETHREAD;
 #endif
+#ifdef VBOX_USE_CRIT_SECT_FOR_GIANT
+    int rc = RTCritSectLeave(&pGMM->GiantCritSect);
+#else
     int rc = RTSemFastMutexRelease(pGMM->hMtx);
     AssertRC(rc);
+#endif
     return rc;
 }
 
@@ -988,11 +1028,19 @@ static bool gmmR0MutexYield(PGMM pGMM, uint64_t *puLockNanoTS)
     pGMM->hMtxOwner = NIL_RTNATIVETHREAD;
 #endif
     ASMAtomicIncU32(&pGMM->cMtxContenders);
+#ifdef VBOX_USE_CRIT_SECT_FOR_GIANT
+    int rc1 = RTCritSectLeave(&pGMM->GiantCritSect); AssertRC(rc1);
+#else
     int rc1 = RTSemFastMutexRelease(pGMM->hMtx); AssertRC(rc1);
+#endif
 
     RTThreadYield();
 
+#ifdef VBOX_USE_CRIT_SECT_FOR_GIANT
+    int rc2 = RTCritSectEnter(&pGMM->GiantCritSect); AssertRC(rc2);
+#else
     int rc2 = RTSemFastMutexRequest(pGMM->hMtx); AssertRC(rc2);
+#endif
     *puLockNanoTS = RTTimeSystemNanoTS();
     ASMAtomicDecU32(&pGMM->cMtxContenders);
 #ifdef VBOX_STRICT
@@ -1212,6 +1260,7 @@ GMMR0DECL(void) GMMR0CleanupVM(PGVM pGVM)
          * and leftover mappings.  (This'll only catch private pages,
          * shared pages will be 'left behind'.)
          */
+        /** @todo r=bird: This scanning+freeing could be optimized in bound mode! */
         uint64_t    cPrivatePages = pGVM->gmm.s.Stats.cPrivatePages; /* save */
 
         unsigned    iCountDown = 64;
@@ -1223,7 +1272,9 @@ GMMR0DECL(void) GMMR0CleanupVM(PGVM pGVM)
             RTListForEachReverse(&pGMM->ChunkList, pChunk, GMMCHUNK, ListNode)
             {
                 uint32_t const cFreeChunksOld = pGMM->cFreedChunks;
-                if (gmmR0CleanupVMScanChunk(pGMM, pGVM, pChunk))
+                if (   (   !pGMM->fBoundMemoryMode
+                        || pChunk->hGVM == pGVM->hSelf)
+                    && gmmR0CleanupVMScanChunk(pGMM, pGVM, pChunk))
                 {
                     /* We left the giant mutex, so reset the yield counters. */
                     uLockNanoTS = RTTimeSystemNanoTS();
@@ -1238,7 +1289,10 @@ GMMR0DECL(void) GMMR0CleanupVM(PGVM pGVM)
                         iCountDown--;
                 }
                 if (pGMM->cFreedChunks != cFreeChunksOld)
+                {
+                    fRedoFromStart = true;
                     break;
+                }
             }
         } while (fRedoFromStart);
 
@@ -1346,6 +1400,8 @@ GMMR0DECL(void) GMMR0CleanupVM(PGVM pGVM)
  */
 static bool gmmR0CleanupVMScanChunk(PGMM pGMM, PGVM pGVM, PGMMCHUNK pChunk)
 {
+    Assert(!pGMM->fBoundMemoryMode || pChunk->hGVM == pGVM->hSelf);
+
     /*
      * Look for pages belonging to the VM.
      * (Perform some internal checks while we're scanning.)
@@ -2373,12 +2429,13 @@ static uint32_t gmmR0AllocatePagesInBoundMode(PGMM pGMM, PGVM pGVM, uint32_t iPa
 
 
 /**
- * Checks if we should start picking pages from chunks of other VMs.
+ * Checks if we should start picking pages from chunks of other VMs because
+ * we're getting close to the system memory or reserved limit.
  *
  * @returns @c true if we should, @c false if we should first try allocate more
  *          chunks.
  */
-static bool gmmR0ShouldAllocatePagesInOtherChunks(PGVM pGVM)
+static bool gmmR0ShouldAllocatePagesInOtherChunksBecauseOfLimits(PGVM pGVM)
 {
     /*
      * Don't allocate a new chunk if we're
@@ -2401,6 +2458,24 @@ static bool gmmR0ShouldAllocatePagesInOtherChunks(PGVM pGVM)
      */
     /** @todo.  */
 
+    return false;
+}
+
+
+/**
+ * Checks if we should start picking pages from chunks of other VMs because
+ * there is a lot of free pages around.
+ *
+ * @returns @c true if we should, @c false if we should first try allocate more
+ *          chunks.
+ */
+static bool gmmR0ShouldAllocatePagesInOtherChunksBecauseOfLotsFree(PGMM pGMM)
+{
+    /*
+     * Setting the limit at 16 chunks (32 MB) at the moment.
+     */
+    if (pGMM->PrivateX.cFreePages >= GMM_CHUNK_NUM_PAGES * 16)
+        return true;
     return false;
 }
 
@@ -2529,8 +2604,12 @@ static int gmmR0AllocatePagesNew(PGMM pGMM, PGVM pGVM, uint32_t cPages, PGMMPAGE
         {
             /* Maybe we should try getting pages from chunks "belonging" to
                other VMs before allocating more chunks? */
-            if (gmmR0ShouldAllocatePagesInOtherChunks(pGVM))
+            bool fTriedOnSameAlready = false;
+            if (gmmR0ShouldAllocatePagesInOtherChunksBecauseOfLimits(pGVM))
+            {
                 iPage = gmmR0AllocatePagesFromSameNode(pGMM, pGVM, &pGMM->PrivateX, iPage, cPages, paPages);
+                fTriedOnSameAlready = true;
+            }
 
             /* Allocate memory from empty chunks. */
             if (iPage < cPages)
@@ -2539,6 +2618,16 @@ static int gmmR0AllocatePagesNew(PGMM pGMM, PGVM pGVM, uint32_t cPages, PGMMPAGE
             /* Grab empty shared chunks. */
             if (iPage < cPages)
                 iPage = gmmR0AllocatePagesFromEmptyChunksOnSameNode(pGMM, pGVM, &pGMM->Shared, iPage, cPages, paPages);
+
+            /* If there is a lof of free pages spread around, try not waste
+               system memory on more chunks. (Should trigger defragmentation.) */
+            if (   !fTriedOnSameAlready
+                && gmmR0ShouldAllocatePagesInOtherChunksBecauseOfLotsFree(pGMM))
+            {
+                iPage = gmmR0AllocatePagesFromSameNode(pGMM, pGVM, &pGMM->PrivateX, iPage, cPages, paPages);
+                if (iPage < cPages)
+                    iPage = gmmR0AllocatePagesIndiscriminately(pGMM, pGVM, &pGMM->PrivateX, iPage, cPages, paPages);
+            }
 
             /*
              * Ok, try allocate new chunks.
@@ -2781,7 +2870,7 @@ GMMR0DECL(int) GMMR0AllocateHandyPages(PVM pVM, VMCPUID idCpu, uint32_t cPagesTo
                 }
             } /* for each page to update */
 
-            if (RT_SUCCESS(rc))
+            if (RT_SUCCESS(rc) && cPagesToAlloc > 0)
             {
 #if defined(VBOX_STRICT) && 0 /** @todo re-test this later. Appeared to be a PGM init bug. */
                 for (iPage = 0; iPage < cPagesToAlloc; iPage++)

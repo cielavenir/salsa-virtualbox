@@ -6594,7 +6594,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message numerus="yes">
         <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
-        <translation type="unfinished">
+        <translation type="obsolete">
             <numerusform>&lt;p&gt;As máquinas virtuais &lt;b&gt;%1&lt;/b&gt; possuem estado de execução salvo. &lt;/p&gt;&lt;p&gt;Se você continuar, o estado atual de execução destas máquinas será descartado. As máquinas existentes não serão afetadas.&lt;/p&gt;</numerusform>
             <numerusform></numerusform>
         </translation>
@@ -6896,6 +6896,18 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>&amp;Network Operations Manager...</source>
         <translation type="obsolete">Gerenciador de Operações de Rede (&amp;N)...</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Failed to initialize COM because the VirtualBox global configuration directory &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; is not accessible. Please check the permissions of this directory and of its parent directory.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
+        <comment>This text is never used with n == 0.  Feel free to drop the %n where possible, we only included it because of problems with Qt Linguist (but the user can see how many machines are in the list and doesn&apos;t need to be told).</comment>
+        <translation type="unfinished">
+            <numerusform>&lt;p&gt;As máquinas virtuais &lt;b&gt;%1&lt;/b&gt; possuem estado de execução salvo. &lt;/p&gt;&lt;p&gt;Se você continuar, o estado atual de execução destas máquinas será descartado. As máquinas existentes não serão afetadas.&lt;/p&gt;</numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -11362,7 +11374,7 @@ Versão %1</translation>
     </message>
     <message>
         <source>and</source>
-        <translation>e</translation>
+        <translation type="obsolete">e</translation>
     </message>
     <message>
         <source>MB</source>

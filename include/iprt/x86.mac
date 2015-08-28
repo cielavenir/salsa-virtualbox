@@ -228,10 +228,15 @@
 %define MSR_IA32_TSC                        0x10
 %define MSR_IA32_PLATFORM_ID                0x17
 %ifndef MSR_IA32_APICBASE
-%define MSR_IA32_APICBASE                   0x1b
+ %define MSR_IA32_APICBASE                  0x1b
+ %define MSR_IA32_APICBASE_EN               RT_BIT_64(11)
+ %define MSR_IA32_APICBASE_EXTD             RT_BIT_64(10)
+ %define MSR_IA32_APICBASE_BSP              RT_BIT_64(8)
+ %define MSR_IA32_APICBASE_BASE_MIN         0x0000000ffffff000
 %endif
 %define MSR_IA32_FEATURE_CONTROL            0x3A
 %define MSR_IA32_FEATURE_CONTROL_LOCK       RT_BIT(0)
+%define MSR_IA32_FEATURE_CONTROL_SMX_VMXON  RT_BIT(1)
 %define MSR_IA32_FEATURE_CONTROL_VMXON      RT_BIT(2)
 %define MSR_IA32_BIOS_UPDT_TRIG             0x79
 %define MSR_IA32_BIOS_SIGN_ID               0x8B
@@ -286,8 +291,9 @@
 %define MSR_IA32_VMX_PROCBASED_CTLS2        0x48B
 %define MSR_IA32_VMX_EPT_CAPS               0x48C
 %define MSR_IA32_DS_AREA                    0x600
-%define MSR_IA32_APIC_START                 0x800
-%define MSR_IA32_APIC_END                   0x900
+%define MSR_IA32_X2APIC_START               0x800
+%define MSR_IA32_X2APIC_TPR                 0x808
+%define MSR_IA32_X2APIC_END                 0xBFF
 %define MSR_K6_EFER                         0xc0000080
 %define  MSR_K6_EFER_SCE                     RT_BIT(0)
 %define  MSR_K6_EFER_LME                     RT_BIT(8)

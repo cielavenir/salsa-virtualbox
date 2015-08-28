@@ -5386,7 +5386,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message numerus="yes">
         <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
-        <translation type="unfinished">
+        <translation type="obsolete">
             <numerusform>&lt;p&gt;De virtuelle maskiner &lt;b&gt;%1&lt;/b&gt; har gemte tilstande.&lt;/p&gt;&lt;p&gt;Hvis du fortsætter vil kørselstilstanden af de eksporterede maskiner blive kasseret. Bemærk at de nuværende maskiner ikke ændres.&lt;/p&gt;</numerusform>
             <numerusform></numerusform>
         </translation>
@@ -5631,6 +5631,18 @@ p, li { white-space: pre-wrap; }
         <source>Ok</source>
         <comment>extension pack</comment>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Failed to initialize COM because the VirtualBox global configuration directory &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; is not accessible. Please check the permissions of this directory and of its parent directory.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
+        <comment>This text is never used with n == 0.  Feel free to drop the %n where possible, we only included it because of problems with Qt Linguist (but the user can see how many machines are in the list and doesn&apos;t need to be told).</comment>
+        <translation type="unfinished">
+            <numerusform>&lt;p&gt;De virtuelle maskiner &lt;b&gt;%1&lt;/b&gt; har gemte tilstande.&lt;/p&gt;&lt;p&gt;Hvis du fortsætter vil kørselstilstanden af de eksporterede maskiner blive kasseret. Bemærk at de nuværende maskiner ikke ændres.&lt;/p&gt;</numerusform>
+            <numerusform></numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -8898,7 +8910,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>and</source>
-        <translation>og</translation>
+        <translation type="obsolete">og</translation>
     </message>
     <message>
         <source>MB</source>

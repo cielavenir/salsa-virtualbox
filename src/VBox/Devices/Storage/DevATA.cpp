@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2006-2011 Oracle Corporation
+ * Copyright (C) 2006-2012 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -2068,13 +2068,15 @@ static bool atapiPassthroughSS(ATADevState *s)
                 ataSCSIPadStr(s->CTX_SUFF(pbIOBuffer) + 16, "CD-ROM", 16);
                 ataSCSIPadStr(s->CTX_SUFF(pbIOBuffer) + 32, "1.0", 4);
             }
-            else if (s->aATAPICmd[0] == SCSI_READ_TOC_PMA_ATIP)
+            else if (   s->aATAPICmd[0] == SCSI_READ_TOC_PMA_ATIP
+                     && (s->aATAPICmd[2] & 0xf) != 0x05
+                     && s->aATAPICmd[6] != 0xaa)
             {
                 /* Set the media type if we can detect it. */
                 uint8_t *pbBuf = s->CTX_SUFF(pbIOBuffer);
 
                 /** @todo: Implemented only for formatted TOC now. */
-                if (   (s->aATAPICmd[1] & 0xf) == 0
+                if (   (s->aATAPICmd[2] & 0xf) == 0
                     && cbTransfer >= 6)
                 {
                     uint32_t NewMediaType;
@@ -7327,7 +7329,8 @@ const PDMDEVREG g_DevicePIIX3IDE =
     "  LUN #999 is the LED/Status connector.",
     /* fFlags */
     PDM_DEVREG_FLAGS_DEFAULT_BITS | PDM_DEVREG_FLAGS_RC | PDM_DEVREG_FLAGS_R0 |
-    PDM_DEVREG_FLAGS_FIRST_SUSPEND_NOTIFICATION | PDM_DEVREG_FLAGS_FIRST_POWEROFF_NOTIFICATION,
+    PDM_DEVREG_FLAGS_FIRST_SUSPEND_NOTIFICATION | PDM_DEVREG_FLAGS_FIRST_POWEROFF_NOTIFICATION |
+    PDM_DEVREG_FLAGS_FIRST_RESET_NOTIFICATION,
     /* fClass */
     PDM_DEVREG_CLASS_STORAGE,
     /* cMaxInstances */

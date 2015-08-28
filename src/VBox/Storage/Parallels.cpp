@@ -335,6 +335,8 @@ static int parallelsOpenImage(PPARALLELSIMAGE pImage, unsigned uOpenFlags)
     pImage->pInterfaceIOCallbacks = VDGetInterfaceIOInt(pImage->pInterfaceIO);
     AssertPtrReturn(pImage->pInterfaceIOCallbacks, VERR_INVALID_PARAMETER);
 
+    pImage->uOpenFlags = uOpenFlags;
+
     rc = parallelsFileOpen(pImage, pImage->pszFilename,
                            VDOpenFlagsToFileOpenFlags(uOpenFlags,
                                                       false /* fCreate */));

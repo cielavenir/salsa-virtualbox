@@ -49,26 +49,12 @@
  */
 
 #ifdef XORG_7X
-# include "xorg-server.h"
 # include <string.h>
 #endif
 #include "vboxvideo.h"
-#include <iprt/asm-math.h>
 #include "version-generated.h"
 #include "product-generated.h"
-#include <xf86.h>
-#include <misc.h>
-
-/* All drivers initialising the SW cursor need this */
-#include "mipointer.h"
-
-/* Colormap handling */
-#include "micmap.h"
-#include "xf86cmap.h"
-
-/* DPMS */
-/* #define DPMS_SERVER
-#include "extensions/dpms.h" */
+#include "xf86.h"
 
 /* VGA hardware functions for setting and restoring text mode */
 #include "vgaHW.h"
@@ -104,10 +90,6 @@ Bool VBOXSetMode(ScrnInfoPtr pScrn, unsigned cDisplay, unsigned cWidth,
 
     TRACE_LOG("cDisplay=%u, cWidth=%u, cHeight=%u, x=%d, y=%d, displayWidth=%d\n",
               cDisplay, cWidth, cHeight, x, y, pScrn->displayWidth);
-    pVBox->aScreenLocation[cDisplay].cx = cWidth;
-    pVBox->aScreenLocation[cDisplay].cy = cHeight;
-    pVBox->aScreenLocation[cDisplay].x = x;
-    pVBox->aScreenLocation[cDisplay].y = y;
     offStart = y * pVBox->cbLine + x * vboxBPP(pScrn) / 8;
     /* Deactivate the screen if the mode - specifically the virtual width - is
      * too large for VRAM as we sometimes have to do this - see comments in
@@ -121,12 +103,8 @@ Bool VBOXSetMode(ScrnInfoPtr pScrn, unsigned cDisplay, unsigned cWidth,
         return FALSE;
     else
         cwReal = RT_MIN((int) cWidth, pScrn->displayWidth - x);
-    TRACE_LOG("pVBox->afDisabled[cDisplay]=%d\n",
-              (int)pVBox->afDisabled[cDisplay]);
-    /* Don't fiddle with the hardware if we are switched
-     * to a virtual terminal. */
-    if (pVBox->vtSwitch)
-        return TRUE;
+    TRACE_LOG("pVBox->afDisabled[%u]=%d\n",
+              cDisplay, (int)pVBox->afDisabled[cDisplay]);
     if (cDisplay == 0)
         VBoxVideoSetModeRegisters(cwReal, cHeight, pScrn->displayWidth,
                                   vboxBPP(pScrn), 0, x, y);
@@ -153,8 +131,13 @@ Bool VBOXAdjustScreenPixmap(ScrnInfoPtr pScrn, int width, int height)
     PixmapPtr pPixmap = pScreen->GetScreenPixmap(pScreen);
     VBOXPtr pVBox = VBOXGetRec(pScrn);
     uint64_t cbLine = vboxLineLength(pScrn, width);
+    int displayWidth = vboxDisplayPitch(pScrn, cbLine);
 
     TRACE_LOG("width=%d, height=%d\n", width, height);
+    if (   width == pScrn->virtualX
+        && height == pScrn->virtualY
+        && displayWidth == pScrn->displayWidth)
+        return TRUE;
     if (!pPixmap) {
         xf86DrvMsg(pScrn->scrnIndex, X_ERROR,
                    "Failed to get the screen pixmap.\n");
@@ -173,7 +156,7 @@ Bool VBOXAdjustScreenPixmap(ScrnInfoPtr pScrn, int width, int height)
     vboxClearVRAM(pScrn, width, height);
     pScrn->virtualX = width;
     pScrn->virtualY = height;
-    pScrn->displayWidth = vboxDisplayPitch(pScrn, cbLine);
+    pScrn->displayWidth = displayWidth;
     pVBox->cbLine = cbLine;
 #ifdef VBOX_DRI
     if (pVBox->useDRI)

@@ -320,7 +320,7 @@ static int VBoxDrvFreeBSDOpen(struct cdev *pDev, int fOpen, struct thread *pTd, 
     /*
      * Create a new session.
      */
-    rc = supdrvCreateSession(&g_VBoxDrvFreeBSDDevExt, true /* fUser */, &pSession);
+    rc = supdrvCreateSession(&g_VBoxDrvFreeBSDDevExt, true /* fUser */, true /* fUnrestricted */, &pSession);
     if (RT_SUCCESS(rc))
     {
         /** @todo get (r)uid and (r)gid.
@@ -363,7 +363,7 @@ static int VBoxDrvFreeBSDClose(struct cdev *pDev, int fFile, int DevType, struct
      */
     if (VALID_PTR(pSession))
     {
-        supdrvCloseSession(&g_VBoxDrvFreeBSDDevExt, pSession);
+        supdrvSessionRelease(pSession);
         if (!ASMAtomicCmpXchgPtr(&pDev->si_drv1, NULL, pSession))
             OSDBGPRINT(("VBoxDrvFreeBSDClose: si_drv1=%p expected %p!\n", pDev->si_drv1, pSession));
         ASMAtomicDecU32(&g_cUsers);
@@ -398,9 +398,10 @@ static int VBoxDrvFreeBSDIOCtl(struct cdev *pDev, u_long ulCmd, caddr_t pvData, 
     /*
      * Deal with the fast ioctl path first.
      */
-    if (    ulCmd == SUP_IOCTL_FAST_DO_RAW_RUN
-        ||  ulCmd == SUP_IOCTL_FAST_DO_HWACC_RUN
-        ||  ulCmd == SUP_IOCTL_FAST_DO_NOP)
+    if (   (    ulCmd == SUP_IOCTL_FAST_DO_RAW_RUN
+            ||  ulCmd == SUP_IOCTL_FAST_DO_HWACC_RUN
+            ||  ulCmd == SUP_IOCTL_FAST_DO_NOP)
+        && pSession->fUnrestricted == true)
         return supdrvIOCtlFast(ulCmd, *(uint32_t *)pvData, &g_VBoxDrvFreeBSDDevExt, pSession);
 
     return VBoxDrvFreeBSDIOCtlSlow(pSession, ulCmd, pvData, pTd);
@@ -493,6 +494,8 @@ static int VBoxDrvFreeBSDIOCtlSlow(PSUPDRVSESSION pSession, u_long ulCmd, caddr_
             RTMemTmpFree(pHdr);
             return rc;
         }
+        if (Hdr.cbIn < cbReq)
+            RT_BZERO((uint8_t *)pHdr + Hdr.cbIn, cbReq - Hdr.cbIn);
     }
     else
     {
@@ -503,7 +506,7 @@ static int VBoxDrvFreeBSDIOCtlSlow(PSUPDRVSESSION pSession, u_long ulCmd, caddr_
     /*
      * Process the IOCtl.
      */
-    int rc = supdrvIOCtl(ulCmd, &g_VBoxDrvFreeBSDDevExt, pSession, pHdr);
+    int rc = supdrvIOCtl(ulCmd, &g_VBoxDrvFreeBSDDevExt, pSession, pHdr, cbReq);
     if (RT_LIKELY(!rc))
     {
         /*
@@ -575,6 +578,25 @@ int VBOXCALL SUPDrvFreeBSDIDC(uint32_t uReq, PSUPDRVIDCREQHDR pReq)
      * Do the job.
      */
     return supdrvIDC(uReq, &g_VBoxDrvFreeBSDDevExt, pSession, pReq);
+}
+
+
+void VBOXCALL supdrvOSCleanupSession(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession)
+{
+    NOREF(pDevExt);
+    NOREF(pSession);
+}
+
+
+void VBOXCALL supdrvOSSessionHashTabInserted(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession, void *pvUser)
+{
+    NOREF(pDevExt); NOREF(pSession); NOREF(pvUser);
+}
+
+
+void VBOXCALL supdrvOSSessionHashTabRemoved(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession, void *pvUser)
+{
+    NOREF(pDevExt); NOREF(pSession); NOREF(pvUser);
 }
 
 

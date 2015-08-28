@@ -1600,7 +1600,7 @@ Hardware::Hardware()
           keyboardHidType(KeyboardHidType_PS2Keyboard),
           chipsetType(ChipsetType_PIIX3),
           fEmulatedUSBCardReader(false),
-          clipboardMode(ClipboardMode_Bidirectional),
+          clipboardMode(ClipboardMode_Disabled),
           ulMemoryBalloonSize(0),
           fPageFusionEnabled(false)
 {
@@ -3951,10 +3951,10 @@ void MachineConfigFile::buildHardwareXML(xml::ElementNode &elmParent,
     const char *pcszClip;
     switch (hw.clipboardMode)
     {
-        case ClipboardMode_Disabled: pcszClip = "Disabled"; break;
+        default: /*case ClipboardMode_Disabled:*/ pcszClip = "Disabled"; break;
         case ClipboardMode_HostToGuest: pcszClip = "HostToGuest"; break;
         case ClipboardMode_GuestToHost: pcszClip = "GuestToHost"; break;
-        default: /*case ClipboardMode_Bidirectional:*/ pcszClip = "Bidirectional"; break;
+        case ClipboardMode_Bidirectional: pcszClip = "Bidirectional"; break;
     }
     pelmClip->setAttribute("mode", pcszClip);
 

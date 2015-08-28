@@ -350,7 +350,7 @@ public:
         return S_OK;
     }
 private:
-    Console *mConsole;
+    ComObjPtr<Console>    mConsole;
 };
 
 typedef ListenerImpl<VmEventListener, Console*> VmEventListenerImpl;
@@ -1596,8 +1596,8 @@ DECLCALLBACK(int) Console::doGuestPropNotification(void *pvExtension,
     PHOSTCALLBACKDATA   pCBData = reinterpret_cast<PHOSTCALLBACKDATA>(pvParms);
     AssertReturn(sizeof(HOSTCALLBACKDATA) == cbParms, VERR_INVALID_PARAMETER);
     AssertReturn(HOSTCALLBACKMAGIC == pCBData->u32Magic, VERR_INVALID_PARAMETER);
-    Log5(("Console::doGuestPropNotification: pCBData={.pcszName=%s, .pcszValue=%s, .pcszFlags=%s}\n",
-          pCBData->pcszName, pCBData->pcszValue, pCBData->pcszFlags));
+    LogFlow(("pCBData={.pcszName=%s, .pcszValue=%s, .pcszFlags=%s}\n",
+              pCBData->pcszName, pCBData->pcszValue, pCBData->pcszFlags));
 
     int  rc;
     Bstr name(pCBData->pcszName);
@@ -1612,7 +1612,7 @@ DECLCALLBACK(int) Console::doGuestPropNotification(void *pvExtension,
         rc = VINF_SUCCESS;
     else
     {
-        LogFunc(("Console::doGuestPropNotification: hrc=%Rhrc pCBData={.pcszName=%s, .pcszValue=%s, .pcszFlags=%s}\n",
+        LogFlow(("hRc=%Rhrc pCBData={.pcszName=%s, .pcszValue=%s, .pcszFlags=%s}\n",
                  hrc, pCBData->pcszName, pCBData->pcszValue, pCBData->pcszFlags));
         rc = Global::vboxStatusCodeFromCOM(hrc);
     }
@@ -2062,7 +2062,7 @@ STDMETHODIMP Console::PowerDown(IProgress **aProgress)
         int vrc = RTThreadCreate(NULL, Console::powerDownThread,
                                  (void *) task.get(), 0,
                                  RTTHREADTYPE_MAIN_WORKER, 0,
-                                 "VMPowerDown");
+                                 "VMPwrDwn");
         if (RT_FAILURE(vrc))
         {
             rc = setError(E_FAIL, "Could not create VMPowerDown thread (%Rrc)", vrc);
@@ -3332,7 +3332,7 @@ STDMETHODIMP Console::TakeSnapshot(IN_BSTR aName,
                                  0,
                                  RTTHREADTYPE_MAIN_WORKER,
                                  0,
-                                 "ConsoleTakeSnap");
+                                 "TakeSnap");
         if (FAILED(vrc))
             throw setError(E_FAIL,
                            tr("Could not create VMTakeSnap thread (%Rrc)"),
@@ -5354,6 +5354,7 @@ HRESULT Console::setGuestProperty(IN_BSTR aName, IN_BSTR aValue, IN_BSTR aFlags)
         return E_INVALIDARG;
     if ((aFlags != NULL) && !VALID_PTR(aFlags))
         return E_INVALIDARG;
+    bool fDelete = (!aValue || !aValue[0]);
 
     AutoCaller autoCaller(this);
     AssertComRCReturnRC(autoCaller.rc());
@@ -5377,7 +5378,7 @@ HRESULT Console::setGuestProperty(IN_BSTR aName, IN_BSTR aValue, IN_BSTR aFlags)
     /* The + 1 is the null terminator */
     parm[0].u.pointer.size = (uint32_t)Utf8Name.length() + 1;
     Utf8Str Utf8Value = aValue;
-    if (aValue != NULL)
+    if (!fDelete)
     {
         parm[1].type = VBOX_HGCM_SVC_PARM_PTR;
         parm[1].u.pointer.addr = (void*)Utf8Value.c_str();
@@ -5392,10 +5393,10 @@ HRESULT Console::setGuestProperty(IN_BSTR aName, IN_BSTR aValue, IN_BSTR aFlags)
         /* The + 1 is the null terminator */
         parm[2].u.pointer.size = (uint32_t)Utf8Flags.length() + 1;
     }
-    if ((aValue != NULL) && (aFlags != NULL))
+    if (!fDelete && (aFlags != NULL))
         vrc = m_pVMMDev->hgcmHostCall("VBoxGuestPropSvc", SET_PROP_HOST,
                                       3, &parm[0]);
-    else if (aValue != NULL)
+    else if (!fDelete)
         vrc = m_pVMMDev->hgcmHostCall("VBoxGuestPropSvc", SET_PROP_VALUE_HOST,
                                     2, &parm[0]);
     else
@@ -6638,7 +6639,7 @@ HRESULT Console::powerUp(IProgress **aProgress, bool aPaused)
 
         int vrc = RTThreadCreate(NULL, Console::powerUpThread,
                                  (void *)task.get(), 0,
-                                 RTTHREADTYPE_MAIN_WORKER, 0, "VMPowerUp");
+                                 RTTHREADTYPE_MAIN_WORKER, 0, "VMPwrUp");
         if (RT_FAILURE(vrc))
             throw setError(E_FAIL, "Could not create VMPowerUp thread (%Rrc)", vrc);
 
@@ -7494,7 +7495,7 @@ DECLCALLBACK(void) Console::vmstateChangeCallback(PVM aVM,
                 int vrc = RTThreadCreate(NULL, Console::powerDownThread,
                                          (void *) task.get(), 0,
                                          RTTHREADTYPE_MAIN_WORKER, 0,
-                                         "VMPowerDown");
+                                         "VMPwrDwn");
                 AssertMsgRCBreak(vrc, ("Could not create VMPowerDown thread (%Rrc)\n", vrc));
 
                 /* task is now owned by powerDownThread(), so release it */
@@ -7773,7 +7774,7 @@ HRESULT Console::attachUSBDevice(IUSBDevice *aHostDevice, ULONG aMaskedIfs)
     alock.leave();
 
 /** @todo just do everything here and only wrap the PDMR3Usb call. That'll offload some notification stuff from the EMT thread. */
-    int vrc = VMR3ReqCallWait(ptrVM, VMCPUID_ANY,
+    int vrc = VMR3ReqCallWait(ptrVM, 0 /* idDstCpu (saved state, see #6232) */,
                               (PFNRT)usbAttachCallback, 7,
                               this, ptrVM.raw(), aHostDevice, uuid.raw(), fRemote, Address.c_str(), aMaskedIfs);
 
@@ -7897,7 +7898,7 @@ HRESULT Console::detachUSBDevice(USBDeviceList::iterator &aIt)
     alock.leave();
 
 /** @todo just do everything here and only wrap the PDMR3Usb call. That'll offload some notification stuff from the EMT thread. */
-    int vrc = VMR3ReqCallWait(ptrVM, VMCPUID_ANY,
+    int vrc = VMR3ReqCallWait(ptrVM, 0 /* idDstCpu (saved state, see #6232) */,
                               (PFNRT)usbDetachCallback, 5,
                               this, ptrVM.raw(), &aIt, (*aIt)->id().raw());
     ComAssertRCRet(vrc, E_FAIL);

@@ -495,7 +495,7 @@ PyObject *LogConsoleMessage(PyObject *self, PyObject *args)
 
 #ifdef VBOX
 
-#  include <VBox/com/EventQueue.h>
+#  include <VBox/com/NativeEventQueue.h>
 #  include <iprt/err.h>
 
 static PyObject*
@@ -510,7 +510,7 @@ PyXPCOMMethod_WaitForEvents(PyObject *self, PyObject *args)
     }
 
     int rc;
-    com::EventQueue* aEventQ = com::EventQueue::getMainEventQueue();
+    com::NativeEventQueue* aEventQ = com::NativeEventQueue::getMainEventQueue();
     NS_WARN_IF_FALSE(aEventQ != nsnull, "Null main event queue");
     if (!aEventQ)
 	{
@@ -540,7 +540,7 @@ PyXPCOMMethod_WaitForEvents(PyObject *self, PyObject *args)
 static PyObject*
 PyXPCOMMethod_InterruptWait(PyObject *self, PyObject *args)
 {
-  com::EventQueue* aEventQ = com::EventQueue::getMainEventQueue();
+  com::NativeEventQueue* aEventQ = com::NativeEventQueue::getMainEventQueue();
   NS_WARN_IF_FALSE(aEventQ != nsnull, "Null main event queue");
   if (!aEventQ)
       return NULL;

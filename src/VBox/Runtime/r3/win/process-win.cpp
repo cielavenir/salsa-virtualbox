@@ -49,11 +49,14 @@
 #include <iprt/getopt.h>
 #include <iprt/initterm.h>
 #include <iprt/ldr.h>
+#include <iprt/log.h>
 #include <iprt/mem.h>
 #include <iprt/once.h>
 #include <iprt/pipe.h>
 #include <iprt/string.h>
 #include <iprt/socket.h>
+
+#include "../init.h"
 
 
 /*******************************************************************************
@@ -155,12 +158,11 @@ static DECLCALLBACK(void) rtProcWinTerm(RTTERMREASON enmReason, int32_t iStatus,
  * Initialize the globals.
  *
  * @returns IPRT status code.
- * @param   pvUser1             Ignored.
- * @param   pvUser2             Ignored.
+ * @param   pvUser              Ignored.
  */
-static DECLCALLBACK(int32_t) rtProcWinInitOnce(void *pvUser1, void *pvUser2)
+static DECLCALLBACK(int32_t) rtProcWinInitOnce(void *pvUser)
 {
-    NOREF(pvUser1); NOREF(pvUser2);
+    NOREF(pvUser);
 
     g_cProcesses        = 0;
     g_cProcessesAlloc   = 0;
@@ -292,7 +294,8 @@ static int rtProcMapErrorCodes(DWORD dwError)
         case ERROR_PASSWORD_EXPIRED:
         case ERROR_ACCOUNT_RESTRICTION: /* See: http://support.microsoft.com/kb/303846/ */
         case ERROR_PASSWORD_RESTRICTION:
-            rc = VERR_AUTHENTICATION_FAILURE;
+        case ERROR_ACCOUNT_DISABLED:    /* See: http://support.microsoft.com/kb/263936 */
+            rc = VERR_ACCOUNT_RESTRICTED;
             break;
 
         case ERROR_FILE_CORRUPT:
@@ -416,120 +419,100 @@ static bool rtProcFindProcessByName(const char * const *papszNames, PSID pSID, P
      * On modern systems (W2K+) try the Toolhelp32 API first; this is more stable
      * and reliable. Fallback to EnumProcess on NT4.
      */
-    RTLDRMOD hKernel32;
-    int rc = RTLdrLoad("Kernel32.dll", &hKernel32);
-    if (RT_SUCCESS(rc))
+    PFNCREATETOOLHELP32SNAPSHOT pfnCreateToolhelp32Snapshot =
+        (PFNCREATETOOLHELP32SNAPSHOT)GetProcAddress(g_hModKernel32, "CreateToolhelp32Snapshot");
+    PFNPROCESS32FIRST pfnProcess32First =
+        (PFNPROCESS32FIRST)GetProcAddress(g_hModKernel32, "Process32First");
+    PFNPROCESS32NEXT pfnProcess32Next =
+        (PFNPROCESS32NEXT)GetProcAddress(g_hModKernel32, "Process32Next");
+    if (pfnProcess32Next && pfnProcess32First && pfnCreateToolhelp32Snapshot)
     {
-        PFNCREATETOOLHELP32SNAPSHOT pfnCreateToolhelp32Snapshot;
-        rc = RTLdrGetSymbol(hKernel32, "CreateToolhelp32Snapshot", (void**)&pfnCreateToolhelp32Snapshot);
-        if (RT_SUCCESS(rc))
+        HANDLE hSnap = pfnCreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (hSnap != INVALID_HANDLE_VALUE)
         {
-            PFNPROCESS32FIRST pfnProcess32First;
-            rc = RTLdrGetSymbol(hKernel32, "Process32First", (void**)&pfnProcess32First);
-            if (RT_SUCCESS(rc))
+            for (size_t i = 0; papszNames[i] && !fFound; i++)
             {
-                PFNPROCESS32NEXT pfnProcess32Next;
-                rc = RTLdrGetSymbol(hKernel32, "Process32Next", (void**)&pfnProcess32Next);
-                if (RT_SUCCESS(rc))
+                PROCESSENTRY32 procEntry;
+                procEntry.dwSize = sizeof(PROCESSENTRY32);
+                if (pfnProcess32First(hSnap, &procEntry))
                 {
-                    HANDLE hSnap = pfnCreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-                    if (hSnap != INVALID_HANDLE_VALUE)
+                    do
                     {
-                        for (size_t i = 0; papszNames[i] && !fFound; i++)
+                        if (   _stricmp(procEntry.szExeFile, papszNames[i]) == 0
+                            && RT_SUCCESS(rtProcGetProcessHandle(procEntry.th32ProcessID, pSID, phToken)))
                         {
-                            PROCESSENTRY32 procEntry;
-                            procEntry.dwSize = sizeof(PROCESSENTRY32);
-                            if (pfnProcess32First(hSnap, &procEntry))
-                            {
-                                do
-                                {
-                                    if (   _stricmp(procEntry.szExeFile, papszNames[i]) == 0
-                                        && RT_SUCCESS(rtProcGetProcessHandle(procEntry.th32ProcessID, pSID, phToken)))
-                                    {
-                                        fFound = true;
-                                        break;
-                                    }
-                                } while (pfnProcess32Next(hSnap, &procEntry));
-                            }
-                            else /* Process32First */
-                                dwErr = GetLastError();
-                            if (FAILED(dwErr))
-                                break;
+                            fFound = true;
+                            break;
                         }
-                        CloseHandle(hSnap);
-                    }
-                    else /* hSnap == INVALID_HANDLE_VALUE */
-                        dwErr = GetLastError();
+                    } while (pfnProcess32Next(hSnap, &procEntry));
                 }
+                else /* Process32First */
+                    dwErr = GetLastError();
+                if (FAILED(dwErr))
+                    break;
             }
+            CloseHandle(hSnap);
         }
-        else /* CreateToolhelp32Snapshot / Toolhelp32 API not available. */
-        {
-            /*
-             * NT4 needs a copy of "PSAPI.dll" (redistributed by Microsoft and not
-             * part of the OS) in order to get a lookup. If we don't have this DLL
-             * we are not able to get a token and therefore no UI will be visible.
-             */
-            RTLDRMOD hPSAPI;
-            int rc = RTLdrLoad("PSAPI.dll", &hPSAPI);
-            if (RT_SUCCESS(rc))
-            {
-                PFNENUMPROCESSES pfnEnumProcesses;
-                rc = RTLdrGetSymbol(hPSAPI, "EnumProcesses", (void**)&pfnEnumProcesses);
-                if (RT_SUCCESS(rc))
-                {
-                    PFNGETMODULEBASENAME pfnGetModuleBaseName;
-                    rc = RTLdrGetSymbol(hPSAPI, "GetModuleBaseName", (void**)&pfnGetModuleBaseName);
-                    if (RT_SUCCESS(rc))
-                    {
-                        /** @todo Retry if pBytesReturned equals cbBytes! */
-                        DWORD adwPIDs[4096]; /* Should be sufficient for now. */
-                        DWORD cbBytes = 0;
-                        if (pfnEnumProcesses(adwPIDs, sizeof(adwPIDs), &cbBytes))
-                        {
-                            for (size_t i = 0; papszNames[i] && !fFound; i++)
-                            {
-                                for (DWORD dwIdx = 0; dwIdx < cbBytes/sizeof(DWORD) && !fFound; dwIdx++)
-                                {
-                                    HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
-                                                               FALSE, adwPIDs[dwIdx]);
-                                    if (hProc)
-                                    {
-                                        char *pszProcName = NULL;
-                                        DWORD dwSize = 128;
-                                        do
-                                        {
-                                            RTMemRealloc(pszProcName, dwSize);
-                                            if (pfnGetModuleBaseName(hProc, 0, pszProcName, dwSize) == dwSize)
-                                                dwSize += 128;
-                                            if (dwSize > _4K) /* Play safe. */
-                                                break;
-                                        } while (GetLastError() == ERROR_INSUFFICIENT_BUFFER);
-
-                                        if (pszProcName)
-                                        {
-                                            if (   _stricmp(pszProcName, papszNames[i]) == 0
-                                                && RT_SUCCESS(rtProcGetProcessHandle(adwPIDs[dwIdx], pSID, phToken)))
-                                            {
-                                                fFound = true;
-                                            }
-                                        }
-                                        if (pszProcName)
-                                            RTStrFree(pszProcName);
-                                        CloseHandle(hProc);
-                                    }
-                                }
-                            }
-                        }
-                        else
-                            dwErr = GetLastError();
-                    }
-                }
-                RTLdrClose(hPSAPI);
-            }
-        }
-        RTLdrClose(hKernel32);
+        else /* hSnap == INVALID_HANDLE_VALUE */
+            dwErr = GetLastError();
     }
+    else /* CreateToolhelp32Snapshot / Toolhelp32 API not available. */
+    {
+        /*
+         * NT4 needs a copy of "PSAPI.dll" (redistributed by Microsoft and not
+         * part of the OS) in order to get a lookup. If we don't have this DLL
+         * we are not able to get a token and therefore no UI will be visible.
+         */
+        PFNGETMODULEBASENAME pfnGetModuleBaseName =
+            (PFNGETMODULEBASENAME)RTLdrGetSystemSymbol("psapi.dll", "GetModuleBaseName");
+        if (!pfnGetModuleBaseName)
+            return false;
+        PFNENUMPROCESSES pfnEnumProcesses =
+            (PFNENUMPROCESSES)RTLdrGetSystemSymbol("psapi.dll", "EnumProcesses");
+        if (!pfnEnumProcesses)
+            return false;
+
+        /** @todo Retry if pBytesReturned equals cbBytes! */
+        DWORD adwPIDs[4096]; /* Should be sufficient for now. */
+        DWORD cbBytes = 0;
+        if (pfnEnumProcesses(adwPIDs, sizeof(adwPIDs), &cbBytes))
+        {
+            for (size_t i = 0; papszNames[i] && !fFound; i++)
+            {
+                for (DWORD dwIdx = 0; dwIdx < cbBytes/sizeof(DWORD) && !fFound; dwIdx++)
+                {
+                    HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                                               FALSE, adwPIDs[dwIdx]);
+                    if (hProc)
+                    {
+                        char *pszProcName = NULL;
+                        DWORD dwSize = 128;
+                        do
+                        {
+                            RTMemRealloc(pszProcName, dwSize);
+                            if (pfnGetModuleBaseName(hProc, 0, pszProcName, dwSize) == dwSize)
+                                dwSize += 128;
+                            if (dwSize > _4K) /* Play safe. */
+                                break;
+                        } while (GetLastError() == ERROR_INSUFFICIENT_BUFFER);
+
+                        if (pszProcName)
+                        {
+                            if (   _stricmp(pszProcName, papszNames[i]) == 0
+                                    && RT_SUCCESS(rtProcGetProcessHandle(adwPIDs[dwIdx], pSID, phToken)))
+                                fFound = true;
+                        }
+                        if (pszProcName)
+                            RTStrFree(pszProcName);
+                        CloseHandle(hProc);
+                    }
+                }
+            }
+        }
+        else
+            dwErr = GetLastError();
+    }
+
     Assert(dwErr == NO_ERROR);
     return fFound;
 }
@@ -562,7 +545,13 @@ static int rtProcUserLogon(PRTUTF16 pwszUser, PRTUTF16 pwszPassword, PRTUTF16 pw
                           LOGON32_PROVIDER_DEFAULT,
                           phToken);
     if (!fRc)
-        return rtProcMapErrorCodes(GetLastError());
+    {
+        DWORD dwErr = GetLastError();
+        int rc = rtProcMapErrorCodes(dwErr);
+        if (rc == VERR_UNRESOLVED_ERROR)
+            LogRel(("rtProcUserLogon: dwErr=%u (%#x), rc=%Rrc\n", dwErr, dwErr, rc));
+        return rc;
+    }
     return VINF_SUCCESS;
 }
 
@@ -644,7 +633,7 @@ static int rtProcEnvironmentCreateInternal(VOID *pvBlock, RTENV hEnv, PRTUTF16 *
 static int rtProcEnvironmentCreateFromToken(HANDLE hToken, RTENV hEnv, PRTUTF16 *ppwszBlock)
 {
     RTLDRMOD hUserenv;
-    int rc = RTLdrLoad("Userenv.dll", &hUserenv);
+    int rc = RTLdrLoadSystem("Userenv.dll", true /*fNoUnload*/, &hUserenv);
     if (RT_SUCCESS(rc))
     {
         PFNCREATEENVIRONMENTBLOCK pfnCreateEnvironmentBlock;
@@ -729,42 +718,39 @@ static int rtProcCreateAsUserHlp(PRTUTF16 pwszUser, PRTUTF16 pwszPassword, PRTUT
      */
     if (!(fFlags & RTPROC_FLAGS_SERVICE))
     {
-        RTLDRMOD hAdvAPI32;
-        rc = RTLdrLoad("Advapi32.dll", &hAdvAPI32);
-        if (RT_SUCCESS(rc))
+        PFNCREATEPROCESSWITHLOGON pfnCreateProcessWithLogonW =
+            (PFNCREATEPROCESSWITHLOGON)RTLdrGetSystemSymbol("Advapi32.dll", "CreateProcessWithLogonW");
+        if (pfnCreateProcessWithLogonW)
         {
-            /*
-             * This may fail on too old (NT4) platforms or if the calling process
-             * is running on a SYSTEM account (like a service, ERROR_ACCESS_DENIED) on newer
-             * platforms (however, this works on W2K!).
-             */
-            PFNCREATEPROCESSWITHLOGON pfnCreateProcessWithLogonW;
-            rc = RTLdrGetSymbol(hAdvAPI32, "CreateProcessWithLogonW", (void**)&pfnCreateProcessWithLogonW);
+            PRTUTF16 pwszzBlock;
+            rc = rtProcEnvironmentCreateFromAccount(pwszUser, pwszPassword, NULL /* Domain */,
+                                                    hEnv, &pwszzBlock);
             if (RT_SUCCESS(rc))
             {
-                PRTUTF16 pwszzBlock;
-                rc = rtProcEnvironmentCreateFromAccount(pwszUser, pwszPassword, NULL /* Domain */,
-                                                        hEnv, &pwszzBlock);
-                if (RT_SUCCESS(rc))
+                fRc = pfnCreateProcessWithLogonW(pwszUser,
+                                                 NULL,                       /* lpDomain*/
+                                                 pwszPassword,
+                                                 1 /*LOGON_WITH_PROFILE*/,   /* dwLogonFlags */
+                                                 pwszExec,
+                                                 pwszCmdLine,
+                                                 dwCreationFlags,
+                                                 pwszzBlock,
+                                                 NULL,                       /* pCurrentDirectory */
+                                                 pStartupInfo,
+                                                 pProcInfo);
+                if (!fRc)
                 {
-                    fRc = pfnCreateProcessWithLogonW(pwszUser,
-                                                     NULL,                       /* lpDomain*/
-                                                     pwszPassword,
-                                                     1 /*LOGON_WITH_PROFILE*/,   /* dwLogonFlags */
-                                                     pwszExec,
-                                                     pwszCmdLine,
-                                                     dwCreationFlags,
-                                                     pwszzBlock,
-                                                     NULL,                       /* pCurrentDirectory */
-                                                     pStartupInfo,
-                                                     pProcInfo);
-                    if (!fRc)
-                        dwErr = GetLastError();
-                    rtProcEnvironmentDestroy(pwszzBlock);
+                    DWORD dwErr = GetLastError();
+                    rc = rtProcMapErrorCodes(dwErr);
+                    if (rc == VERR_UNRESOLVED_ERROR)
+                        LogRel(("rtProcCreateAsUserHlp: pfnCreateProcessWithLogonW (%p) failed: dwErr=%u (%#x), rc=%Rrc\n",
+                               pfnCreateProcessWithLogonW, dwErr, dwErr, rc));
                 }
+                rtProcEnvironmentDestroy(pwszzBlock);
             }
-            RTLdrClose(hAdvAPI32);
         }
+        else
+            rc = VERR_SYMBOL_NOT_FOUND;
     }
 
     /*
@@ -886,7 +872,7 @@ static int rtProcCreateAsUserHlp(PRTUTF16 pwszUser, PRTUTF16 pwszPassword, PRTUT
                  */
                 phToken = fFound ? &hTokenUserDesktop : &hTokenLogon;
                 RTLDRMOD hUserenv;
-                int rc = RTLdrLoad("Userenv.dll", &hUserenv);
+                int rc = RTLdrLoadSystem("Userenv.dll", true /*fNoUnload*/, &hUserenv);
                 if (RT_SUCCESS(rc))
                 {
                     PFNLOADUSERPROFILEW pfnLoadUserProfileW;
@@ -968,7 +954,11 @@ static int rtProcCreateAsUserHlp(PRTUTF16 pwszUser, PRTUTF16 pwszPassword, PRTUT
 
     if (   RT_SUCCESS(rc)
         && dwErr != NO_ERROR)
+    {
         rc = rtProcMapErrorCodes(dwErr);
+        if (rc == VERR_UNRESOLVED_ERROR)
+            LogRel(("rtProcCreateAsUserHlp: dwErr=%u (%#x), rc=%Rrc\n", dwErr, dwErr, rc));
+    }
 
     return rc;
 }
@@ -995,7 +985,7 @@ RTR3DECL(int)   RTProcCreateEx(const char *pszExec, const char * const *papszArg
     /*
      * Initialize the globals.
      */
-    int rc = RTOnce(&g_rtProcWinInitOnce, rtProcWinInitOnce, NULL, NULL);
+    int rc = RTOnce(&g_rtProcWinInitOnce, rtProcWinInitOnce, NULL);
     AssertRCReturn(rc, rc);
 
     /*
@@ -1197,7 +1187,7 @@ RTR3DECL(int)   RTProcCreateEx(const char *pszExec, const char * const *papszArg
 RTR3DECL(int) RTProcWait(RTPROCESS Process, unsigned fFlags, PRTPROCSTATUS pProcStatus)
 {
     AssertReturn(!(fFlags & ~(RTPROCWAIT_FLAGS_BLOCK | RTPROCWAIT_FLAGS_NOBLOCK)), VERR_INVALID_PARAMETER);
-    int rc = RTOnce(&g_rtProcWinInitOnce, rtProcWinInitOnce, NULL, NULL);
+    int rc = RTOnce(&g_rtProcWinInitOnce, rtProcWinInitOnce, NULL);
     AssertRCReturn(rc, rc);
 
     /*
@@ -1290,7 +1280,10 @@ RTR3DECL(int) RTProcWaitNoResume(RTPROCESS Process, unsigned fFlags, PRTPROCSTAT
 
 RTR3DECL(int) RTProcTerminate(RTPROCESS Process)
 {
-    int rc = RTOnce(&g_rtProcWinInitOnce, rtProcWinInitOnce, NULL, NULL);
+    if (Process == NIL_RTPROCESS)
+        return VINF_SUCCESS;
+
+    int rc = RTOnce(&g_rtProcWinInitOnce, rtProcWinInitOnce, NULL);
     AssertRCReturn(rc, rc);
 
     /*

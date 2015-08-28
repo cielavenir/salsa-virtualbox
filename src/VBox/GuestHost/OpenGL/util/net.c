@@ -957,7 +957,7 @@ crNetRecvFlowControl( CRConnection *conn,   CRMessageFlowControl *msg,
     conn->InstantReclaim( conn, (CRMessage *) msg );
 }
 
-
+#ifdef IN_GUEST
 /**
  * Called by the main receive function when we get a CR_MESSAGE_WRITEBACK
  * message.  Writeback is used to implement glGet*() functions.
@@ -990,7 +990,7 @@ crNetRecvReadback( CRMessageReadback *rb, unsigned int len )
     (*writeback)--;
     crMemcpy( dest_ptr, ((char *)rb) + sizeof(*rb), payload_len );
 }
-
+#endif
 
 /**
  * This is used by the SPUs that do packing (such as Pack, Tilesort and
@@ -1068,13 +1068,21 @@ crNetDefaultRecv( CRConnection *conn, CRMessage *msg, unsigned int len )
             }
             break;
         case CR_MESSAGE_READ_PIXELS:
-            crError( "Can't handle read pixels" );
+            crWarning( "Can't handle read pixels" );
             return;
         case CR_MESSAGE_WRITEBACK:
+#ifdef IN_GUEST
             crNetRecvWriteback( &(pRealMsg->writeback) );
+#else
+            crWarning("CR_MESSAGE_WRITEBACK not expected\n");
+#endif
             return;
         case CR_MESSAGE_READBACK:
+#ifdef IN_GUEST
             crNetRecvReadback( &(pRealMsg->readback), len );
+#else
+            crWarning("CR_MESSAGE_READBACK not expected\n");
+#endif
             return;
         case CR_MESSAGE_CRUT:
             /* nothing */
@@ -1092,7 +1100,7 @@ crNetDefaultRecv( CRConnection *conn, CRMessage *msg, unsigned int len )
             {
                 char string[128];
                 crBytesToString( string, sizeof(string), msg, len );
-                crError("crNetDefaultRecv: received a bad message: type=%d buf=[%s]\n"
+                crWarning("crNetDefaultRecv: received a bad message: type=%d buf=[%s]\n"
                                 "Did you add a new message type and forget to tell "
                                 "crNetDefaultRecv() about it?\n",
                                 msg->header.type, string );

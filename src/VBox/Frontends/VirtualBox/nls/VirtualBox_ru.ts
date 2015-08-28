@@ -5754,7 +5754,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message numerus="yes">
         <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
-        <translation type="unfinished">
+        <translation type="obsolete">
             <numerusform>&lt;p&gt;Виртуальная машина &lt;b&gt;%1&lt;/b&gt; в данный момент находится в сохранённом состоянии.&lt;/p&gt;&lt;p&gt;Если Вы продолжите, рабочее состояние экспортируемой машины будет сброшено. Учтите, что существующие машины не будут изменены.&lt;/p&gt;</numerusform>
             <numerusform>&lt;p&gt;Виртуальные машины &lt;b&gt;%1&lt;/b&gt; в данный момент находятся в сохранённом состоянии.&lt;/p&gt;&lt;p&gt;Если Вы продолжите, рабочее состояние экспортируемых машины будет сброшено. Учтите, что существующие машины не будут изменены.&lt;/p&gt;</numerusform>
             <numerusform>&lt;p&gt;Виртуальные машины &lt;b&gt;%1&lt;/b&gt; в данный момент находятся в сохранённом состоянии.&lt;/p&gt;&lt;p&gt;Если Вы продолжите, рабочее состояние экспортируемых машины будет сброшено. Учтите, что существующие машины не будут изменены.&lt;/p&gt;</numerusform>
@@ -5995,6 +5995,19 @@ p, li { white-space: pre-wrap; }
         <source>Ok</source>
         <comment>extension pack</comment>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Failed to initialize COM because the VirtualBox global configuration directory &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; is not accessible. Please check the permissions of this directory and of its parent directory.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
+        <comment>This text is never used with n == 0.  Feel free to drop the %n where possible, we only included it because of problems with Qt Linguist (but the user can see how many machines are in the list and doesn&apos;t need to be told).</comment>
+        <translation type="unfinished">
+            <numerusform>&lt;p&gt;Виртуальная машина &lt;b&gt;%1&lt;/b&gt; в данный момент находится в сохранённом состоянии.&lt;/p&gt;&lt;p&gt;Если Вы продолжите, рабочее состояние экспортируемой машины будет сброшено. Учтите, что существующие машины не будут изменены.&lt;/p&gt;</numerusform>
+            <numerusform>&lt;p&gt;Виртуальные машины &lt;b&gt;%1&lt;/b&gt; в данный момент находятся в сохранённом состоянии.&lt;/p&gt;&lt;p&gt;Если Вы продолжите, рабочее состояние экспортируемых машины будет сброшено. Учтите, что существующие машины не будут изменены.&lt;/p&gt;</numerusform>
+            <numerusform>&lt;p&gt;Виртуальные машины &lt;b&gt;%1&lt;/b&gt; в данный момент находятся в сохранённом состоянии.&lt;/p&gt;&lt;p&gt;Если Вы продолжите, рабочее состояние экспортируемых машины будет сброшено. Учтите, что существующие машины не будут изменены.&lt;/p&gt;</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -9376,7 +9389,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>and</source>
-        <translation>и</translation>
+        <translation type="obsolete">и</translation>
     </message>
     <message>
         <source>MB</source>

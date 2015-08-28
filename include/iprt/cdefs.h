@@ -906,16 +906,33 @@
 /** @def RTDATADECL(type)
  * Runtime Library export or import declaration.
  * Data declared using this macro exists in all contexts.
- * @param   type    The return type of the function declaration.
+ * @param   type    The data type.
+ */
+/** @def RT_DECL_DATA_CONST(type)
+ * Definition of a const variable. See DECL_HIDDEN_CONST.
+ * @param   type    The const data type.
  */
 #if defined(IN_RT_R3) || defined(IN_RT_RC) || defined(IN_RT_R0)
 # ifdef IN_RT_STATIC
-#  define RTDATADECL(type)  DECLHIDDEN(type)
+#  define RTDATADECL(type)          DECLHIDDEN(type)
+#  define RT_DECL_DATA_CONST(type)  DECL_HIDDEN_CONST(type)
 # else
-#  define RTDATADECL(type)  DECLEXPORT(type)
+#  define RTDATADECL(type)          DECLEXPORT(type)
+#  if defined(__cplusplus) && defined(__GNUC__)
+#   define RT_DECL_DATA_CONST(type) type
+#  elif defined(_MSC_VER)
+#   if _MSC_VER < 1400
+#    define RT_DECL_DATA_CONST(type) DECLEXPORT(extern type)
+#   else
+#    define RT_DECL_DATA_CONST(type) DECLEXPORT(type)
+#   endif
+#  else
+#   define RT_DECL_DATA_CONST(type) DECLEXPORT(type)
+#  endif
 # endif
 #else
-# define RTDATADECL(type)   DECLIMPORT(type)
+# define RTDATADECL(type)           DECLIMPORT(type)
+# define RT_DECL_DATA_CONST(type)   DECLIMPORT(type)
 #endif
 
 /** @def RT_DECL_CLASS
@@ -1057,6 +1074,13 @@
 /** RT_CONCAT4 helper, don't use.  */
 #define RT_CONCAT4_HLP(a,b,c,d)     a##b##c##d
 
+/**
+ * String constant tuple - string constant, strlen(string constant).
+ *
+ * @param   a_szConst   String constant.
+ */
+#define RT_STR_TUPLE(a_szConst)  a_szConst, (sizeof(a_szConst) - 1)
+
 
 /** @def RT_BIT
  * Convert a bit number into an integer bitmask (unsigned).
@@ -1168,13 +1192,17 @@
  * This differs from the usual offsetof() in that it's not relying on builtin
  * compiler stuff and thus can use variables in arrays the structure may
  * contain. This is useful to determine the sizes of structures ending
- * with a variable length field.
+ * with a variable length field. For gcc >= 4.4 see @bugref{7775}.
  *
  * @returns offset into the structure of the specified member. signed.
  * @param   type    Structure type.
  * @param   member  Member.
  */
-#define RT_OFFSETOF(type, member)               ( (int)(uintptr_t)&( ((type *)(void *)0)->member) )
+#if defined(__GNUC__) && defined(__cplusplus) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4))
+# define RT_OFFSETOF(type, member)              ( (int)(uintptr_t)&( ((type *)(void *)0x1000)->member) - 0x1000 )
+#else
+# define RT_OFFSETOF(type, member)              ( (int)(uintptr_t)&( ((type *)(void *)0)->member) )
+#endif
 
 /** @def RT_UOFFSETOF
  * Our own special offsetof() variant, returns an unsigned result.
@@ -1182,13 +1210,17 @@
  * This differs from the usual offsetof() in that it's not relying on builtin
  * compiler stuff and thus can use variables in arrays the structure may
  * contain. This is useful to determine the sizes of structures ending
- * with a variable length field.
+ * with a variable length field. For gcc >= 4.4 see @bugref{7775}.
  *
  * @returns offset into the structure of the specified member. unsigned.
  * @param   type    Structure type.
  * @param   member  Member.
  */
-#define RT_UOFFSETOF(type, member)              ( (uintptr_t)&( ((type *)(void *)0)->member) )
+#if defined(__GNUC__) && defined(__cplusplus) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 4))
+# define RT_UOFFSETOF(type, member)             ( (uintptr_t)&( ((type *)(void *)0x1000)->member) - 0x1000 )
+#else
+# define RT_UOFFSETOF(type, member)             ( (uintptr_t)&( ((type *)(void *)0)->member) )
+#endif
 
 /** @def RT_OFFSETOF_ADD
  * RT_OFFSETOF with an addend.

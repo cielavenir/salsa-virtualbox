@@ -213,6 +213,8 @@ static void stubCheckWindowsState(void)
         return;
 #endif
 
+    /* Try to keep a consistent locking order. */
+    crHashtableLock(stub.windowTable);
 #if defined(CR_NEWWINTRACK) && !defined(WINDOWS)
     crLockMutex(&stub.mutex);
 #endif
@@ -223,6 +225,7 @@ static void stubCheckWindowsState(void)
 #if defined(CR_NEWWINTRACK) && !defined(WINDOWS)
     crUnlockMutex(&stub.mutex);
 #endif
+    crHashtableUnlock(stub.windowTable);
 }
 
 
@@ -1018,10 +1021,11 @@ static DECLCALLBACK(int) stubSyncThreadProc(RTTHREAD ThreadSelf, void *pvUser)
 #ifdef WINDOWS
     PeekMessage(&msg, NULL, WM_USER, WM_USER, PM_NOREMOVE);
 # ifdef VBOX_WITH_WDDM
-    hVBoxD3D = GetModuleHandle("VBoxDispD3D");
-    if (hVBoxD3D)
+    hVBoxD3D = NULL;
+    if (!GetModuleHandleEx(0, "VBoxDispD3D", &hVBoxD3D))
     {
-        hVBoxD3D = LoadLibrary("VBoxDispD3D");
+        crDebug("GetModuleHandleEx failed err %d", GetLastError());
+        hVBoxD3D = NULL;
     }
 
     if (hVBoxD3D)
@@ -1124,9 +1128,12 @@ static DECLCALLBACK(int) stubSyncThreadProc(RTTHREAD ThreadSelf, void *pvUser)
             }
         }
 #else
+        /* Try to keep a consistent locking order. */
+        crHashtableLock(stub.windowTable);
         crLockMutex(&stub.mutex);
         crHashtableWalk(stub.windowTable, stubSyncTrCheckWindowsCB, NULL);
         crUnlockMutex(&stub.mutex);
+        crHashtableUnlock(stub.windowTable);
         RTThreadSleep(50);
 #endif
     }
@@ -1207,15 +1214,6 @@ stubInitLocked(void)
         {
             crNetFreeConnection(ns.conn);
         }
-#if 0 && defined(CR_NEWWINTRACK)
-        {
-            Status st = XInitThreads();
-            if (st==0)
-            {
-                crWarning("XInitThreads returned %i", (int)st);
-            }
-        }
-#endif
     }
 #endif
 

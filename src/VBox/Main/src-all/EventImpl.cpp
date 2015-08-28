@@ -706,8 +706,10 @@ static BOOL implies(VBoxEventType_T who, VBoxEventType_T what)
         case VBoxEventType_Invalid:
             return FALSE;
         default:
-            return who == what;
+            break;
     }
+
+    return who == what;
 }
 
 ListenerRecord::ListenerRecord(IEventListener*                  aListener,
@@ -812,8 +814,8 @@ HRESULT ListenerRecord::process(IEvent*                     aEvent,
             eventProcessed(aEvent, pit);
         return rc;
     }
-    else
-        return enqueue(aEvent);
+
+    return enqueue(aEvent);
 }
 
 

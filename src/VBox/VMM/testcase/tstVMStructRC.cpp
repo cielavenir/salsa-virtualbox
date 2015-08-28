@@ -1201,7 +1201,7 @@ int main()
     GEN_CHECK_OFF(PATMPATCHPAGE, pHighestAddrGC);
     GEN_CHECK_OFF(PATMPATCHPAGE, cCount);
     GEN_CHECK_OFF(PATMPATCHPAGE, cMaxPatches);
-    GEN_CHECK_OFF(PATMPATCHPAGE, aPatch);
+    GEN_CHECK_OFF(PATMPATCHPAGE, papPatch);
 
     return (0);
 }

@@ -361,12 +361,12 @@ static int hmR0InitIntel(uint32_t u32FeaturesECX, uint32_t u32FeaturesEDX)
         g_HvmR0.vmx.fUsingSUPR0EnableVTx = rc != VERR_NOT_SUPPORTED;
         if (g_HvmR0.vmx.fUsingSUPR0EnableVTx)
         {
-            AssertMsg(rc == VINF_SUCCESS || rc == VERR_VMX_IN_VMX_ROOT_MODE || rc == VERR_VMX_NO_VMX, ("%Rrc\n", rc));
+            AssertLogRelMsg(rc == VINF_SUCCESS || rc == VERR_VMX_IN_VMX_ROOT_MODE || rc == VERR_VMX_NO_VMX, ("%Rrc\n", rc));
             if (RT_SUCCESS(rc))
             {
                 g_HvmR0.vmx.fSupported = true;
                 rc = SUPR0EnableVTx(false /* fEnable */);
-                AssertRC(rc);
+                AssertLogRelRC(rc);
             }
         }
         else
@@ -420,9 +420,12 @@ static int hmR0InitIntel(uint32_t u32FeaturesECX, uint32_t u32FeaturesEDX)
                      * Enter root mode
                      */
                     RTR0MEMOBJ hScatchMemObj;
-                    rc = RTR0MemObjAllocCont(&hScatchMemObj, PAGE_SIZE, true /* executable R0 mapping */);
+                    rc = RTR0MemObjAllocCont(&hScatchMemObj, PAGE_SIZE, true /*fExecutable*/);
                     if (RT_FAILURE(rc))
+                    {
+                        LogRel(("hmR0InitIntel: RTR0MemObjAllocCont(,PAGE_SIZE,true) -> %Rrc\n", rc));
                         return rc;
+                    }
 
                     void      *pvScatchPage      = RTR0MemObjAddress(hScatchMemObj);
                     RTHCPHYS   HCPhysScratchPage = RTR0MemObjGetPagePhysAddr(hScatchMemObj, 0);
@@ -781,7 +784,7 @@ static DECLCALLBACK(void) hmR0InitIntelCpu(RTCPUID idCpu, void *pvUser1, void *p
         == (MSR_IA32_FEATURE_CONTROL_VMXON | MSR_IA32_FEATURE_CONTROL_LOCK))
         rc = VINF_SUCCESS;
     else
-        rc = VERR_VMX_MSR_LOCKED_OR_DISABLED;
+        rc = VERR_VMX_MSR_LOCKING_FAILED;
 
     hmR0FirstRcSetStatus(pFirstRc, rc);
 }
@@ -898,10 +901,9 @@ static DECLCALLBACK(void) hmR0EnableCpuCallback(RTCPUID idCpu, void *pvUser1, vo
  * @param   pvUser          The VM handle.
  * @param   pvUserIgnore    NULL, ignored.
  */
-static DECLCALLBACK(int32_t) hmR0EnableAllCpuOnce(void *pvUser, void *pvUserIgnore)
+static DECLCALLBACK(int32_t) hmR0EnableAllCpuOnce(void *pvUser)
 {
     PVM pVM = (PVM)pvUser;
-    NOREF(pvUserIgnore);
 
     /*
      * Indicate that we've initialized.
@@ -991,7 +993,7 @@ VMMR0DECL(int) HWACCMR0EnableAllCpus(PVM pVM)
     if (ASMAtomicReadBool(&g_HvmR0.fSuspended))
         return VERR_HWACCM_SUSPEND_PENDING;
 
-    return RTOnce(&g_HvmR0.EnableAllCpusOnce, hmR0EnableAllCpuOnce, pVM, NULL);
+    return RTOnce(&g_HvmR0.EnableAllCpusOnce, hmR0EnableAllCpuOnce, pVM);
 }
 
 

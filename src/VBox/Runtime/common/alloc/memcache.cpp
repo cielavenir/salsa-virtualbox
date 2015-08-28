@@ -564,7 +564,7 @@ RTDECL(void) RTMemCacheFree(RTMEMCACHE hMemCache, void *pvObj)
         uintptr_t iObj   = offObj / pThis->cbObject;
         Assert(iObj * pThis->cbObject == offObj);
         Assert(iObj < pThis->cPerPage);
-        AssertReturnVoid(ASMAtomicBitTestAndClear(pPage->pbmAlloc, iObj));
+        AssertReturnVoid(ASMAtomicBitTestAndClear(pPage->pbmAlloc, (int32_t)iObj));
 
         ASMAtomicIncS32(&pPage->cFree);
         ASMAtomicIncS32(&pThis->cFree);

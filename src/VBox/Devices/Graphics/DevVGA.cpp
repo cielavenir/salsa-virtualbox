@@ -1219,7 +1219,7 @@ static uint32_t vga_mem_readb(void *opaque, target_phys_addr_t addr, int *prc)
         ret = s->CTX_SUFF(vram_ptr)[off];
     } else {
         /* standard VGA latched access */
-        VERIFY_VRAM_READ_OFF_RETURN(s, addr, *prc);
+        VERIFY_VRAM_READ_OFF_RETURN(s, addr * 4 + 3, *prc);
         s->latch = ((uint32_t *)s->CTX_SUFF(vram_ptr))[addr];
 
         if (!(s->gr[5] & 0x08)) {
@@ -1795,7 +1795,7 @@ static int vga_draw_text(VGAState *s, int full_update, bool fFailOnResize, bool 
     cx_max_upd = -1;
     cx_min_upd = width;
 
-    for(cy = 0; cy < height; cy = cy + (1 << dscan)) {
+    for(cy = 0; cy < (height - dscan); cy = cy + (1 << dscan)) {
         d1 = dest;
         src = s1;
         cx_min = width;
@@ -3042,7 +3042,7 @@ static int vgaInternalMMIOFill(PVGASTATE pThis, void *pvUser, RTGCPHYS GCPhysAdd
             }
     } else if (pThis->gr[5] & 0x10) {
         /* odd/even mode (aka text mode mapping) */
-        VERIFY_VRAM_WRITE_OFF_RETURN(pThis, GCPhysAddr * 2 + cItems * cbItem - 1);
+        VERIFY_VRAM_WRITE_OFF_RETURN(pThis, (GCPhysAddr + cItems * cbItem) * 4 - 1);
         while (cItems-- > 0)
             for (i = 0; i < cbItem; i++)
             {
@@ -3056,7 +3056,7 @@ static int vgaInternalMMIOFill(PVGASTATE pThis, void *pvUser, RTGCPHYS GCPhysAdd
             }
     } else {
         /* standard VGA latched access */
-        VERIFY_VRAM_WRITE_OFF_RETURN(pThis, GCPhysAddr + cItems * cbItem - 1);
+        VERIFY_VRAM_WRITE_OFF_RETURN(pThis, (GCPhysAddr + cItems * cbItem) * 4 - 1);
 
         switch(pThis->gr[5] & 3) {
         default:

@@ -70,6 +70,21 @@ VBox-kStuff_SOURCES = \
 	iprt/kHlpString-iprt.cpp \
 	iprt/kRdrFile-iprt.cpp
 
+
+#
+# The library for static linking.
+#
+LIBRARIES += VBox-kStuffStatic
+VBox-kStuffStatic_TEMPLATE = VBOXR3STATIC
+VBox-kStuffStatic_EXTENDS = VBox-kStuff
+
+
+LIBRARIES += VBox-kStuffStaticBldProg
+VBox-kStuffStaticBldProg_TEMPLATE = VBoxBldProg
+VBox-kStuffStaticBldProg_EXTENDS = VBox-kStuff
+
+
+#
 # Generate the error constants.
 $$(VBox-kStuff_0_OUTDIR)/kErrNameConsts.h: \
 		$(PATH_SUB_CURRENT)/kStuff/include/k/kErrors.h \

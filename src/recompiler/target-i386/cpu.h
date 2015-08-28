@@ -64,6 +64,7 @@
 # include <iprt/asm.h>
 # include <VBox/vmm/vmm.h>
 # include <VBox/vmm/stam.h>
+# undef MSR_IA32_APICBASE_BSP
 #endif /* VBOX */
 
 #define R_EAX 0

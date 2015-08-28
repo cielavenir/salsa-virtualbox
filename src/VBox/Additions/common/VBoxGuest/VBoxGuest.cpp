@@ -61,11 +61,15 @@ static void testSetMouseStatus(void);
 #endif
 static int VBoxGuestCommonIOCtl_SetMouseStatus(PVBOXGUESTDEVEXT pDevExt, PVBOXGUESTSESSION pSession, uint32_t fFeatures);
 
+#ifdef VBOX_WITH_DPC_LATENCY_CHECKER
+int VBoxGuestCommonIOCtl_DPC(PVBOXGUESTDEVEXT pDevExt, PVBOXGUESTSESSION pSession,
+                             void *pvData, size_t cbData, size_t *pcbDataReturned);
+#endif /* VBOX_WITH_DPC_LATENCY_CHECKER */
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-static const size_t cbChangeMemBalloonReq = RT_OFFSETOF(VMMDevChangeMemBalloon, aPhysPage[VMMDEV_MEMORY_BALLOON_CHUNK_PAGES]);
+static const uint32_t cbChangeMemBalloonReq = RT_OFFSETOF(VMMDevChangeMemBalloon, aPhysPage[VMMDEV_MEMORY_BALLOON_CHUNK_PAGES]);
 
 #if defined(RT_OS_SOLARIS)
 /**
@@ -182,7 +186,7 @@ static int vboxGuestInitFixateGuestMappings(PVBOXGUESTDEVEXT pDevExt)
             pReq->header.requestType = VMMDevReq_SetHypervisorInfo;
             pReq->header.rc          = VERR_INTERNAL_ERROR;
             pReq->hypervisorSize     = cbHypervisor;
-            pReq->hypervisorStart    = (uintptr_t)RTR0MemObjAddress(hObj);
+            pReq->hypervisorStart    = (RTGCPTR32)(uintptr_t)RTR0MemObjAddress(hObj);
             if (    uAlignment == PAGE_SIZE
                 &&  pReq->hypervisorStart & (_4M - 1))
                 pReq->hypervisorStart = RT_ALIGN_32(pReq->hypervisorStart, _4M);
@@ -1575,7 +1579,7 @@ static int VBoxGuestCommonIOCtl_VMMRequest(PVBOXGUESTDEVEXT pDevExt, PVBOXGUESTS
      */
     const VMMDevRequestType enmType   = pReqHdr->requestType;
     const uint32_t          cbReq     = pReqHdr->size;
-    const uint32_t          cbMinSize = vmmdevGetRequestSize(enmType);
+    const uint32_t          cbMinSize = (uint32_t)vmmdevGetRequestSize(enmType);
 
     Log(("VBoxGuestCommonIOCtl: VMMREQUEST type %d\n", pReqHdr->requestType));
 
@@ -2136,37 +2140,6 @@ static int VBoxGuestCommonIOCtl_WriteCoreDump(PVBOXGUESTDEVEXT pDevExt, VBoxGues
 }
 
 
-#ifdef VBOX_WITH_VRDP_SESSION_HANDLING
-/**
- * Enables the VRDP session and saves its session ID.
- *
- * @returns VBox status code.
- *
- * @param   pDevExt             The device extention.
- * @param   pSession            The session.
- */
-static int VBoxGuestCommonIOCtl_EnableVRDPSession(VBOXGUESTDEVEXT pDevExt, PVBOXGUESTSESSION pSession)
-{
-    /* Nothing to do here right now, since this only is supported on Windows at the moment. */
-    return VERR_NOT_IMPLEMENTED;
-}
-
-
-/**
- * Disables the VRDP session.
- *
- * @returns VBox status code.
- *
- * @param   pDevExt             The device extention.
- * @param   pSession            The session.
- */
-static int VBoxGuestCommonIOCtl_DisableVRDPSession(VBOXGUESTDEVEXT pDevExt, PVBOXGUESTSESSION pSession)
-{
-    /* Nothing to do here right now, since this only is supported on Windows at the moment. */
-    return VERR_NOT_IMPLEMENTED;
-}
-#endif /* VBOX_WITH_VRDP_SESSION_HANDLING */
-
 #ifdef DEBUG
 /** Unit test SetMouseStatus instead of really executing the request. */
 static bool     g_test_fSetMouseStatus = false;
@@ -2436,6 +2409,12 @@ int VBoxGuestCommonIOCtl(unsigned iFunction, PVBOXGUESTDEVEXT pDevExt, PVBOXGUES
         CHECKRET_MIN_SIZE("VMMREQUEST", sizeof(VMMDevRequestHeader));
         rc = VBoxGuestCommonIOCtl_VMMRequest(pDevExt, pSession, (VMMDevRequestHeader *)pvData, cbData, pcbDataReturned);
     }
+#ifdef VBOX_WITH_DPC_LATENCY_CHECKER
+    else if (VBOXGUEST_IOCTL_STRIP_SIZE(iFunction) == VBOXGUEST_IOCTL_STRIP_SIZE(VBOXGUEST_IOCTL_DPC))
+    {
+        rc = VBoxGuestCommonIOCtl_DPC(pDevExt, pSession, pvData, cbData, pcbDataReturned);
+    }
+#endif /* VBOX_WITH_DPC_LATENCY_CHECKER */
 #ifdef VBOX_WITH_HGCM
     /*
      * These ones are a bit tricky.
@@ -2550,15 +2529,6 @@ int VBoxGuestCommonIOCtl(unsigned iFunction, PVBOXGUESTDEVEXT pDevExt, PVBOXGUES
                 rc = VBoxGuestCommonIOCtl_WriteCoreDump(pDevExt, (VBoxGuestWriteCoreDump *)pvData);
                 break;
 
-#ifdef VBOX_WITH_VRDP_SESSION_HANDLING
-            case VBOXGUEST_IOCTL_ENABLE_VRDP_SESSION:
-                rc = VBoxGuestCommonIOCtl_EnableVRDPSession(pDevExt, pSession);
-                break;
-
-            case VBOXGUEST_IOCTL_DISABLE_VRDP_SESSION:
-                rc = VBoxGuestCommonIOCtl_DisableVRDPSession(pDevExt, pSession);
-                break;
-#endif /* VBOX_WITH_VRDP_SESSION_HANDLING */
             case VBOXGUEST_IOCTL_SET_MOUSE_STATUS:
                 CHECKRET_SIZE("SET_MOUSE_STATUS", sizeof(uint32_t));
                 rc = VBoxGuestCommonIOCtl_SetMouseStatus(pDevExt, pSession,

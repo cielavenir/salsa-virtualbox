@@ -1,4 +1,4 @@
-/* $Revision: 72437 $ */
+/* $Revision: 97658 $ */
 /** @file
  * VirtualBox Support Driver - IOCtl definitions.
  */
@@ -55,6 +55,23 @@
 # define SUP_CTL_CODE_BIG(Function)             CTL_CODE(FILE_DEVICE_UNKNOWN, (Function) | SUP_IOCTL_FLAG, METHOD_BUFFERED, FILE_WRITE_ACCESS)
 # define SUP_CTL_CODE_FAST(Function)            CTL_CODE(FILE_DEVICE_UNKNOWN, (Function) | SUP_IOCTL_FLAG, METHOD_NEITHER,  FILE_WRITE_ACCESS)
 # define SUP_CTL_CODE_NO_SIZE(uIOCtl)           (uIOCtl)
+
+# define SUP_NT_STATUS_BASE                     UINT32_C(0xe9860000) /**< STATUS_SEVERITY_ERROR + C-bit + facility 0x986. */
+# define SUP_NT_STATUS_IS_VBOX(a_rcNt)          ( ((uint32_t)(a_rcNt) & 0xffff0000) == SUP_NT_STATUS_BASE )
+# define SUP_NT_STATUS_TO_VBOX(a_rcNt)          ( (int)((uint32_t)(a_rcNt) | UINT32_C(0xffff0000)) )
+
+/** NT device name for system access. */
+# define SUPDRV_NT_DEVICE_NAME_SYS              L"\\Device\\VBoxDrv"
+/** NT device name for user access. */
+# define SUPDRV_NT_DEVICE_NAME_USR              L"\\Device\\VBoxDrvU"
+# ifdef VBOX_WITH_HARDENING
+/** NT device name for hardened stub access. */
+#  define SUPDRV_NT_DEVICE_NAME_STUB            L"\\Device\\VBoxDrvStub"
+/** NT device name for getting error information for failed VBoxDrv or
+ * VBoxDrvStub open. */
+#  define SUPDRV_NT_DEVICE_NAME_ERROR_INFO      L"\\Device\\VBoxDrvErrorInfo"
+# endif
+
 
 #elif defined(RT_OS_SOLARIS)
   /* No automatic buffering, size limited to 255 bytes. */
@@ -192,7 +209,7 @@ typedef SUPREQHDR *PSUPREQHDR;
  * @todo Pending work on next major version change:
  *          - None.
  */
-#define SUPDRV_IOC_VERSION                              0x00190000
+#define SUPDRV_IOC_VERSION                              0x00190001
 
 /** SUP_IOCTL_COOKIE. */
 typedef struct SUPCOOKIE

@@ -247,6 +247,9 @@ rm -f "$CONFIG_DIR/$CONFIG_FILES"
 rmdir "$CONFIG_DIR" 2>/dev/null
 test "$ACTION" = "install" || exit 0
 
+# Choose a proper umask
+umask 022
+
 # install the new version
 mkdir -p -m 755 "$CONFIG_DIR"
 test ! -d "$INSTALLATION_DIR" && REMOVE_INSTALLATION_DIR=1

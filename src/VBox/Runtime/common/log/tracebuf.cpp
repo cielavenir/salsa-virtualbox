@@ -375,7 +375,7 @@ RTDECL(int) RTTraceBufCarve(PRTTRACEBUF phTraceBuf, uint32_t cEntries, uint32_t 
     if (cEntries < RTTRACEBUF_MIN_ENTRIES)
         cEntries = RTTRACEBUF_MIN_ENTRIES;
 
-    uint32_t offVolatile = RTTRACEBUF_ALIGNMENT - ((uintptr_t)pvBlock & (RTTRACEBUF_ALIGNMENT - 1));
+    uint32_t offVolatile = RTTRACEBUF_ALIGNMENT - (uint32_t)((uintptr_t)pvBlock & (RTTRACEBUF_ALIGNMENT - 1));
     if (offVolatile < sizeof(RTTRACEBUFINT))
         offVolatile += RTTRACEBUF_ALIGNMENT;
     size_t cbReqBlock = offVolatile

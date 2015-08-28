@@ -27,6 +27,9 @@
 #include <iprt/string.h>
 #include "compiler.h"
 
+/* ShadowFB support */
+#include "shadowfb.h"
+
 #include "vboxvideo.h"
 
 /**************************************************************************
@@ -52,7 +55,7 @@ vboxHandleDirtyRect(ScrnInfoPtr pScrn, int iRects, BoxPtr aRects)
     unsigned j;
 
     pVBox = pScrn->driverPrivate;
-    if (pVBox->fHaveHGSMI == FALSE || pVBox->vtSwitch)
+    if (pVBox->fHaveHGSMI == FALSE || !pScrn->vtSema)
         return;
 
     for (i = 0; i < iRects; ++i)

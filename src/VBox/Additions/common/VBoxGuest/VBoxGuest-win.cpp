@@ -21,6 +21,7 @@
 #include "VBoxGuestInternal.h"
 
 #include <iprt/asm.h>
+#include <iprt/asm-amd64-x86.h>
 
 #include <VBox/log.h>
 #include <VBox/VBoxGuestLib.h>
@@ -728,85 +729,46 @@ static NTSTATUS vboxguestwinIOCtl(PDEVICE_OBJECT pDevObj, PIRP pIrp)
         pSession = pDevExt->win.s.pKernelSession;
     }
 
-    /*
-     * First process Windows specific stuff which cannot be handled
-     * by the common code used on all other platforms. In the default case
-     * we then finally handle the common cases.
-     */
-    switch (uCmd)
+    /* Verify that it's a buffered CTL. */
+    if ((pStack->Parameters.DeviceIoControl.IoControlCode & 0x3) == METHOD_BUFFERED)
     {
-#ifdef VBOX_WITH_VRDP_SESSION_HANDLING
-        case VBOXGUEST_IOCTL_ENABLE_VRDP_SESSION:
-        {
-            LogRel(("VBoxGuest::vboxguestwinIOCtl: ENABLE_VRDP_SESSION: Currently: %sabled\n",
-                    pDevExt->fVRDPEnabled? "en": "dis"));
-            if (!pDevExt->fVRDPEnabled)
-            {
-                KUSER_SHARED_DATA *pSharedUserData = (KUSER_SHARED_DATA *)KI_USER_SHARED_DATA;
+        /*
+         * Process the common IOCtls.
+         */
+        size_t cbDataReturned;
+        int vrc = VBoxGuestCommonIOCtl(uCmd, pDevExt, pSession, pBuf, cbData, &cbDataReturned);
 
-                pDevExt->fVRDPEnabled            = TRUE;
-                LogRel(("VBoxGuest::vboxguestwinIOCtl: ENABLE_VRDP_SESSION: Current active console ID: 0x%08X\n",
-                        pSharedUserData->ActiveConsoleId));
-                pDevExt->ulOldActiveConsoleId    = pSharedUserData->ActiveConsoleId;
-                pSharedUserData->ActiveConsoleId = 2;
+        Log(("VBoxGuest::vboxguestwinGuestDeviceControl: rc=%Rrc, pBuf=0x%p, cbData=%u, cbDataReturned=%u\n",
+             vrc, pBuf, cbData, cbDataReturned));
+
+        if (RT_SUCCESS(vrc))
+        {
+            if (RT_UNLIKELY(   cbDataReturned > cbData
+                            || cbDataReturned > pStack->Parameters.DeviceIoControl.OutputBufferLength))
+            {
+                Log(("VBoxGuest::vboxguestwinGuestDeviceControl: Too much output data %u - expected %u!\n", cbDataReturned, cbData));
+                cbDataReturned = cbData;
+                Status = STATUS_BUFFER_TOO_SMALL;
             }
-            break;
+            if (cbDataReturned > 0)
+                cbOut = cbDataReturned;
         }
-
-        case VBOXGUEST_IOCTL_DISABLE_VRDP_SESSION:
+        else
         {
-            LogRel(("VBoxGuest::vboxguestwinIOCtl: DISABLE_VRDP_SESSION: Currently: %sabled\n",
-                    pDevExt->fVRDPEnabled? "en": "dis"));
-            if (pDevExt->fVRDPEnabled)
+            if (   vrc == VERR_NOT_SUPPORTED
+                || vrc == VERR_INVALID_PARAMETER)
             {
-                KUSER_SHARED_DATA *pSharedUserData = (KUSER_SHARED_DATA *)KI_USER_SHARED_DATA;
-
-                pDevExt->fVRDPEnabled            = FALSE;
-                Log(("VBoxGuest::vboxguestwinIOCtl: DISABLE_VRDP_SESSION: Current active console ID: 0x%08X\n",
-                     pSharedUserData->ActiveConsoleId));
-                pSharedUserData->ActiveConsoleId = pDevExt->ulOldActiveConsoleId;
-                pDevExt->ulOldActiveConsoleId    = 0;
-            }
-            break;
-        }
-#else
-        /* Add at least one (bogus) fall through case to shut up MSVC! */
-        case 0:
-#endif
-        default:
-        {
-            /*
-             * Process the common IOCtls.
-             */
-            size_t cbDataReturned;
-            int vrc = VBoxGuestCommonIOCtl(uCmd, pDevExt, pSession, pBuf, cbData, &cbDataReturned);
-
-            Log(("VBoxGuest::vboxguestwinGuestDeviceControl: rc=%Rrc, pBuf=0x%p, cbData=%u, cbDataReturned=%u\n",
-                 vrc, pBuf, cbData, cbDataReturned));
-
-            if (RT_SUCCESS(vrc))
-            {
-                if (RT_UNLIKELY(cbDataReturned > cbData))
-                {
-                    Log(("VBoxGuest::vboxguestwinGuestDeviceControl: Too much output data %u - expected %u!\n", cbDataReturned, cbData));
-                    cbDataReturned = cbData;
-                    Status = STATUS_BUFFER_TOO_SMALL;
-                }
-                if (cbDataReturned > 0)
-                    cbOut = cbDataReturned;
+                Status = STATUS_INVALID_PARAMETER;
             }
             else
-            {
-                if (   vrc == VERR_NOT_SUPPORTED
-                    || vrc == VERR_INVALID_PARAMETER)
-                {
-                    Status = STATUS_INVALID_PARAMETER;
-                }
-                else
-                    Status = STATUS_UNSUCCESSFUL;
-            }
-            break;
+                Status = STATUS_UNSUCCESSFUL;
         }
+    }
+    else
+    {
+        Log(("VBoxGuest::vboxguestwinGuestDeviceControl: Not buffered request (%#x) - not supported\n",
+             pStack->Parameters.DeviceIoControl.IoControlCode));
+        Status = STATUS_NOT_SUPPORTED;
     }
 
     pIrp->IoStatus.Status = Status;
@@ -1397,3 +1359,119 @@ static void vboxguestwinDoTests()
 
 #endif /* DEBUG */
 
+#ifdef VBOX_WITH_DPC_LATENCY_CHECKER
+#pragma pack(1)
+typedef struct DPCSAMPLE
+{
+    LARGE_INTEGER PerfDelta;
+    LARGE_INTEGER PerfCounter;
+    LARGE_INTEGER PerfFrequency;
+    uint64_t u64TSC;
+} DPCSAMPLE;
+
+typedef struct DPCDATA
+{
+    KDPC Dpc;
+    KTIMER Timer;
+    KSPIN_LOCK SpinLock;
+
+    ULONG ulTimerRes;
+
+    LARGE_INTEGER DueTime;
+
+    BOOLEAN fFinished;
+
+    LARGE_INTEGER PerfCounterPrev;
+
+    int iSampleCount;
+    DPCSAMPLE aSamples[8192];
+} DPCDATA;
+#pragma pack(1)
+
+#define VBOXGUEST_DPC_TAG 'DPCS'
+
+static VOID DPCDeferredRoutine(struct _KDPC *Dpc,
+                               PVOID DeferredContext,
+                               PVOID SystemArgument1,
+                               PVOID SystemArgument2)
+{
+    DPCDATA *pData = (DPCDATA *)DeferredContext;
+
+    KeAcquireSpinLockAtDpcLevel(&pData->SpinLock);
+
+    if (pData->iSampleCount >= RT_ELEMENTS(pData->aSamples))
+    {
+        pData->fFinished = 1;
+        KeReleaseSpinLockFromDpcLevel(&pData->SpinLock);
+        return;
+    }
+
+    DPCSAMPLE *pSample = &pData->aSamples[pData->iSampleCount++];
+
+    pSample->u64TSC = ASMReadTSC();
+    pSample->PerfCounter = KeQueryPerformanceCounter(&pSample->PerfFrequency);
+    pSample->PerfDelta.QuadPart = pSample->PerfCounter.QuadPart - pData->PerfCounterPrev.QuadPart;
+
+    pData->PerfCounterPrev.QuadPart = pSample->PerfCounter.QuadPart;
+
+    KeSetTimer(&pData->Timer, pData->DueTime, &pData->Dpc);
+
+    KeReleaseSpinLockFromDpcLevel(&pData->SpinLock);
+}
+
+int VBoxGuestCommonIOCtl_DPC(PVBOXGUESTDEVEXT pDevExt, PVBOXGUESTSESSION pSession,
+                             void *pvData, size_t cbData, size_t *pcbDataReturned)
+{
+    int rc = VINF_SUCCESS;
+
+    /* Allocate a non paged memory for samples and related data. */
+    DPCDATA *pData = (DPCDATA *)ExAllocatePoolWithTag(NonPagedPool, sizeof(DPCDATA), VBOXGUEST_DPC_TAG);
+
+    if (!pData)
+    {
+        RTLogBackdoorPrintf("VBoxGuest: DPC: DPCDATA allocation failed.\n");
+        return VERR_NO_MEMORY;
+    }
+
+    KeInitializeDpc(&pData->Dpc, DPCDeferredRoutine, pData);
+    KeInitializeTimer(&pData->Timer);
+    KeInitializeSpinLock(&pData->SpinLock);
+
+    pData->fFinished = 0;
+    pData->iSampleCount = 0;
+    pData->PerfCounterPrev.QuadPart = 0;
+
+    pData->ulTimerRes = ExSetTimerResolution(1000 * 10, 1);
+    pData->DueTime.QuadPart = -(int64_t)pData->ulTimerRes / 10;
+
+    /* Start the DPC measurements. */
+    KeSetTimer(&pData->Timer, pData->DueTime, &pData->Dpc);
+
+    while (!pData->fFinished)
+    {
+        LARGE_INTEGER Interval;
+        Interval.QuadPart = -100 * 1000 * 10;
+        KeDelayExecutionThread(KernelMode, TRUE, &Interval);
+    }
+
+    ExSetTimerResolution(0, 0);
+
+    /* Log everything to the host. */
+    RTLogBackdoorPrintf("DPC: ulTimerRes = %d\n", pData->ulTimerRes);
+    int i;
+    for (i = 0; i < pData->iSampleCount; i++)
+    {
+        DPCSAMPLE *pSample = &pData->aSamples[i];
+
+        RTLogBackdoorPrintf("[%d] pd %lld pc %lld pf %lld t %lld\n",
+                i,
+                pSample->PerfDelta.QuadPart,
+                pSample->PerfCounter.QuadPart,
+                pSample->PerfFrequency.QuadPart,
+                pSample->u64TSC);
+    }
+
+    ExFreePoolWithTag(pData, VBOXGUEST_DPC_TAG);
+    return rc;
+}
+#endif /* VBOX_WITH_DPC_LATENCY_CHECKER */

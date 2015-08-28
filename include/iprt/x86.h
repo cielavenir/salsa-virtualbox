@@ -833,12 +833,22 @@ typedef const X86CPUIDFEATEDX *PCX86CPUIDFEATEDX;
 #define MSR_IA32_PLATFORM_ID                0x17
 
 #ifndef MSR_IA32_APICBASE /* qemu cpu.h kludge */
-#define MSR_IA32_APICBASE                   0x1b
+# define MSR_IA32_APICBASE                  0x1b
+/** Local APIC enabled. */
+# define MSR_IA32_APICBASE_EN               RT_BIT_64(11)
+/** X2APIC enabled (requires the EN bit to be set). */
+# define MSR_IA32_APICBASE_EXTD             RT_BIT_64(10)
+/** The processor is the boot strap processor (BSP). */
+# define MSR_IA32_APICBASE_BSP              RT_BIT_64(8)
+/** Minimum base address mask, consult CPUID leaf 0x80000008 for the actual
+ *  width. */
+# define MSR_IA32_APICBASE_BASE_MIN         UINT64_C(0x0000000ffffff000)
 #endif
 
 /** CPU Feature control. */
 #define MSR_IA32_FEATURE_CONTROL            0x3A
 #define MSR_IA32_FEATURE_CONTROL_LOCK       RT_BIT(0)
+#define MSR_IA32_FEATURE_CONTROL_SMX_VMXON  RT_BIT(1)
 #define MSR_IA32_FEATURE_CONTROL_VMXON      RT_BIT(2)
 
 /** BIOS update trigger (microcode update). */
@@ -958,8 +968,9 @@ typedef const X86CPUIDFEATEDX *PCX86CPUIDFEATEDX;
 /** DS Save Area (R/W). */
 #define MSR_IA32_DS_AREA                    0x600
 /** X2APIC MSR ranges. */
-#define MSR_IA32_APIC_START                 0x800
-#define MSR_IA32_APIC_END                   0x900
+#define MSR_IA32_X2APIC_START               0x800
+#define MSR_IA32_X2APIC_TPR                 0x808
+#define MSR_IA32_X2APIC_END                 0xBFF
 
 /** K6 EFER - Extended Feature Enable Register. */
 #define MSR_K6_EFER                         0xc0000080

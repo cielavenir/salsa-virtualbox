@@ -2122,6 +2122,7 @@ static DECLCALLBACK(int) drvvdConstruct(PPDMDRVINS pDrvIns,
     bool        fHostIP = false;
     bool        fUseNewIo = false;
     bool        fUseBlockCache = false;
+    bool        fInformAboutZeroBlocks = false;
     unsigned    iLevel = 0;
     PCFGMNODE   pCurNode = pCfg;
     VDTYPE      enmType = VDTYPE_HDD;
@@ -2139,7 +2140,7 @@ static DECLCALLBACK(int) drvvdConstruct(PPDMDRVINS pDrvIns,
                                           "ReadOnly\0MaybeReadOnly\0TempReadOnly\0Shareable\0HonorZeroWrites\0"
                                           "HostIPStack\0UseNewIo\0BootAcceleration\0BootAccelerationBuffer\0"
                                           "SetupMerge\0MergeSource\0MergeTarget\0BwGroup\0Type\0BlockCache\0"
-                                          "CachePath\0CacheFormat\0");
+                                          "CachePath\0CacheFormat\0InformAboutZeroBlocks\0");
         }
         else
         {
@@ -2261,6 +2262,13 @@ static DECLCALLBACK(int) drvvdConstruct(PPDMDRVINS pDrvIns,
             }
             else
                 rc = VINF_SUCCESS;
+            rc = CFGMR3QueryBoolDef(pCurNode, "InformAboutZeroBlocks", &fInformAboutZeroBlocks, false);
+            if (RT_FAILURE(rc))
+            {
+                rc = PDMDRV_SET_ERROR(pDrvIns, rc,
+                                      N_("DrvVD: Configuration error: Querying \"InformAboutZeroBlocks\" as boolean failed"));
+                break;
+            }
 
             char *psz;
             rc = CFGMR3QueryStringAlloc(pCfg, "Type", &psz);
@@ -2569,6 +2577,8 @@ static DECLCALLBACK(int) drvvdConstruct(PPDMDRVINS pDrvIns,
             uOpenFlags |= VD_OPEN_FLAGS_ASYNC_IO;
         if (pThis->fShareable)
             uOpenFlags |= VD_OPEN_FLAGS_SHAREABLE;
+        if (fInformAboutZeroBlocks)
+            uOpenFlags |= VD_OPEN_FLAGS_INFORM_ABOUT_ZERO_BLOCKS;
 
         /* Try to open backend in async I/O mode first. */
         rc = VDOpen(pThis->pDisk, pszFormat, pszName, uOpenFlags, pImage->pVDIfsImage);

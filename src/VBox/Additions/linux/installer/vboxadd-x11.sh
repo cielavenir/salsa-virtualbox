@@ -1,6 +1,6 @@
 #! /bin/sh
 #
-# Linux Additions X11 setup init script ($Revision: 77057 $)
+# Linux Additions X11 setup init script ($Revision: 85162 $)
 #
 
 #
@@ -54,6 +54,7 @@ esac
 # The last of the three is for the X.org 6.7 included in Fedora Core 2
 xver=`X -version 2>&1`
 x_version=`echo "$xver" | sed -n 's/^X Window System Version \([0-9.]\+\)/\1/p'``echo "$xver" | sed -n 's/^XFree86 Version \([0-9.]\+\)/\1/p'``echo "$xver" | sed -n 's/^X Protocol Version 11, Revision 0, Release \([0-9.]\+\)/\1/p'``echo "$xver" | sed -n 's/^X.Org X Server \([0-9.]\+\)/\1/p'`
+x_version_short=`echo "${x_version}" | sed 's/\([0-9]*\.[0-9]*\)\..*/\1/'`
 # Version of Redhat or Fedora installed.  Needed for setting up selinux policy.
 redhat_release=`cat /etc/redhat-release 2> /dev/null`
 # All the different possible locations for XFree86/X.Org configuration files
@@ -326,28 +327,21 @@ setup()
             echo "installing the X.Org drivers."
             dox11config=""
             ;;
-        1.12.* )
-            xserver_version="X.Org Server 1.12"
-            vboxvideo_src=vboxvideo_drv_112.so
-            test "$system" = "redhat" || setupxorgconf=""
-            ;;
         1.11.* )
             xserver_version="X.Org Server 1.11"
             vboxvideo_src=vboxvideo_drv_111.so
-            # Does Fedora still ship without vboxvideo detection?
-            # test "$system" = "redhat" || setupxorgconf=""
+            test "$system" = "redhat" || setupxorgconf=""
             ;;
         1.10.* )
             xserver_version="X.Org Server 1.10"
             vboxvideo_src=vboxvideo_drv_110.so
-            # Does Fedora still ship without vboxvideo detection?
-            # test "$system" = "redhat" || setupxorgconf=""
+            test "$system" = "redhat" || setupxorgconf=""
             ;;
         1.9.* )
             xserver_version="X.Org Server 1.9"
             vboxvideo_src=vboxvideo_drv_19.so
-            # Fedora 14 looks likely to ship without vboxvideo detection
-            # test "$system" = "redhat" || setupxorgconf=""
+            # Fedora 14 to 16 patched out vboxvideo detection
+            test "$system" = "redhat" || setupxorgconf=""
             ;;
         1.8.* )
             xserver_version="X.Org Server 1.8"
@@ -418,12 +412,21 @@ setup()
             newmouse=""
             ;;
         * )
-            echo "Warning: unknown version of the X Window System installed.  Not installing"
-            echo "X Window System drivers."
-            dox11config=""
+            # Anything else, including all X server versions as of 1.12.
+            xserver_version="X.Org Server ${x_version_short}"
+            vboxvideo_src=vboxvideo_drv_`echo ${x_version_short} | sed 's/\.//'`.so
+            setupxorgconf=""
+            test -f "${lib_dir}/${vboxvideo_src}" ||
+            {
+                echo "Warning: unknown version of the X Window System installed.  Not installing"
+                echo "X Window System drivers."
+                dox11config=""
+                vboxvideo_src=""
+            }
             ;;
     esac
-    begin "Installing $xserver_version modules"
+    test -n "${dox11config}" &&
+        begin "Installing $xserver_version modules"
     rm "$modules_dir/drivers/vboxvideo_drv$driver_ext" 2>/dev/null
     rm "$modules_dir/input/vboxmouse_drv$driver_ext" 2>/dev/null
     case "$vboxvideo_src" in ?*)

@@ -23,7 +23,7 @@ Name:      %NAME%
 Version:   %BUILDVER%_%BUILDREL%
 Release:   1
 URL:       http://www.virtualbox.org/
-Source:    VirtualBox.tar.bz2
+Source:    VirtualBox.tar
 License:   GPLv2
 Group:     Applications/System
 Vendor:    Oracle Corporation
@@ -432,13 +432,13 @@ rm -rf $RPM_BUILD_ROOT
 %{?rpm_suse: /sbin/rcvboxdrv}
 %{?rpm_suse: /sbin/rcvboxballoonctrl-service}
 %{?rpm_suse: /sbin/rcvboxweb-service}
-/lib/modules
 /etc/vbox
-/usr/bin
+/usr/bin/*
 /usr/src/vbox*
 /usr/lib/virtualbox
-/usr/share/applications
-/usr/share/icons
-/usr/share/mime/packages
-/usr/share/pixmaps
+/usr/share/applications/*
+/usr/share/icons/hicolor/*/apps/*
+/usr/share/icons/hicolor/*/mimetypes/*
+/usr/share/mime/packages/*
+/usr/share/pixmaps/*
 /usr/share/virtualbox

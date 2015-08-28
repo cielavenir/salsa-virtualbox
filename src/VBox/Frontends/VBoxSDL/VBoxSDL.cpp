@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2006-2011 Oracle Corporation
+ * Copyright (C) 2006-2013 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -27,7 +27,7 @@
 #include <VBox/com/ErrorInfo.h>
 #include <VBox/com/errorprint.h>
 
-#include <VBox/com/EventQueue.h>
+#include <VBox/com/NativeEventQueue.h>
 #include <VBox/com/VirtualBox.h>
 
 using namespace com;
@@ -725,6 +725,10 @@ static CComModule _Module;
 extern "C"
 DECLEXPORT(int) TrustedMain(int argc, char **argv, char **envp)
 {
+#ifdef Q_WS_X11
+    if (!XInitThreads())
+        return 1;
+#endif
 #ifdef VBOXSDL_WITH_X11
     /*
      * Lock keys on SDL behave different from normal keys: A KeyPress event is generated
@@ -1344,7 +1348,7 @@ DECLEXPORT(int) TrustedMain(int argc, char **argv, char **envp)
     ComPtr<IVirtualBox> pVirtualBox;
     ComPtr<ISession> pSession;
     bool sessionOpened = false;
-    EventQueue* eventQ = com::EventQueue::getMainEventQueue();
+    NativeEventQueue* eventQ = com::NativeEventQueue::getMainEventQueue();
 
     ComPtr<IMachine> pMachine;
 
@@ -2917,6 +2921,10 @@ leave:
  */
 int main(int argc, char **argv)
 {
+#ifdef Q_WS_X11
+    if (!XInitThreads())
+        return 1;
+#endif
     /*
      * Before we do *anything*, we initialize the runtime.
      */

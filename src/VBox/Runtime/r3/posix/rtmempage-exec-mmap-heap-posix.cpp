@@ -558,11 +558,11 @@ int RTHeapPageFree(PRTHEAPPAGE pHeap, void *pv, size_t cPages)
  * Initializes the heap.
  *
  * @returns IPRT status code
- * @param   pvUser1             Unused.
- * @param   pvUser2             Unused.
+ * @param   pvUser              Unused.
  */
-static DECLCALLBACK(int) rtMemPagePosixInitOnce(void *pvUser1, void *pvUser2)
+static DECLCALLBACK(int) rtMemPagePosixInitOnce(void *pvUser)
 {
+    NOREF(pvUser);
     int rc = RTHeapPageInit(&g_MemPagePosixHeap, false /*fExec*/);
     if (RT_SUCCESS(rc))
     {
@@ -615,7 +615,7 @@ static void *rtMemPagePosixAlloc(size_t cb, const char *pszTag, bool fZero, PRTH
     }
     else
     {
-        int rc = RTOnce(&g_MemPagePosixInitOnce, rtMemPagePosixInitOnce, NULL, NULL);
+        int rc = RTOnce(&g_MemPagePosixInitOnce, rtMemPagePosixInitOnce, NULL);
         if (RT_SUCCESS(rc))
             rc = RTHeapPageAlloc(pHeap, cb >> PAGE_SHIFT, pszTag, fZero, &pv);
         if (RT_FAILURE(rc))

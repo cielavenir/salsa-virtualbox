@@ -103,12 +103,12 @@
         <translation>互換性のないQtライブラリエラー</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="658"/>
+        <location filename="../src/main.cpp" line="659"/>
         <source>VirtualBox - Error In %1</source>
         <translation>VirtualBox - %1 のエラー</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="663"/>
+        <location filename="../src/main.cpp" line="664"/>
         <source>&lt;html&gt;&lt;b&gt;%1 (rc=%2)&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</source>
         <translation>&lt;html&gt;&lt;b&gt;%1 (rc=%2)&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
@@ -136,17 +136,17 @@
         <translation>VirtualBox - ランタイムエラー</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="591"/>
+        <location filename="../src/main.cpp" line="592"/>
         <source>&lt;b&gt;Cannot access the kernel driver!&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</source>
         <translation>&lt;b&gt;カーネルドライバにアクセスできません！&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="615"/>
+        <location filename="../src/main.cpp" line="616"/>
         <source>Unknown error %2 during initialization of the Runtime</source>
         <translation>ランタイムの初期化中に予期しないエラー(%2)</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="605"/>
+        <location filename="../src/main.cpp" line="606"/>
         <source>Kernel driver not accessible</source>
         <translation>カーネルドライバにアクセスできない</translation>
     </message>
@@ -5652,117 +5652,122 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <location filename="../src/globals/UIMessageCenter.cpp" line="585"/>
+        <source>&lt;p&gt;Failed to initialize COM because the VirtualBox global configuration directory &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; is not accessible. Please check the permissions of this directory and of its parent directory.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="596"/>
         <source>&lt;p&gt;Failed to create the VirtualBox COM object.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox COMオブジェクトの作成に失敗しました。&lt;/p&gt;&lt;p&gt;アプリケーションを終了します。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="620"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="631"/>
         <source>Failed to set global VirtualBox properties.</source>
         <translation>グローバルなVirtualBoxのプロパティの設定に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="634"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="645"/>
         <source>Failed to access the USB subsystem.</source>
         <translation>USBサブシステムのアクセスに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="644"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="655"/>
         <source>Failed to create a new virtual machine.</source>
         <translation>新規仮想マシンの作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="656"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="667"/>
         <source>Failed to create a new virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>新規仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="666"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="677"/>
         <source>Failed to open virtual machine located in %1.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;を開けませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="677"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="688"/>
         <source>Failed to register the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="686"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="697"/>
         <source>Failed to add virtual machine &lt;b&gt;%1&lt;/b&gt; located in &lt;i&gt;%2&lt;/i&gt; because its already present.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;(&lt;i&gt;&quot;%2&quot;&lt;/i&gt;)の追加に失敗しました。すでに存在します。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="695"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="706"/>
         <source>Failed to apply the settings to the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の設定の適用に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="738"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="749"/>
         <source>&lt;p&gt;The machine settings were changed while you were editing them. You currently have unsaved setting changes.&lt;/p&gt;&lt;p&gt;Would you like to reload the changed settings or to keep your own changes?&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="742"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="753"/>
         <source>Reload settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="742"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="753"/>
         <source>Keep changes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="753"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="764"/>
         <source>The virtual machine that you are changing has been started. Only certain settings can be changed while a machine is running. All other changes will be lost if you close this window now.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="766"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="780"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="777"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="791"/>
         <source>Failed to start the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の起動に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="792"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="803"/>
         <source>Failed to pause the execution of the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の一時停止に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="803"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="814"/>
         <source>Failed to resume the execution of the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の再開に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="826"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="840"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="837"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="851"/>
         <source>Failed to save the state of the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の状態の保存に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="852"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="866"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="863"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="877"/>
         <source>Failed to clone the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="878"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="892"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="889"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="903"/>
         <source>Failed to create a snapshot of the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のスナップショット作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="904"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="916"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="915"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="927"/>
         <source>Failed to stop the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の停止に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="928"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="936"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="939"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="947"/>
         <source>Failed to remove the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の除去に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="946"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="957"/>
         <source>Failed to discard the saved state of the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の保存された状態の破棄に失敗しました。</translation>
     </message>
@@ -5779,7 +5784,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の最新のスナップショットと状態の破棄に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1111"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1122"/>
         <source>There is no virtual machine named &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;がありません。</translation>
     </message>
@@ -5793,7 +5798,7 @@ p, li { white-space: pre-wrap; }
 </translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1256"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1267"/>
         <source>&lt;p&gt;Are you sure you want to discard the saved state of the virtual machine &lt;b&gt;%1&lt;/b&gt;?&lt;/p&gt;&lt;p&gt;This operation is equivalent to resetting or powering off the machine without doing a proper shutdown of the guest OS.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の保存された状態を破棄しますか？&lt;/p&gt;&lt;p&gt;この操作はゲストOSを適切にシャットダウンせずにリセットまたは電源をオフにすることと同等です。&lt;/p&gt;</translation>
     </message>
@@ -5839,12 +5844,12 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">%1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;の登録解除に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1555"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1566"/>
         <source>Failed to create a new session.</source>
         <translation>新規セッションの作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1573"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1584"/>
         <source>Failed to open a session for the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のセッションを開けませんでした。</translation>
     </message>
@@ -5857,61 +5862,61 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">ホスト ネットワーク インターフェース&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2958"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2966"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2968"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2976"/>
         <source>Failed to remove the host network interface &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>ホスト ネットワーク インターフェース&lt;b&gt;&quot;%1&quot;&lt;/b&gt;を取り除けませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1613"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1625"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1624"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1636"/>
         <source>Failed to attach the USB device &lt;b&gt;%1&lt;/b&gt; to the virtual machine &lt;b&gt;%2&lt;/b&gt;.</source>
         <translation>USB デバイス&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の仮想マシン&lt;b&gt;&quot;%2&quot;&lt;/b&gt;への割り当てに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1639"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1651"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1650"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1662"/>
         <source>Failed to detach the USB device &lt;b&gt;%1&lt;/b&gt; from the virtual machine &lt;b&gt;%2&lt;/b&gt;.</source>
         <translation>USB デバイス&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の仮想マシン&lt;b&gt;&quot;%2&quot;&lt;/b&gt;からの割り当て解除に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3006"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3032"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3016"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3042"/>
         <source>Failed to create the shared folder &lt;b&gt;%1&lt;/b&gt; (pointing to &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;) for the virtual machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;の共有フォルダ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;(参照先 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;)の作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3019"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3029"/>
         <source>Failed to remove the shared folder &lt;b&gt;%1&lt;/b&gt; (pointing to &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;) from the virtual machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;の共有フォルダ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;(参照先 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;)の除去に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2034"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2045"/>
         <source>&lt;p&gt;The Virtual Machine reports that the guest OS does not support &lt;b&gt;mouse pointer integration&lt;/b&gt; in the current video mode. You need to capture the mouse (by clicking over the VM display or pressing the host key) in order to use the mouse inside the guest OS.&lt;/p&gt;</source>
         <translation>&lt;p&gt;現在のビデオモードではゲストOSで&lt;b&gt;マウス統合&lt;/b&gt;機能がサポートされません。ゲストOSでマウスを使用するためにはマウスをキャプチャ(仮想マシンの画面をクリックするか、またはホストキーを押す)する必要があります。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2054"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2065"/>
         <source>&lt;p&gt;The Virtual Machine is currently in the &lt;b&gt;Paused&lt;/b&gt; state and not able to see any keyboard or mouse input. If you want to continue to work inside the VM, you need to resume it by selecting the corresponding action from the menu bar.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンは現在&lt;b&gt;&quot;一時停止&quot;&lt;/b&gt;状態のため、キーボードとマウス操作を受け付けません。仮想マシンでの作業を続けたい場合は、メニューバーから対応する動作を選択して、仮想マシンを再開する必要があります。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2273"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2284"/>
         <source>&lt;p&gt;Cannot run VirtualBox in &lt;i&gt;VM Selector&lt;/i&gt; mode due to local restrictions.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ローカルの制限のため、 &lt;i&gt;VM Selector&lt;/i&gt;モードでVirtualBoxを実行できません。&lt;/p&gt;&lt;p&gt;アプリケーションを終了します。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2412"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2422"/>
         <source>Failed to update Guest Additions. The Guest Additions installation image will be mounted to provide a manual installation.</source>
         <translation>Guest Additionsの更新に失敗しました。Guest Additionsのインストールイメージは手動インストールのためマウントされます。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2447"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2457"/>
         <source>Failed to install the Extension Pack &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>機能拡張パッケージ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のインストールに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2460"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2470"/>
         <source>Failed to uninstall the Extension Pack &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>機能拡張パッケージ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のアンインストールに失敗しました。</translation>
     </message>
@@ -5920,82 +5925,82 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">機能拡張パッケージ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;を除去します。本当に除去しますか？</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2551"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2561"/>
         <source>&amp;Remove</source>
         <translation>除去(&amp;R)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2564"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2574"/>
         <source>The current port forwarding rules are not valid. None of the host or guest port values may be set to zero.</source>
         <translation>現在のポートフォワーディングルールは無効です。 ホストまたはゲストポートの値にゼロが設定されています。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2571"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2581"/>
         <source>&lt;p&gt;There are unsaved changes in the port forwarding configuration.&lt;/p&gt;&lt;p&gt;If you proceed your changes will be discarded.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ポートフォワーディング設定の変更が保存されていません。&lt;/p&gt;&lt;p&gt;続行すると変更は破棄されます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2600"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2610"/>
         <source>&lt;nobr&gt;Fatal Error&lt;/nobr&gt;</source>
         <comment>runtime error info</comment>
         <translation>&lt;nobr&gt;致命的なエラー&lt;/nobr&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2606"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2616"/>
         <source>&lt;nobr&gt;Non-Fatal Error&lt;/nobr&gt;</source>
         <comment>runtime error info</comment>
         <translation>&lt;nobr&gt;致命的でないエラー&lt;/nobr&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2612"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2622"/>
         <source>&lt;nobr&gt;Warning&lt;/nobr&gt;</source>
         <comment>runtime error info</comment>
         <translation>&lt;nobr&gt;警告&lt;/nobr&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2629"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2639"/>
         <source>&lt;nobr&gt;Error ID: &lt;/nobr&gt;</source>
         <comment>runtime error info</comment>
         <translation>&lt;nobr&gt;エラーID: &lt;/nobr&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2631"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2641"/>
         <source>Severity: </source>
         <comment>runtime error info</comment>
         <translation>重要度:</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2642"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2652"/>
         <source>&lt;p&gt;A fatal error has occurred during virtual machine execution! The virtual machine will be powered off. Please copy the following error message using the clipboard to help diagnose the problem:&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンの実行中に致命的なエラーが発生しました！仮想マシンの電源をオフにします。調査のために以下のエラーメッセージをクリップボードにコピーして使用してください:&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2654"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2664"/>
         <source>&lt;p&gt;An error has occurred during virtual machine execution! The error details are shown below. You may try to correct the error and resume the virtual machine execution.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンの実行中にエラーが発生しました！エラーの詳細を以下に示します。説明されたエラーを修正し、仮想マシンの再実行することができます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2663"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2673"/>
         <source>&lt;p&gt;The virtual machine execution may run into an error condition as described below. We suggest that you take an appropriate action to avert the error.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンの実行中、以下で説明されるエラーが発生するかもしれません。このメッセージは無視できますが、動作を確実にするために、説明された誤りを対策することが推奨されます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2845"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2855"/>
         <source>Sorry, some generic error happens.</source>
         <translation type="unfinished">申し訳ありません。不明なエラーが発生しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2980"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2990"/>
         <source>Failed to attach the hard disk (&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;) to the slot &lt;i&gt;%2&lt;/i&gt; of the machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>ハードディスク(&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;)の、仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;のスロット&lt;i&gt;&quot;%2&quot;&lt;/i&gt; への割り当てに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2986"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2996"/>
         <source>Failed to attach the CD/DVD device (&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;) to the slot &lt;i&gt;%2&lt;/i&gt; of the machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>CD/DVDデバイス(&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;)の、仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;のスロット&lt;i&gt;&quot;%2&quot;&lt;/i&gt; への割り当てに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2992"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3002"/>
         <source>Failed to attach the floppy device (&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;) to the slot &lt;i&gt;%2&lt;/i&gt; of the machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>フロッピーデバイス(&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;)の、仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;のスロット&lt;i&gt;&quot;%2&quot;&lt;/i&gt; への割り当てに失敗しました。</translation>
     </message>
@@ -6004,31 +6009,31 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;この仮想マシンでUSB 2.0を有効化するには&lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;のインストールが必要です。VirtualBoxのダウンロードサイトから機能拡張パッケージをダウンロードし、インストールしてください。機能拡張パッケージをインストールすると、USB 2.0を有効化することができます。現在の設定をキャンセルしない場合、USB 2.0は無効化されます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3202"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3212"/>
         <source>Result&amp;nbsp;Code: </source>
         <comment>error info</comment>
         <translation>終了コード&amp;nbsp;: </translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3208"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3218"/>
         <source>Component: </source>
         <comment>error info</comment>
         <translation>コンポーネント: </translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3216"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3226"/>
         <source>Interface: </source>
         <comment>error info</comment>
         <translation>インターフェース: </translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3225"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3235"/>
         <source>Callee: </source>
         <comment>error info</comment>
         <translation>呼び出し先: </translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3233"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3243"/>
         <source>Callee&amp;nbsp;RC: </source>
         <comment>error info</comment>
         <translation>呼び出し先&amp;nbsp;RC: </translation>
@@ -6060,27 +6065,27 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">仮想マシン&lt;b&gt;%1&lt;b&gt;のスナップショット保存フォルダのパスを&lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;に変更できませんでした。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3045"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3055"/>
         <source>&lt;p&gt;Failed to remove the shared folder &lt;b&gt;%1&lt;/b&gt; (pointing to &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;) from the virtual machine &lt;b&gt;%3&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Please close all programs in the guest OS that may be using this shared folder and try again.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシン&lt;b&gt;%3&lt;/b&gt;の共有フォルダ&lt;b&gt;%1&lt;/b&gt;(参照先:&lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;)の削除に失敗しました。&lt;/p&gt;&lt;p&gt;この共有フォルダを使用しているゲストOSのすべてのプログラムを終了し、再実行してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1677"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1688"/>
         <source>&lt;p&gt;Could not find the VirtualBox Guest Additions CD image file &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt; or &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Do you wish to download this CD image from the Internet?&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox Guest Additions CDイメージファイル&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;または&lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;が見つかりません。&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;インターネットからCDイメージをダウンロードしますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1691"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1702"/>
         <source>&lt;p&gt;Failed to download the VirtualBox Guest Additions CD image from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;%3&lt;/p&gt;</source>
         <translation>&lt;p&gt;&lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;からVirtualBox Guest Additions CDイメージをダウンロードできません。&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;%3&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1710"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1721"/>
         <source>&lt;p&gt;Are you sure you want to download the VirtualBox Guest Additions CD image from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; (size %3 bytes)?&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox Guest Additions CDイメージを&lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; (サイズ %3バイト)からダウンロードしますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1722"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1733"/>
         <source>&lt;p&gt;The VirtualBox Guest Additions CD image has been successfully downloaded from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; and saved locally as &lt;nobr&gt;&lt;b&gt;%3&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Do you wish to register this CD image and mount it on the virtual CD/DVD drive?&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox Guest Additions CDイメージを&lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt;からダウンロードし、&lt;nobr&gt;&lt;b&gt;%3&lt;/b&gt;に保存しました。&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;CDイメージを登録し、仮想CD/DVDドライブにマウントしますか？&lt;/p&gt;</translation>
     </message>
@@ -6094,7 +6099,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;仮想マシンのウィンドウを&quot;シームレス&quot;モードに切り替えます。&lt;b&gt;%1&lt;/b&gt;キーを押すといつでもウィンドウ表示に戻ることができます。注：ホストキーは現在&lt;b&gt;%2&lt;/b&gt;に割り当てられています。&lt;/p&gt;&lt;p&gt;注：シームレスモードではメインメニューバーは表示されません。メニューバーにアクセスするには &lt;b&gt;Host+Home&lt;/b&gt;キーを押してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3069"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3079"/>
         <source>&lt;p&gt;The virtual machine window is optimized to work in &lt;b&gt;%1&amp;nbsp;bit&lt;/b&gt; color mode but the virtual display is currently set to &lt;b&gt;%2&amp;nbsp;bit&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Please open the display properties dialog of the guest OS and select a &lt;b&gt;%3&amp;nbsp;bit&lt;/b&gt; color mode, if it is available, for best possible performance of the virtual video subsystem.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Note&lt;/b&gt;. Some operating systems, like OS/2, may actually work in 32&amp;nbsp;bit mode but report it as 24&amp;nbsp;bit (16 million colors). You may try to select a different color mode to see if this message disappears or you can simply disable the message now if you are sure the required color mode (%4&amp;nbsp;bit) is not available in the guest OS.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンウィンドウは&lt;b&gt;%1&amp;nbsp;ビット&lt;/b&gt;カラーモードに最適化されますが、現在仮想ディスプレイは&lt;b&gt;%2&amp;nbsp;ビット&lt;/b&gt;に設定されています。&lt;/p&gt;&lt;p&gt;最良の仮想ビデオサブシステム性能を得るため、利用可能であるならばゲストOSの画面設定ダイアログを開き、&lt;b&gt;%3&amp;nbsp;ビット&lt;/b&gt;カラーモードを選択してください。&lt;/p&gt;&lt;p&gt;&lt;b&gt;注：OS/2など、いくつかのオペレーティングシステムは32&amp;nbsp;ビットモードの動作を24&amp;nbsp;ビット(約1600万色)として報告します。 このメッセージが消えるか、またはゲストOSで必要な色深度(%4&amp;nbsp;ビット) が利用できないことが分かっているならば、単にメッセージを無効にできるか確認するために異なった色深度を選択することができます。&lt;/p&gt;</translation>
     </message>
@@ -6103,7 +6108,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;仮想マシン実行中に重大なエラーが発生したため、仮想マシンは停止しました。&lt;/p&gt;&lt;p&gt;問題の解決のため、&lt;a href=http://www.virtualbox.org&gt;http://www.virtualbox.org&lt;/a&gt;のCommunityセクションを参照するか、サポート契約を締結してください。あなたがエラー発生時に行った操作と共に、&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;ディレクトリに格納されているログファイル(&lt;tt&gt;VBox.log&lt;/tt&gt;)とイメージファイル(&lt;tt&gt;VBox.png&lt;/tt&gt;)を提供してください。注：VirualBoxメインウィンドウの&lt;b&gt;[仮想マシン]&lt;/b&gt;メニューから[ログを参照]を選択して、上記ファイルにアクセスすることができます。&lt;/p&gt;&lt;p&gt;仮想マシンを電源オフするには&lt;b&gt;[OK]&lt;/b&gt;ボタンをクリックしてください。このままデバッグを行うには&lt;b&gt;[無視]&lt;/b&gt;ボタンをクリックしてください。デバッグには特別な知識とツールを必要とするため、&lt;b&gt;[OK]&lt;/b&gt;ボタンをクリックすることを推奨します。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2257"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2268"/>
         <source>&lt;p&gt;You didn&apos;t attach a hard disk to the new virtual machine. The machine will not be able to boot unless you attach a hard disk with a guest operating system or some other bootable media to it later using the machine settings dialog or the First Run Wizard.&lt;/p&gt;&lt;p&gt;Do you wish to continue?&lt;/p&gt;</source>
         <translation>&lt;p&gt;新規仮想マシンにハードディスクが割り当てられていません。仮想マシン設定ダイアログか初回起動ウィザードを使用してゲストOSをインストールしたハードディスクまたは他の起動可能なメディアを割り当てないと仮想マシンは起動しません。&lt;/p&gt;&lt;p&gt;続行しますか？&lt;/p&gt;</translation>
     </message>
@@ -6118,7 +6123,7 @@ p, li { white-space: pre-wrap; }
         <translation>ライセンスファイル&lt;nobr&gt;&lt;b&gt;&quot;%1&quot;&lt;/b&gt;&lt;/nobr&gt;が開けません。ファイルのパーミッションを確認してください。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="814"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="825"/>
         <source>Failed to send the ACPI Power Button press event to the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;への電源ボタン オフのACPIイベント送信に失敗しました。</translation>
     </message>
@@ -6127,7 +6132,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;VirtualBox オンライン登録サービスへの接続に失敗しました。&lt;/p&gt;&lt;p&gt;%1&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1877"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1888"/>
         <source>&lt;p&gt;Congratulations! You have been successfully registered as a user of VirtualBox.&lt;/p&gt;&lt;p&gt;Thank you for finding time to fill out the registration form!&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox のユーザー登録が完了しました。&lt;/p&gt;&lt;p&gt;登録フォームに書き込む時間を割いてくださり、ありがとうございました！&lt;/p&gt;</translation>
     </message>
@@ -6140,24 +6145,24 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;グローバルなVirtualBox設定の&lt;b&gt;&lt;nobr&gt;&quot;%1&quot;&lt;/nobr&gt;&lt;/b&gt;への保存に失敗しました。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="596"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="607"/>
         <source>&lt;p&gt;Failed to load the global GUI configuration from &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
         <translation>&lt;p&gt;グローバルなGUI構成の&lt;b&gt;&lt;nobr&gt;&quot;%1&quot;&lt;/nobr&gt;&lt;/b&gt;からの読み込みに失敗しました。&lt;/p&gt;
 &lt;p&gt;アプリケーションを終了します。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="610"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="621"/>
         <source>&lt;p&gt;Failed to save the global GUI configuration to &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
         <translation>&lt;p&gt;グローバルなGUI構成の&lt;b&gt;&lt;nobr&gt;&quot;%1&quot;&lt;/nobr&gt;&lt;/b&gt;への保存に失敗しました。&lt;/p&gt;
 &lt;p&gt;アプリケーションを終了します。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="707"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="718"/>
         <source>Failed to save the settings of the virtual machine &lt;b&gt;%1&lt;/b&gt; to &lt;b&gt;&lt;nobr&gt;%2&lt;/nobr&gt;&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の設定の&lt;b&gt;&lt;nobr&gt;&quot;%2&quot;&lt;/nobr&gt;&lt;/b&gt;への保存に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="729"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="740"/>
         <source>Failed to load the settings of the virtual machine &lt;b&gt;%1&lt;/b&gt; from &lt;b&gt;&lt;nobr&gt;%2&lt;/nobr&gt;&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の設定の&lt;b&gt;&lt;nobr&gt;&quot;%2”&lt;/nobr&gt;&lt;/b&gt;からの読み込みに失敗しました。</translation>
     </message>
@@ -6172,7 +6177,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">登録解除</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1263"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1274"/>
         <source>Discard</source>
         <comment>saved state</comment>
         <translation>破棄</translation>
@@ -6217,28 +6222,28 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">ハードディスクイメージの、仮想マシン&lt;b&gt;&quot;%4&quot;&lt;/b&gt;のバス %3 のチャンネル %2 のデバイススロット %1 からの割り当て解除に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1715"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1748"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1760"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1726"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1759"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1771"/>
         <source>Download</source>
         <comment>additions</comment>
         <translation>ダウンロード</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1730"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1741"/>
         <source>Mount</source>
         <comment>additions</comment>
         <translation>マウント</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1946"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1979"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1957"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1990"/>
         <source>&lt;p&gt;The host key is currently defined as &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;</source>
         <comment>additional message box paragraph</comment>
         <translation>&lt;p&gt;現在ホストキーは&lt;b&gt;%1&lt;/b&gt;に割り当てられています。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1953"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1964"/>
         <source>Capture</source>
         <comment>do input capture</comment>
         <translation>キャプチャ</translation>
@@ -6249,7 +6254,7 @@ p, li { white-space: pre-wrap; }
 &lt;p&gt;&lt;b&gt;[確認]&lt;/b&gt;ボタンをクリックして仮想ディスクマネージャを起動し、どのメディアにアクセスできないのか確認してください。または&lt;b&gt;[無視]&lt;/b&gt;ボタンをクリックして、このメッセージを無視してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2078"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2089"/>
         <source>Check</source>
         <comment>inaccessible media message box</comment>
         <translation>確認</translation>
@@ -6279,36 +6284,36 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">キャンセル</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2149"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2160"/>
         <source>Switch</source>
         <comment>fullscreen</comment>
         <translation>切り替え</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2169"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2180"/>
         <source>Switch</source>
         <comment>seamless</comment>
         <translation>切り替え</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2234"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2245"/>
         <source>&lt;p&gt;Do you really want to reset the virtual machine?&lt;/p&gt;&lt;p&gt;This will cause any unsaved data in applications running inside it to be lost.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンを本当にリセットしますか？&lt;/p&gt;&lt;p&gt;仮想マシンをリセットすると、その中で稼動中のすべてのアプリケーションの保存されていないデータは失われます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2238"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2249"/>
         <source>Reset</source>
         <comment>machine</comment>
         <translation>リセット</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2266"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2277"/>
         <source>Continue</source>
         <comment>no hard disk attached</comment>
         <translation>続ける</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2267"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2278"/>
         <source>Go Back</source>
         <comment>no hard disk attached</comment>
         <translation>戻る</translation>
@@ -6333,12 +6338,12 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">選択</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1123"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1134"/>
         <source>&lt;p&gt;Could not enter seamless mode due to insufficient guest video memory.&lt;/p&gt;&lt;p&gt;You should configure the virtual machine to have at least &lt;b&gt;%1&lt;/b&gt; of video memory.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ゲストOSのビデオメモリ不足のため、シームレスモードに切り替えできません。&lt;/p&gt;&lt;p&gt;仮想マシンの設定でビデオメモリを &lt;b&gt;%1&lt;/b&gt;以上に設定してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1136"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1147"/>
         <source>&lt;p&gt;Could not switch the guest display to fullscreen mode due to insufficient guest video memory.&lt;/p&gt;&lt;p&gt;You should configure the virtual machine to have at least &lt;b&gt;%1&lt;/b&gt; of video memory.&lt;/p&gt;&lt;p&gt;Press &lt;b&gt;Ignore&lt;/b&gt; to switch to fullscreen mode anyway or press &lt;b&gt;Cancel&lt;/b&gt; to cancel the operation.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ゲストOSのビデオメモリ不足のため、ゲスト画面をフルスクリーンモードに切り替えできません。&lt;/p&gt;&lt;p&gt;仮想マシンの設定でビデオメモリを &lt;b&gt;%1&lt;/b&gt;以上に設定してください。&lt;/p&gt;&lt;p&gt;&lt;b&gt;[無視]&lt;/b&gt;ボタンをクリックしてフルスクリーンモードに切り換えるか、&lt;b&gt;[キャンセル]&lt;/b&gt;ボタンをクリックして操作を取り消してください。&lt;/p&gt;</translation>
     </message>
@@ -6347,22 +6352,22 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;ネットワークエラーのため、新しいバージョン情報を取得できません:&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1919"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1930"/>
         <source>You are already running the most recent version of VirtualBox.</source>
         <translation>最新バージョンのVirtualBoxがインストールされています。 後でバージョン確認を行ってください。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1931"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1942"/>
         <source>&lt;p&gt;You have &lt;b&gt;clicked the mouse&lt;/b&gt; inside the Virtual Machine display or pressed the &lt;b&gt;host key&lt;/b&gt;. This will cause the Virtual Machine to &lt;b&gt;capture&lt;/b&gt; the host mouse pointer (only if the mouse pointer integration is not currently supported by the guest OS) and the keyboard, which will make them unavailable to other applications running on your host machine.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;host key&lt;/b&gt; at any time to &lt;b&gt;uncapture&lt;/b&gt; the keyboard and mouse (if it is captured) and return them to normal operation. The currently assigned host key is shown on the status bar at the bottom of the Virtual Machine window, next to the&amp;nbsp;&lt;img src=:/hostkey_16px.png/&gt;&amp;nbsp;icon. This icon, together with the mouse icon placed nearby, indicate the current keyboard and mouse capture state.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンの画面を&lt;b&gt;マウスクリック&lt;/b&gt;するか、または&lt;b&gt;ホストキー&lt;/b&gt;を押すと、仮想マシンはマウスポインタ(マウス統合機能がゲストOSでサポートされていないときだけ)とキーボードを&lt;b&gt;キャプチャ&lt;/b&gt;します。仮想マシンにキーボードとマウスがキャプチャされるとホストマシンで動作する他のアプリケーションは利用できません。&lt;/p&gt;&lt;p&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;ホストキー&lt;/b&gt;を押すと、キーボードとマウス(キャプチャされているとき)は&lt;b&gt;キャプチャ解除&lt;/b&gt;され、通常の操作に戻ることができます。現在割り当てられているホストキーは仮想マシンのウィンドウ下部のステータスバーに&amp;nbsp;&lt;img src=:/hostkey_16px.png/&gt;&amp;nbsp;アイコンで表示されます。このアイコンはマウスアイコンと共に現在のキーボ−ドとマウスのキャプチャ状態を表示します。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1964"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1975"/>
         <source>&lt;p&gt;You have the &lt;b&gt;Auto capture keyboard&lt;/b&gt; option turned on. This will cause the Virtual Machine to automatically &lt;b&gt;capture&lt;/b&gt; the keyboard every time the VM window is activated and make it unavailable to other applications running on your host machine: when the keyboard is captured, all keystrokes (including system ones like Alt-Tab) will be directed to the VM.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;host key&lt;/b&gt; at any time to &lt;b&gt;uncapture&lt;/b&gt; the keyboard and mouse (if it is captured) and return them to normal operation. The currently assigned host key is shown on the status bar at the bottom of the Virtual Machine window, next to the&amp;nbsp;&lt;img src=:/hostkey_16px.png/&gt;&amp;nbsp;icon. This icon, together with the mouse icon placed nearby, indicate the current keyboard and mouse capture state.&lt;/p&gt;</source>
         <translation>&lt;p&gt;&lt;b&gt;キーボードの自動キャプチャ&lt;/b&gt;機能が有効です。仮想マシンのウィンドウがアクティブのとき、仮想マシンはキーボードを自動的に&lt;b&gt;キャプチャ&lt;/b&gt;します。キーボードがキャプチャされると、すべてのキーストローク(Alt-Tabなどを含む)が仮想マシンに送られるため、ホストマシンで動作する他のアプリケーションは利用できません。&lt;/p&gt;&lt;p&gt;&lt;b&gt;ホストキー&lt;/b&gt;を押すと、キーボードとマウス(キャプチャされているとき)は&lt;b&gt;キャプチャ解除&lt;/b&gt;され、通常の操作に戻ることができます。現在割り当てられているホストキーは仮想マシンのウィンドウ下部のステータスバーに&amp;nbsp;&lt;img src=:/hostkey_16px.png/&gt;&amp;nbsp;アイコンで表示されます。このアイコンはマウスアイコンと共に現在のキーボ−ドとマウスのキャプチャ状態を表示します。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2010"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2021"/>
         <source>&lt;p&gt;The Virtual Machine reports that the guest OS supports &lt;b&gt;mouse pointer integration&lt;/b&gt;. This means that you do not need to &lt;i&gt;capture&lt;/i&gt; the mouse pointer to be able to use it in your guest OS -- all mouse actions you perform when the mouse pointer is over the Virtual Machine&apos;s display are directly sent to the guest OS. If the mouse is currently captured, it will be automatically uncaptured.&lt;/p&gt;&lt;p&gt;The mouse icon on the status bar will look like&amp;nbsp;&lt;img src=:/mouse_seamless_16px.png/&gt;&amp;nbsp;to inform you that mouse pointer integration is supported by the guest OS and is currently turned on.&lt;/p&gt;&lt;p&gt;&lt;b&gt;Note&lt;/b&gt;: Some applications may behave incorrectly in mouse pointer integration mode. You can always disable it for the current session (and enable it again) by selecting the corresponding action from the menu bar.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ゲストOSで&lt;b&gt;マウス統合&lt;/b&gt;機能がサポートされています。ゲストOSでマウスポインタを&lt;i&gt;キャプチャ&lt;/i&gt;することなく使用できます。仮想マシンの画面上にマウスポインタがあるとき、すべてのマウスの動作は直接ゲストOSに送られます。現在マウスがキャプチャされているときは、自動的にキャプチャ解除されます。ステータスバーのマウスアイコンは、マウス統合機能がゲストOSでサポートされ、現在有効であることを示すため&amp;nbsp;&lt;img src=:/mouse_seamless_16px.png/&gt;&amp;nbsp;のように表示されます。 &lt;/p&gt;&lt;p&gt;&lt;b&gt;注&lt;/b&gt;: マウス統合機能が有効なとき、いくつかのアプリケーションの動作が不正になるかもしれません。メニューバーから対応する動作を選択して現在のセッションのマウス統合機能を無効化(または有効化)することができます。&lt;/p&gt;</translation>
     </message>
@@ -6435,63 +6440,63 @@ p, li { white-space: pre-wrap; }
         <translation>製品情報ダイアログを表示</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1901"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1912"/>
         <source>&lt;p&gt;A new version of VirtualBox has been released! Version &lt;b&gt;%1&lt;/b&gt; is available at &lt;a href=&quot;http://www.virtualbox.org/&quot;&gt;virtualbox.org&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;You can download this version using the link:&lt;/p&gt;&lt;p&gt;&lt;a href=%2&gt;%3&lt;/a&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBoxの新しいバージョンがリリースされました！ バージョン &lt;b&gt;%1&lt;/b&gt;は&lt;a href=&quot;http://www.virtualbox.org/&quot;&gt;virtualbox.org&lt;/a&gt;から入手できます。&lt;/p&gt;&lt;p&gt;このリンクから最新バージョンをダウンロードできます。: &lt;/p&gt;&lt;p&gt;&lt;a href=%2&gt;%3&lt;/a&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1284"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1295"/>
         <source>&lt;p&gt;Are you sure you want to release the %1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;?&lt;/p&gt;&lt;p&gt;This will detach it from the following virtual machine(s): &lt;b&gt;%3&lt;/b&gt;.&lt;/p&gt;</source>
         <translation>&lt;p&gt;&quot;%1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;&quot;を解放しますか？&lt;/p&gt;&lt;p&gt;以下の仮想マシンから解放されます: &lt;b&gt;%3&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1216"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1227"/>
         <source>&lt;p&gt;You are about to remove the virtual machine &lt;b&gt;%1&lt;/b&gt; from the machine list.&lt;/p&gt;&lt;p&gt;Would you like to delete the files containing the virtual machine from your hard disk as well?&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;をリストから除去します。&lt;/p&gt;&lt;p&gt;仮想マシンを構成するファイルをハードディスクから削除しますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1219"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1230"/>
         <source>&lt;p&gt;You are about to remove the virtual machine &lt;b&gt;%1&lt;/b&gt; from the machine list.&lt;/p&gt;&lt;p&gt;Would you like to delete the files containing the virtual machine from your hard disk as well? Doing this will also remove the files containing the machine&apos;s virtual hard disks if they are not in use by another machine.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;をリストから除去します。&lt;/p&gt;&lt;p&gt;仮想マシンを構成するファイルをハードディスクから削除しますか？他の仮想マシンで使用されていない仮想ハードディスクは削除されます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1231"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1242"/>
         <source>Delete all files</source>
         <translation>すべてのファイルを削除</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1232"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1243"/>
         <source>Remove only</source>
         <translation>除去のみ</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1239"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1250"/>
         <source>You are about to remove the inaccessible virtual machine &lt;b&gt;%1&lt;/b&gt; from the machine list. Do you wish to proceed?</source>
         <translation>アクセスできない仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;をリストから除去します。続行しますか？</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1249"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1260"/>
         <source>Remove</source>
         <translation>除去</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1292"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1303"/>
         <source>Release</source>
         <comment>detach medium</comment>
         <translation>解放</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1301"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1312"/>
         <source>&lt;p&gt;Are you sure you want to remove the %1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt; from the list of known media?&lt;/p&gt;</source>
         <translation>&lt;p&gt;メディアのリストから&quot;%1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;&quot;を除去しますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1311"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1322"/>
         <source>Note that as this hard disk is inaccessible its storage unit cannot be deleted right now.</source>
         <translation>注：このハードディスクにアクセスできないため、現在ストレージ 装置を削除できません。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1315"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1326"/>
         <source>The next dialog will let you choose whether you also want to delete the storage unit of this hard disk or keep it for later usage.</source>
         <translation>次のダイアログで、このハードディスクのストレージ装置を削除するか、後で使用するため保持するかを選択できます。</translation>
     </message>
@@ -6500,35 +6505,35 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;注：このメディアのストレージ装置は削除されません。後でリストに再度追加することが可能です。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1326"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1337"/>
         <source>Remove</source>
         <comment>medium</comment>
         <translation>除去</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1333"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1344"/>
         <source>&lt;p&gt;The hard disk storage unit at location &lt;b&gt;%1&lt;/b&gt; already exists. You cannot create a new virtual hard disk that uses this location because it can be already used by another virtual hard disk.&lt;/p&gt;&lt;p&gt;Please specify a different location.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ハードディスク ストレージ装置の場所 &lt;b&gt;&quot;%1&quot;&lt;/b&gt;はすでに存在します。別の仮想ハードディスクが使用しているため、この場所に新規仮想ハードディスクを作成できません。&lt;/p&gt;&lt;p&gt;別の場所を指定してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1344"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1355"/>
         <source>&lt;p&gt;Do you want to delete the storage unit of the hard disk &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;?&lt;/p&gt;&lt;p&gt;If you select &lt;b&gt;Delete&lt;/b&gt; then the specified storage unit will be permanently deleted. This operation &lt;b&gt;cannot be undone&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;If you select &lt;b&gt;Keep&lt;/b&gt; then the hard disk will be only removed from the list of known hard disks, but the storage unit will be left untouched which makes it possible to add this hard disk to the list later again.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ハードディスク&lt;nobr&gt;&lt;b&gt;&quot;%1&quot;&lt;/b&gt;&lt;/nobr&gt;のストレージ装置を削除しますか？&lt;/p&gt;&lt;p&gt;&lt;b&gt;[削除]&lt;/b&gt;を選択すると、指定されたストレージ装置は永久に削除されます。この操作は&lt;b&gt;元に戻せません&lt;/b&gt;。&lt;/p&gt;&lt;p&gt;&lt;b&gt;[保持]&lt;/b&gt;を選択すると、ハードディスクはリストから取り除かれますが、ストレージ装置は後でリストに再度追加できるように、そのまま置かれます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1358"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1369"/>
         <source>Delete</source>
         <comment>hard disk storage</comment>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1359"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1370"/>
         <source>Keep</source>
         <comment>hard disk storage</comment>
         <translation>保持</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1370"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1381"/>
         <source>Failed to delete the storage unit of the hard disk &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>ハードディスク ストレージ装置&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の削除に失敗しました。</translation>
     </message>
@@ -6537,7 +6542,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;新規の割り当てに利用できる未使用のハードディスクがありません。&lt;/p&gt;&lt;p&gt;&lt;b&gt;[作成]&lt;/b&gt;ボタンをクリックし、&lt;i&gt;新規仮想ディスク作成ウィザード&lt;/i&gt;を起動して新規ハードディスクイメージを作成するか、&lt;b&gt;[選択]&lt;/b&gt;ボタンをクリックして、&lt;i&gt;仮想メディアマネージャ&lt;/i&gt;を開き、動作を選択してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1441"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1452"/>
         <source>Failed to create the hard disk storage &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;.&lt;/nobr&gt;</source>
         <translation>ハードディスク ストレージ&lt;nobr&gt;&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の作成に失敗しました。&lt;/nobr&gt;</translation>
     </message>
@@ -6558,32 +6563,32 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&quot;%1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;&quot;の、仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;からのマウント解除に失敗しかました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1529"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1540"/>
         <source>Failed to open the %1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;.</source>
         <translation>&quot;%1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;&quot;のオープンに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1542"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1553"/>
         <source>Failed to close the %1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;.</source>
         <translation>&quot;%1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;&quot;のクローズに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1583"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1594"/>
         <source>Failed to determine the accessibility state of the medium &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;.</source>
         <translation>メディア&lt;nobr&gt;&lt;b&gt;&quot;%1&quot;&lt;/b&gt;&lt;/nobr&gt;のアクセス可否状態の取得に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1865"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1876"/>
         <source>&lt;p&gt;Failed to connect to the VirtualBox online registration service due to the following error:&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBoxのオンライン登録サービスに接続できません。エラー:&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1911"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1922"/>
         <source>&lt;p&gt;Unable to obtain the new version information due to the following error:&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;新しいバージョンの情報を取得できません。エラー:&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2067"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2078"/>
         <source>&lt;p&gt;One or more virtual hard disks, CD/DVD or floppy media are not currently accessible. As a result, you will not be able to operate virtual machines that use these media until they become accessible later.&lt;/p&gt;&lt;p&gt;Press &lt;b&gt;Check&lt;/b&gt; to open the Virtual Media Manager window and see what media are inaccessible, or press &lt;b&gt;Ignore&lt;/b&gt; to ignore this message.&lt;/p&gt;</source>
         <translation>&lt;p&gt;一つ以上の仮想ハードディスク、CD/DVDまたはフロッピーメディアのに現在アクセスできません。アクセス可能になるまでこれらのメディアを使用する仮想マシンを操作できません。&lt;/p&gt;&lt;p&gt;&lt;b&gt;[確認]&lt;/b&gt;ボタンをクリックして仮想メディアマネージャを起動し、どのメディアにアクセスできないのか確認してください。または&lt;b&gt;[無視]&lt;/b&gt;ボタンをクリックして、このメッセージを無視してください。&lt;/p&gt;</translation>
     </message>
@@ -6615,7 +6620,7 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">上書き(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2201"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2212"/>
         <source>&lt;p&gt;A critical error has occurred while running the virtual machine and the machine execution has been stopped.&lt;/p&gt;&lt;p&gt;For help, please see the Community section on &lt;a href=http://www.virtualbox.org&gt;http://www.virtualbox.org&lt;/a&gt; or your support contract. Please provide the contents of the log file &lt;tt&gt;VBox.log&lt;/tt&gt; and the image file &lt;tt&gt;VBox.png&lt;/tt&gt;, which you can find in the &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt; directory, as well as a description of what you were doing when this error happened. Note that you can also access the above files by selecting &lt;b&gt;Show Log&lt;/b&gt; from the &lt;b&gt;Machine&lt;/b&gt; menu of the main VirtualBox window.&lt;/p&gt;&lt;p&gt;Press &lt;b&gt;OK&lt;/b&gt; if you want to power off the machine or press &lt;b&gt;Ignore&lt;/b&gt; if you want to leave it as is for debugging. Please note that debugging requires special knowledge and tools, so it is recommended to press &lt;b&gt;OK&lt;/b&gt; now.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシン実行中に重大なエラーが発生したため、仮想マシンは停止しました。&lt;/p&gt;&lt;p&gt;問題の解決のため、&lt;a href=http://www.virtualbox.org&gt;http://www.virtualbox.org&lt;/a&gt;のCommunityセクションを参照するか、サポートに連絡してください。あなたがエラー発生時に行った操作と共に、&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;ディレクトリに格納されているログファイル(&lt;tt&gt;VBox.log&lt;/tt&gt;)とイメージファイル(&lt;tt&gt;VBox.png&lt;/tt&gt;)を提供してください。注：VirualBoxメインウィンドウの&lt;b&gt;[仮想マシン]&lt;/b&gt;メニューから[ログを参照]を選択して、上記ファイルにアクセスすることができます。&lt;/p&gt;&lt;p&gt;仮想マシンを電源オフするには&lt;b&gt;[OK]&lt;/b&gt;ボタンをクリックしてください。このままデバッグを行うには&lt;b&gt;[無視]&lt;/b&gt;ボタンをクリックしてください。デバッグには特別な知識とツールを必要とするため、&lt;b&gt;[OK]&lt;/b&gt;ボタンをクリックすることを推奨します。&lt;/p&gt;</translation>
     </message>
@@ -6657,29 +6662,29 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">USBファイルシステム(usbfs)もDBusとhalサービスも利用できないため、ホストシステムでUSBにアクセスできませんでした。 ゲストOSでホストUSB デバイスを使用するには、これを修正してVirtualBoxを再起動してください。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="954"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="965"/>
         <source>You are trying to shut down the guest with the ACPI power button. This is currently not possible because the guest does not support software shutdown.</source>
         <translation>電源ボタン オフのACPIイベントでゲストOSをシャットダウンしようとしています。ゲストOSがACPIサブシステムを使用しないためシャットダウンできません。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="963"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="974"/>
         <source>&lt;p&gt;VT-x/AMD-V hardware acceleration has been enabled, but is not operational. Your 64-bit guest will fail to detect a 64-bit CPU and will not be able to boot.&lt;/p&gt;&lt;p&gt;Please ensure that you have enabled VT-x/AMD-V properly in the BIOS of your host computer.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想化支援機能(VT-x/AMD-V)を有効化できません。64ビット ゲストOSは64ビットCPUを検出できず、起動できません。&lt;/p&gt;&lt;p&gt;ホストマシンのBIOS設定でVT-x/AMD-Vを有効化してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="969"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="976"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="989"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="996"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="980"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="987"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1000"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1007"/>
         <source>Close VM</source>
         <translation>仮想マシンを閉じる</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="969"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="976"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="989"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="996"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2351"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="980"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="987"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1000"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1007"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2361"/>
         <source>Continue</source>
         <translation>続ける</translation>
     </message>
@@ -6692,11 +6697,11 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">破棄</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1011"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1016"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1028"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1047"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2351"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1022"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1027"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1039"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1058"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2361"/>
         <source>Cancel</source>
         <translation>キャンセル</translation>
     </message>
@@ -6718,99 +6723,99 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;選択したホスト ネットワーク インターフェース ;&lt;nobr&gt;&lt;b&gt;&quot;%1&quot;&lt;/b&gt;を除去しますか？&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;注：&lt;/b&gt; このインターフェースは複数の仮想マシンの1つ以上のネットワーク アタプタで使用中かもしれません。除去すると、他のインターフェース名を選ぶか、別の割り当て方法を正しく設定するまでそれらのアダプタは動作しません。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2944"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2951"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2954"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2961"/>
         <source>Failed to create the host-only network interface.</source>
         <translation>ホストオンリー ネットワーク インターフェースの作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2099"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2110"/>
         <source>&lt;p&gt;Your existing VirtualBox settings files will be automatically converted from the old format to a new format required by the new version of VirtualBox.&lt;/p&gt;&lt;p&gt;Press &lt;b&gt;OK&lt;/b&gt; to start VirtualBox now or press &lt;b&gt;Exit&lt;/b&gt; if you want to terminate the VirtualBox application without any further actions.&lt;/p&gt;</source>
         <translation>&lt;p&gt;既存のVirtualBox設定ファイルは古い形式からVirtualBoxの新バージョンに必要な形式に自動変換されます。&lt;/p&gt;&lt;p&gt;すぐにVirtualBoxを起動するには&lt;b&gt;[OK]&lt;/b&gt;ボタンをクリックしてください。変換結果を保存せずにVirtualBoxアプリケーションを終了するには&lt;b&gt;[終了]&lt;/b&gt;ボタンをクリックしてください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1003"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1014"/>
         <source>&lt;p&gt;You are about to restore snapshot &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;You can create a snapshot of the current state of the virtual machine first by checking the box below; if you do not do this the current state will be permanently lost. Do you wish to proceed?&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1007"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1018"/>
         <source>Create a snapshot of the current machine state</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1013"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1024"/>
         <source>&lt;p&gt;Are you sure you want to restore snapshot &lt;b&gt;%1&lt;/b&gt;?&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1099"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1110"/>
         <source>Can&apos;t find snapshot named &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1272"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1283"/>
         <source>&lt;p&gt;Error changing medium type from &lt;b&gt;%1&lt;/b&gt; to &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1321"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1332"/>
         <source>&lt;p&gt;Note that the storage unit of this medium will not be deleted and that it will be possible to use it later again.&lt;/p&gt;</source>
         <translation>&lt;p&gt;注：このメディアの記憶装置は削除されません。再度利用することができます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1381"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1392"/>
         <source>&lt;p&gt;You are about to add a virtual hard disk to controller &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Would you like to create a new, empty file to hold the disk contents or select an existing one?&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想ハードディスクをコントローラ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;に追加します。&lt;/p&gt;&lt;p&gt;空の仮想ハードディスクを新規作成しますか？既存の仮想ハードディスクを選択しますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1388"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1399"/>
         <source>Create &amp;new disk</source>
         <comment>add attachment routine</comment>
         <translation>新規ディスクの作成(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1389"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1400"/>
         <source>&amp;Choose existing disk</source>
         <comment>add attachment routine</comment>
         <translation>既存のディスクを選択(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1396"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1407"/>
         <source>&lt;p&gt;You are about to add a new CD/DVD drive to controller &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Would you like to choose a virtual CD/DVD disk to put in the drive or to leave it empty for now?&lt;/p&gt;</source>
         <translation>&lt;p&gt;CD/DVDドライブをコントローラ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;に追加します。&lt;/p&gt;&lt;p&gt;仮想CD/DVDディスクをドライブに割り当てますか？空のドライブだけ割り当てますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1404"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1420"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1415"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1431"/>
         <source>&amp;Choose disk</source>
         <comment>add attachment routine</comment>
         <translation>ディスクを選択(&amp;C)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1405"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1421"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1416"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1432"/>
         <source>Leave &amp;empty</source>
         <comment>add attachment routine</comment>
         <translation>空のドライブ(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1412"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1423"/>
         <source>&lt;p&gt;You are about to add a new floppy drive to controller &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Would you like to choose a virtual floppy disk to put in the drive or to leave it empty for now?&lt;/p&gt;</source>
         <translation>&lt;p&gt;フロッピードライブをコントローラ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;に追加します。&lt;/p&gt;&lt;p&gt;仮想フロッピーディスクをドライブに割り当てますか？空のドライブだけ割り当てますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1460"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1471"/>
         <source>Failed to detach the hard disk (&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;) from the slot &lt;i&gt;%2&lt;/i&gt; of the machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>ハードディスク(&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;)の、仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;のスロット&lt;i&gt;&quot;%2&quot;&lt;/i&gt; への割り当て解除に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1466"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1477"/>
         <source>Failed to detach the CD/DVD device (&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;) from the slot &lt;i&gt;%2&lt;/i&gt; of the machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>CD/DVDデバイス(&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;)の、仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;のスロット&lt;i&gt;&quot;%2&quot;&lt;/i&gt; への割り当て解除に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1472"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1483"/>
         <source>Failed to detach the floppy device (&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;) from the slot &lt;i&gt;%2&lt;/i&gt; of the machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>フロッピーデバイス(&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;)の、仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;のスロット&lt;i&gt;&quot;%2&quot;&lt;/i&gt; への割り当て解除に失敗しました。</translation>
     </message>
@@ -6819,50 +6824,49 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;VirtualBox Guest Additionsがインストールされていないため、共有フォルダは利用できません。共有フォルダを使用するには&lt;b&gt;[デバイス]&lt;/b&gt;メニューから&lt;b&gt;[Guest Additions のインストール]&lt;/b&gt;を選びGuest Additionsをインストールまたは再インストールしてください。インストール後、仮想マシンを再起動すると共有フォルダが利用できます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2285"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2296"/>
         <source>Failed to open appliance.</source>
         <translation>仮想アプライアンスのオープンに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2301"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2312"/>
         <source>Failed to open/interpret appliance &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想アプライアンス&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のオープンまたは解析に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2315"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2326"/>
         <source>Failed to import appliance &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想アプライアンス&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のインポートに失敗しました。</translation>
     </message>
     <message numerus="yes">
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2345"/>
         <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
-        <translation type="unfinished">
+        <translation type="obsolete">
             <numerusform>&lt;p&gt;仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;は状態の保存中です。&lt;/p&gt;&lt;p&gt;続行するとエクスポートした仮想マシンのランタイム状態は破棄されます。注：既存の仮想マシンは変更されません。&lt;/p&gt;</numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2361"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2371"/>
         <source>Failed to create appliance.</source>
         <translation>仮想アプライアンスの作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2369"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2388"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2379"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2398"/>
         <source>Failed to prepare the export of the appliance &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想アプライアンス&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のエクスポートの前処理に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2383"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2393"/>
         <source>Failed to create an appliance.</source>
         <translation>仮想アプライアンスの作成に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2401"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2411"/>
         <source>Failed to export appliance &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>仮想アプライアンス&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のエクスポートに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1593"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1604"/>
         <source>&lt;p&gt;Deleting this host-only network will remove the host-only interface this network is based on. Do you want to remove the (host-only network) interface &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;?&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;&lt;b&gt;Note:&lt;/b&gt; this interface may be in use by one or more virtual network adapters belonging to one of your VMs. After it is removed, these adapters will no longer be usable until you correct their settings by either choosing a different interface name or a different adapter attachment type.&lt;/p&gt;</source>
         <translation>&lt;p&gt;このインタフェースを削除すると、このインターフェースが基づいているホストオンリー ネットワーク インタフェースが削除されます。ホストオンリー ネットワーク インタフェース&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;を削除しますか？&lt;/p&gt;&lt;p&gt;&lt;b&gt;注：&lt;/b&gt;このインタフェースは他の仮想ネットワーク アダプタで使用しているかもしれません。削除した場合、それらのアダプタは、他のインタフェース名を選ぶか、別のアダプタ タイプを選んで設定を変更するまで使用できません。&lt;/p&gt;</translation>
     </message>
@@ -6872,32 +6876,32 @@ p, li { white-space: pre-wrap; }
         <translation>ファイル名&lt;b&gt;&quot;%1&quot;&lt;/b&gt;はすでに使われています。ファイルを置き換えますか？&lt;br /&gt;&lt;br /&gt;ファイルの内容は上書きされます。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="983"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="994"/>
         <source>&lt;p&gt;VT-x/AMD-V hardware acceleration has been enabled, but is not operational. Certain guests (e.g. OS/2 and QNX) require this feature.&lt;/p&gt;&lt;p&gt;Please ensure that you have enabled VT-x/AMD-V properly in the BIOS of your host computer.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想化支援機能(VT-x/AMD-V)が有効化されましたが使用できません。いくつかのゲストOS(OS/2やQNXなど))は本機能を必要とします。&lt;/p&gt;&lt;p&gt;ホストマシンのBIOS設定でVT-x/AMD-Vを有効化してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1661"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1672"/>
         <source>&lt;p&gt;The VirtualBox Guest Additions do not appear to be available on this virtual machine, and shared folders cannot be used without them. To use shared folders inside the virtual machine, please install the Guest Additions if they are not installed, or re-install them if they are not working correctly, by selecting &lt;b&gt;Install Guest Additions&lt;/b&gt; from the &lt;b&gt;Devices&lt;/b&gt; menu. If they are installed but the machine is not yet fully started then shared folders will be available once it is.&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox Guest Additionsがインストールされていないため、共有フォルダは利用できません。共有フォルダを使用するには&lt;b&gt;[デバイス]&lt;/b&gt;メニューから&lt;b&gt;[Guest Additions のインストール]&lt;/b&gt;を選びGuest Additionsをインストールまたは再インストールしてください。インストール後、仮想マシンを再起動すると共有フォルダが利用できます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1888"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1899"/>
         <source>&lt;p&gt;Invalid e-mail address or password specified.&lt;/p&gt;</source>
         <translation>&lt;p&gt;無効なメールアドレスまたはパスワードが指定されました。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1891"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1902"/>
         <source>&lt;p&gt;Failed to register the VirtualBox product.&lt;/p&gt;&lt;p&gt;%1&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBoxの登録に失敗しました。&lt;/p&gt;&lt;p&gt;%1&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2326"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2337"/>
         <source>Failed to check files.</source>
         <translation>ファイルの確認に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2337"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2348"/>
         <source>Failed to remove file.</source>
         <translation>ファイルの除去中に失敗しました。</translation>
     </message>
@@ -6912,12 +6916,12 @@ p, li { white-space: pre-wrap; }
         <translation>これはVirtualBoxの試験的ビルドです。このバージョンは実務作業には適していません。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="972"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="983"/>
         <source>&lt;p&gt;VT-x/AMD-V hardware acceleration is not available on your system. Your 64-bit guest will fail to detect a 64-bit CPU and will not be able to boot.</source>
         <translation>&lt;p&gt;ホストマシンの仮想化支援機能(VT-x/AMD-V)が使用できません。64ビット ゲストOSは64ビットCPUを検出できず、起動できません。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="992"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1003"/>
         <source>&lt;p&gt;VT-x/AMD-V hardware acceleration is not available on your system. Certain guests (e.g. OS/2 and QNX) require this feature and will fail to boot without it.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ホストマシンの仮想化支援機能(VT-x/AMD-V)が使用できません。本機能を必要とするいくつかのゲストOS(OS/2やQNXなど)は起動できません。&lt;/p&gt;</translation>
     </message>
@@ -6926,56 +6930,56 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;スナップショット&lt;b&gt;&quot;%1&quot;&lt;/b&gt;に復元しますか？現在の仮想マシンの状態は失われ、それを回復することはできません。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1011"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1016"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1022"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1027"/>
         <source>Restore</source>
         <translation>復元</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1022"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1033"/>
         <source>&lt;p&gt;Deleting the snapshot will cause the state information saved in it to be lost, and disk data spread over several image files that VirtualBox has created together with the snapshot will be merged into one file. This can be a lengthy process, and the information in the snapshot cannot be recovered.&lt;/p&gt;&lt;/p&gt;Are you sure you want to delete the selected snapshot &lt;b&gt;%1&lt;/b&gt;?&lt;/p&gt;</source>
         <translation>&lt;p&gt;スナップショットを削除すると、スナップショットに格納されている情報は失われ、VirtualBoxがスナップショットと共に作成した複数のディスク データはひとつのファイルにマージされます。これには長い時間がかかるかもしれません。そしてスナップショットの情報を回復することはできません。&lt;/p&gt;&lt;p&gt;スナップショット&lt;b&gt;&quot;%1&quot;&lt;/b&gt;を削除しますか？。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1028"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1047"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1039"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1058"/>
         <source>Delete</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1037"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1048"/>
         <source>&lt;p&gt;Deleting the snapshot %1 will temporarily need more disk space. In the worst case the size of image %2 will grow by %3, however on this filesystem there is only %4 free.&lt;/p&gt;&lt;p&gt;Running out of disk space during the merge operation can result in corruption of the image and the VM configuration, i.e. loss of the VM and its data.&lt;/p&gt;&lt;p&gt;You may continue with deleting the snapshot at your own risk.&lt;/p&gt;</source>
         <translation>&lt;p&gt;スナップショット %1の削除には多くのディスク容量を必要とします。ディスクイメージファイル %2のサイズは最大で%3まで増加します。しかし、ディスクの空き容量は%4しかありません。&lt;/p&gt;&lt;p&gt;マージ作業中にディスク容量が不足すると、仮想マシンのデータを失う可能性があります。&lt;/p&gt;&lt;p&gt;スナップショットの削除を自己責任で続行できます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1054"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1066"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1065"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1077"/>
         <source>Failed to restore the snapshot &lt;b&gt;%1&lt;/b&gt; of the virtual machine &lt;b&gt;%2&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%2&quot;&lt;/b&gt;のスナップショット&lt;b&gt;&quot;%1&quot;&lt;/b&gt;への復元に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1076"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1088"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1087"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1099"/>
         <source>Failed to delete the snapshot &lt;b&gt;%1&lt;/b&gt; of the virtual machine &lt;b&gt;%2&lt;/b&gt;.</source>
         <translation>仮想マシン&lt;b&gt;&quot;%2&quot;&lt;/b&gt;のスナップショット&lt;b&gt;&quot;%1&quot;&lt;/b&gt;の削除に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1151"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1162"/>
         <source>&lt;p&gt;Could not change the guest screen to this host screen due to insufficient guest video memory.&lt;/p&gt;&lt;p&gt;You should configure the virtual machine to have at least &lt;b&gt;%1&lt;/b&gt; of video memory.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ビデオメモリ不足のため、ゲスト スクリーンをこのホスト スクリーンに変更できません。&lt;/p&gt;&lt;p&gt;仮想マシンの構成で&lt;b&gt;%1&lt;/b&gt;以上のビデオメモリを指定してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1161"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1172"/>
         <source>&lt;p&gt;Could not change the guest screen to this host screen due to insufficient guest video memory.&lt;/p&gt;&lt;p&gt;You should configure the virtual machine to have at least &lt;b&gt;%1&lt;/b&gt; of video memory.&lt;/p&gt;&lt;p&gt;Press &lt;b&gt;Ignore&lt;/b&gt; to switch the screen anyway or press &lt;b&gt;Cancel&lt;/b&gt; to cancel the operation.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ビデオメモリ不足のため、ゲスト スクリーンをこのホスト スクリーンに変更できません。&lt;/p&gt;&lt;p&gt;仮想マシンの構成で&lt;b&gt;%1&lt;/b&gt;以上のビデオメモリを指定してください。&lt;/p&gt;&lt;p&gt;&lt;b&gt;[無視]&lt;/b&gt;ボタンをクリックしするとスクリーンを強制的に切り換えます。&lt;b&gt;[キャンセル]&lt;/b&gt;ボタンをクリックすると操作は取り消されます。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1176"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1187"/>
         <source>&lt;p&gt;Can not switch the guest display to fullscreen mode. You have more virtual screens configured than physical screens are attached to your host.&lt;/p&gt;&lt;p&gt;Please either lower the virtual screens in your VM configuration or attach additional screens to your host.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ゲスト ディスプレイをフルスクリーンモードに変更できません。ホストマシンに接続されている実ディスプレイよりも多くの仮想ディスプレイが割り当てられています。&lt;/p&gt;&lt;p&gt;仮想ディスプレイの数を減らすか、ホストマシンにディスプレイを追加してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1188"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1199"/>
         <source>&lt;p&gt;Can not switch the guest display to seamless mode. You have more virtual screens configured than physical screens are attached to your host.&lt;/p&gt;&lt;p&gt;Please either lower the virtual screens in your VM configuration or attach additional screens to your host.&lt;/p&gt;</source>
         <translation>&lt;p&gt;ゲスト ディスプレイをシームレスモードに変更できません。ホストマシンに接続されている実ディスプレイよりも多くの仮想ディスプレイが割り当てられています。&lt;/p&gt;&lt;p&gt;仮想ディスプレイの数を減らすか、ホストマシンにディスプレイを追加してください。&lt;/p&gt;</translation>
     </message>
@@ -6998,12 +7002,12 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&lt;p&gt;新規の割り当てに利用できる未使用のメディアがありません。&lt;/p&gt;&lt;p&gt;&lt;b&gt;[選択]&lt;/b&gt;ボタンをクリックして、&lt;i&gt;仮想メディアマネージャ&lt;/i&gt;を開いてください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1427"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1438"/>
         <source>&lt;p&gt;Are you sure you want to delete the CD/DVD-ROM device?&lt;/p&gt;&lt;p&gt;You will not be able to mount any CDs or ISO images or install the Guest Additions without it!&lt;/p&gt;</source>
         <translation>&lt;p&gt;CD/DVD-ROM デバイスを削除しますか？&lt;/p&gt;&lt;p&gt;デバイスがない場合、CD/DVDメディアやISOイメージファイルのマウントおよびGuest Additions のインストールはできません！&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1431"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1442"/>
         <source>&amp;Remove</source>
         <comment>medium</comment>
         <translation>除去(&amp;R)</translation>
@@ -7017,27 +7021,27 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">&quot;%1&quot;の仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;のスロット&lt;i&gt;&quot;%2&quot;&lt;/i&gt;への割り当て解除に失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1493"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1504"/>
         <source>Unable to mount the %1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt; on the machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>%1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;を仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;にマウントできません。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1494"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1505"/>
         <source> Would you like to force mounting of this medium?</source>
         <translation>メディアを強制マウントしますか？</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1498"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1509"/>
         <source>Unable to unmount the %1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt; from the machine &lt;b&gt;%3&lt;/b&gt;.</source>
         <translation>%1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;を仮想マシン&lt;b&gt;&quot;%3&quot;&lt;/b&gt;からマウント解除できません。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1499"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1510"/>
         <source> Would you like to force unmounting of this medium?</source>
         <translation>メディアを強制マウント解除しますか？</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1509"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1520"/>
         <source>Force Unmount</source>
         <translation>強制マウント解除</translation>
     </message>
@@ -7046,245 +7050,253 @@ p, li { white-space: pre-wrap; }
         <translation type="obsolete">仮想ドライブのディスクの取り出しに失敗しました。このドライブはゲストOSによってロックされています。確認後、再実行してください。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1699"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1710"/>
         <source>&lt;p&gt;Could not insert the VirtualBox Guest Additions installer CD image into the virtual machine &lt;b&gt;%1&lt;/b&gt;, as the machine has no CD/DVD-ROM drives. Please add a drive using the storage page of the virtual machine settings dialog.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;がCD/DVD-ROMドライブを持たないため、VirtualBox Guest AdditionsのインストールCDイメージを仮想マシンにインサートできません。 仮想マシン設定ダイアログの[ストレージ]ページでドライブを追加してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1736"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1747"/>
         <source>&lt;p&gt;Failed to save the downloaded file as &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;</source>
         <translation type="unfinished">&lt;p&gt;ダウンロードしたファイル(&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;)の保存に失敗しました。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1743"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1754"/>
         <source>&lt;p&gt;Could not find the VirtualBox User Manual &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Do you wish to download this file from the Internet?&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox ユーザーマニュアル &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;が見つかりません。&lt;/p&gt;&lt;p&gt;ユーザーマニュアルをダウンロードしますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1755"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1766"/>
         <source>&lt;p&gt;Are you sure you want to download the VirtualBox User Manual from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; (size %3 bytes)?&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox ユーザーマニュアルを&lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; (サイズ %3バイト)からダウンロードしますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1766"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1777"/>
         <source>&lt;p&gt;Failed to download the VirtualBox User Manual from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;%3&lt;/p&gt;</source>
         <translation>&lt;p&gt;&lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;からVirtualBox ユーザーマニュアルをダウンロードできません。&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;%3&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1774"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1785"/>
         <source>&lt;p&gt;The VirtualBox User Manual has been successfully downloaded from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; and saved locally as &lt;nobr&gt;&lt;b&gt;%3&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox ユーザーマニュアルを&lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt;からダウンロードし、&lt;nobr&gt;&lt;b&gt;%3&lt;/b&gt;&lt;/nobr&gt;に保存しました。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1784"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1795"/>
         <source>&lt;p&gt;The VirtualBox User Manual has been successfully downloaded from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; but can&apos;t be saved locally as &lt;nobr&gt;&lt;b&gt;%3&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Please choose another location for that file.&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox ユーザーマニュアルを&lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt;からダウンロードしましたが、&lt;nobr&gt;&lt;b&gt;%3&lt;/b&gt;&lt;/nobr&gt;に保存できません。&lt;/p&gt;&lt;p&gt;他の保存場所を選択してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1795"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1806"/>
         <source>&lt;p&gt;You have an old version (%1) of the &lt;b&gt;&lt;nobr&gt;%2&lt;/nobr&gt;&lt;/b&gt; installed.&lt;/p&gt;&lt;p&gt;Do you wish to download latest one from the Internet?&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1799"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1823"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1810"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1834"/>
         <source>Download</source>
         <comment>extension pack</comment>
         <translation type="unfinished">ダウンロード</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1805"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1816"/>
         <source>&lt;p&gt;You have version %1 of the &lt;b&gt;&lt;nobr&gt;%2&lt;/nobr&gt;&lt;/b&gt; installed.&lt;/p&gt;&lt;p&gt;You should download and install version %3 of this extension pack from Oracle!&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1812"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1823"/>
         <source>Ok</source>
         <comment>extension pack</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1819"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1830"/>
         <source>&lt;p&gt;Are you sure you want to download the &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; from &lt;nobr&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; (size %3 bytes)?&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1829"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1840"/>
         <source>&lt;p&gt;The &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; has been successfully downloaded from &lt;nobr&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; and saved locally as &lt;nobr&gt;&lt;b&gt;%3&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Do you wish to install this extension pack?&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1835"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1846"/>
         <source>Install</source>
         <comment>extension pack</comment>
         <translation type="unfinished">インストール</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1841"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1852"/>
         <source>&lt;p&gt;The &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; has been successfully downloaded from &lt;nobr&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; but can&apos;t be saved locally as &lt;nobr&gt;&lt;b&gt;%3&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Please choose another location for that file.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="1851"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="1862"/>
         <source>&lt;p&gt;Failed to download the &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; from &lt;nobr&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;%3&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2110"/>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2128"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2121"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2139"/>
         <source>E&amp;xit</source>
         <comment>warnAboutSettingsAutoConversion message box</comment>
         <translation>終了(&amp;X)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2116"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2127"/>
         <source>&lt;p&gt;The following VirtualBox settings files will be automatically converted from the old format to a new format required by the new version of VirtualBox.&lt;/p&gt;&lt;p&gt;Press &lt;b&gt;OK&lt;/b&gt; to start VirtualBox now or press &lt;b&gt;Exit&lt;/b&gt; if you want to terminate the VirtualBox application without any further actions.&lt;/p&gt;</source>
         <translation>&lt;p&gt;次のVirtualBox設定ファイルは古い形式から新バージョンのVirtualBoxBoxが必要とする新しい形式に自動的に変更されます。&lt;/p&gt;&lt;p&gt;&lt;b&gt;[OK]&lt;/b&gt;ボタンをクリックしてVirtualBoxを起動するか、設定ファイルの変更を行わずにVirtualBoxアプリケーションを終了させたいなら&lt;b&gt;[終了]&lt;/b&gt;ボタンをクリックしてください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2141"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2152"/>
         <source>&lt;p&gt;The virtual machine window will be now switched to &lt;b&gt;fullscreen&lt;/b&gt; mode. You can go back to windowed mode at any time by pressing &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Note that the &lt;i&gt;Host&lt;/i&gt; key is currently defined as &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Note that the main menu bar is hidden in fullscreen mode. You can access it by pressing &lt;b&gt;Host+Home&lt;/b&gt;.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンのウィンドウを&quot;フルスクリーン&quot;モードに切り替えます。&lt;b&gt;%1&lt;/b&gt;キーを押すといつでもウィンドウモードに戻ることができます。&lt;/p&gt;&lt;p&gt;注：&lt;i&gt;ホスト&lt;/i&gt;キーは現在&lt;b&gt;%2&lt;/b&gt;に割り当てられています。&lt;/p&gt;&lt;p&gt;注：フルスクリーンモードではメインメニューバーは表示されません。メニューバーにアクセスするには &lt;b&gt;ホスト+Home&lt;/b&gt;キーを押してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2161"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2172"/>
         <source>&lt;p&gt;The virtual machine window will be now switched to &lt;b&gt;Seamless&lt;/b&gt; mode. You can go back to windowed mode at any time by pressing &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Note that the &lt;i&gt;Host&lt;/i&gt; key is currently defined as &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Note that the main menu bar is hidden in seamless mode. You can access it by pressing &lt;b&gt;Host+Home&lt;/b&gt;.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンのウィンドウを&quot;シームレス&quot;モードに切り替えます。&lt;b&gt;%1&lt;/b&gt;キーを押すといつでもウィンドウ表示に戻ることができます。&lt;/p&gt;&lt;p&gt;注：&lt;i&gt;ホスト&lt;/i&gt;キーは現在&lt;b&gt;%2&lt;/b&gt;に割り当てられています。&lt;/p&gt;&lt;p&gt;注：シームレスモードではメインメニューバーは表示されません。メニューバーにアクセスするには &lt;b&gt;ホスト+Home&lt;/b&gt;キーを押してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2181"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2192"/>
         <source>&lt;p&gt;The virtual machine window will be now switched to &lt;b&gt;Scale&lt;/b&gt; mode. You can go back to windowed mode at any time by pressing &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Note that the &lt;i&gt;Host&lt;/i&gt; key is currently defined as &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Note that the main menu bar is hidden in scale mode. You can access it by pressing &lt;b&gt;Host+Home&lt;/b&gt;.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシンのウィンドウを&quot;スケール&quot;モードに切り替えます。&lt;b&gt;%1&lt;/b&gt;キーを押すといつでもウィンドウ表示に戻ることができます。&lt;/p&gt;&lt;p&gt;注：&lt;i&gt;ホスト&lt;/i&gt;キーは現在&lt;b&gt;%2&lt;/b&gt;に割り当てられています。&lt;/p&gt;&lt;p&gt;注：スケールモードではメインメニューバーは表示されません。メニューバーにアクセスするには &lt;b&gt;ホスト+Home&lt;/b&gt;キーを押してください。&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2189"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2200"/>
         <source>Switch</source>
         <comment>scale</comment>
         <translation>切り替え</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2245"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2256"/>
         <source>&lt;p&gt;Cannot create the machine folder &lt;b&gt;%1&lt;/b&gt; in the parent folder &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Please check that the parent really exists and that you have permissions to create the machine folder.&lt;/p&gt;</source>
         <translation>&lt;p&gt;仮想マシン フォルダ&lt;b&gt;%1&lt;/b&gt;を親フォルダ&lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;に作成できません。&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;親フォルダの存在と、フォルダ作成に必要な権限の有無を確認してください。&lt;/p&gt;</translation>
     </message>
+    <message numerus="yes">
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2356"/>
+        <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
+        <comment>This text is never used with n == 0.  Feel free to drop the %n where possible, we only included it because of problems with Qt Linguist (but the user can see how many machines are in the list and doesn&apos;t need to be told).</comment>
+        <translation type="unfinished">
+            <numerusform>&lt;p&gt;仮想マシン&lt;b&gt;&quot;%1&quot;&lt;/b&gt;は状態の保存中です。&lt;/p&gt;&lt;p&gt;続行するとエクスポートした仮想マシンのランタイム状態は破棄されます。注：既存の仮想マシンは変更されません。&lt;/p&gt;</numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2422"/>
         <location filename="../src/globals/UIMessageCenter.cpp" line="2432"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2442"/>
         <source>Failed to open the Extension Pack &lt;b&gt;%1&lt;/b&gt;.</source>
         <translation>機能拡張パッケージ&lt;b&gt;&quot;%1&quot;&lt;/b&gt;のオープンに失敗しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2469"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2479"/>
         <source>&lt;p&gt;You are about to install a VirtualBox extension pack. Extension packs complement the functionality of VirtualBox and can contain system level software that could be potentially harmful to your system. Please review the description below and only proceed if you have obtained the extension pack from a trusted source.&lt;/p&gt;&lt;p&gt;&lt;table cellpadding=0 cellspacing=0&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Name:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%1&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Version:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Description:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%3&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;VirtualBox 機能拡張パッケージをインストールします。機能拡張パッケージはVirtualBoxに機能を追加しますが、システムに危害を与えるシステムレベルのソフトウェアを含むこともできます。信頼できる発行元から機能拡張パッケージを入手した場合に限り、以下の内容を確認して、処理を続行してください。&lt;/p&gt;&lt;p&gt;&lt;table cellpadding=0 cellspacing=0&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;名前:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%1&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;バージョン:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;説明:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%3&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2480"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2490"/>
         <source>&amp;Install</source>
         <translation>インストール(&amp;I)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2490"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2500"/>
         <source>Extension packs complement the functionality of VirtualBox and can contain system level software that could be potentially harmful to your system. Please review the description below and only proceed if you have obtained the extension pack from a trusted source.</source>
         <translation>機能拡張パッケージはVirtualBoxに機能を追加しますが、システムに危害を与えるシステムレベルのソフトウェアを含むこともできます。信頼できる発行元から機能拡張パッケージを入手した場合に限り、以下の内容を確認して、処理を続行してください。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2503"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2513"/>
         <source>&lt;p&gt;An older version of the extension pack is already installed, would you like to upgrade? &lt;p&gt;%1&lt;/p&gt;&lt;p&gt;&lt;table cellpadding=0 cellspacing=0&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Name:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;New Version:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Current Version:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Description:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%5&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;古いバージョンの機能拡張パッケージがインストールされています。アップグレードしますか？&lt;p&gt;%1&lt;/p&gt;&lt;p&gt;&lt;table cellpadding=0 cellspacing=0&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;名前:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;バージョン:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;現在のバージョン:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;説明:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%5&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2513"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2523"/>
         <source>&amp;Upgrade</source>
         <translation>アップグレード(&amp;U)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2517"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2527"/>
         <source>&lt;p&gt;An newer version of the extension pack is already installed, would you like to downgrade? &lt;p&gt;%1&lt;/p&gt;&lt;p&gt;&lt;table cellpadding=0 cellspacing=0&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Name:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;New Version:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Current Version:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Description:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%5&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;新しいバージョンの機能拡張パッケージがインストールされています。ダウングレードしますか？&lt;p&gt;%1&lt;/p&gt;&lt;p&gt;&lt;table cellpadding=0 cellspacing=0&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;名前:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;バージョン:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;現在のバージョン:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%4&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;説明:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%5&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2527"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2537"/>
         <source>&amp;Downgrade</source>
         <translation>ダウングレード(&amp;D)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2531"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2541"/>
         <source>&lt;p&gt;The extension pack is already installed with the same version, would you like reinstall it? &lt;p&gt;%1&lt;/p&gt;&lt;p&gt;&lt;table cellpadding=0 cellspacing=0&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Name:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Version:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;Description:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%4&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;同じバージョンの機能拡張パッケージがインストールされています。再インストールしますか？&lt;p&gt;%1&lt;/p&gt;&lt;p&gt;&lt;table cellpadding=0 cellspacing=0&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;名前:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%2&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;バージョン:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%3&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;b&gt;説明:&amp;nbsp;&amp;nbsp;&lt;/b&gt;&lt;/td&gt;&lt;td&gt;%4&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2540"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2550"/>
         <source>&amp;Reinstall</source>
         <translation>再インストール(&amp;R)</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2548"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2558"/>
         <source>&lt;p&gt;You are about to remove the VirtualBox extension pack &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Are you sure you want to proceed?&lt;/p&gt;</source>
         <translation>&lt;p&gt; VirtualBox 機能拡張パッケージ&quot;&lt;b&gt;%1&lt;/b&gt;&quot;を除去します。&lt;/p&gt;&lt;p&gt;続行しますか？&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2558"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2568"/>
         <source>The extension pack &lt;br&gt;&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;nobr&gt;&lt;br&gt; was installed successfully.</source>
         <translation>機能拡張パッケージ&lt;br&gt;&lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;nobr&gt;&lt;br&gt;のインストールに成功しました。</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2679"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2689"/>
         <source>hard disk</source>
         <comment>failed to mount ...</comment>
         <translation>ハードディスク</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2681"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2691"/>
         <source>CD/DVD</source>
         <comment>failed to mount ... host-drive</comment>
         <translation>CD/DVD</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2683"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2693"/>
         <source>CD/DVD image</source>
         <comment>failed to mount ...</comment>
         <translation>CD/DVD イメージ</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2685"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2695"/>
         <source>floppy</source>
         <comment>failed to mount ... host-drive</comment>
         <translation>フロッピー</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="2687"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="2697"/>
         <source>floppy image</source>
         <comment>failed to mount ...</comment>
         <translation>フロッピー イメージ</translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3092"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3102"/>
         <source>&lt;p&gt;USB 2.0 is currently enabled for this virtual machine. However, this requires the &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; to be installed.&lt;/p&gt;&lt;p&gt;Please install the Extension Pack from the VirtualBox download site. After this you will be able to re-enable USB 2.0. It will be disabled in the meantime unless you cancel the current settings changes.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3148"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3158"/>
         <source>Could not load the Host USB Proxy Service (VERR_FILE_NOT_FOUND). The service might not be installed on the host computer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3149"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3159"/>
         <source>VirtualBox is not currently allowed to access USB devices.  You can change this by adding your user to the &apos;vboxusers&apos; group.  Please see the user manual for a more detailed explanation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3150"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3160"/>
         <source>VirtualBox is not currently allowed to access USB devices.  You can change this by allowing your user to access the &apos;usbfs&apos; folder and files.  Please see the user manual for a more detailed explanation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3151"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3161"/>
         <source>The USB Proxy Service has not yet been ported to this host</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/globals/UIMessageCenter.cpp" line="3152"/>
+        <location filename="../src/globals/UIMessageCenter.cpp" line="3162"/>
         <source>Could not load the Host USB Proxy service</source>
         <translation type="unfinished"></translation>
     </message>
@@ -11656,9 +11668,8 @@ Version %1</source>
         <translation>I82078</translation>
     </message>
     <message>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3686"/>
         <source>and</source>
-        <translation>and</translation>
+        <translation type="obsolete">and</translation>
     </message>
     <message>
         <source>^(?:(?:(\d+)(?:\s?(B|KB|MB|GB|TB|PB))?)|(?:(\d*)%1(\d{1,2})(?:\s?(KB|MB|GB|TB|PB))))$</source>
@@ -11667,24 +11678,24 @@ Version %1</source>
     </message>
     <message>
         <location filename="../src/globals/VBoxGlobal.cpp" line="3663"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3714"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3774"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3708"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3768"/>
         <source>B</source>
         <comment>size suffix Bytes</comment>
         <translation>B</translation>
     </message>
     <message>
         <location filename="../src/globals/VBoxGlobal.cpp" line="3664"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3716"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3775"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3710"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3769"/>
         <source>KB</source>
         <comment>size suffix KBytes=1024 Bytes</comment>
         <translation>KB</translation>
     </message>
     <message>
         <location filename="../src/globals/VBoxGlobal.cpp" line="3665"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3718"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3776"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3712"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3770"/>
         <location filename="../src/wizards/newvm/UINewVMWzd.cpp" line="365"/>
         <location filename="../src/wizards/newvm/UINewVMWzd.cpp" line="366"/>
         <location filename="../src/widgets/UIApplianceEditorWidget.cpp" line="236"/>
@@ -11695,24 +11706,24 @@ Version %1</source>
     </message>
     <message>
         <location filename="../src/globals/VBoxGlobal.cpp" line="3666"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3720"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3777"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3714"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3771"/>
         <source>GB</source>
         <comment>size suffix GBytes=1024 MBytes</comment>
         <translation>GB</translation>
     </message>
     <message>
         <location filename="../src/globals/VBoxGlobal.cpp" line="3667"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3722"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3778"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3716"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3772"/>
         <source>TB</source>
         <comment>size suffix TBytes=1024 GBytes</comment>
         <translation>TB</translation>
     </message>
     <message>
         <location filename="../src/globals/VBoxGlobal.cpp" line="3668"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3724"/>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="3779"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3718"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="3773"/>
         <source>PB</source>
         <comment>size suffix PBytes=1024 TBytes</comment>
         <translation>PB</translation>
@@ -13833,12 +13844,12 @@ DOS系ゲストOSからアクセスする場合は &lt;tt&gt;net use x:¥¥vboxs
 <context>
     <name>VBoxSwitchMenu</name>
     <message>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="5531"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="5538"/>
         <source>Disable</source>
         <translation>無効</translation>
     </message>
     <message>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="5531"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="5538"/>
         <source>Enable</source>
         <translation>有効</translation>
     </message>
@@ -14056,13 +14067,13 @@ value.&lt;/qt&gt;</source>
 <context>
     <name>VBoxUSBMenu</name>
     <message>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="5461"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="5468"/>
         <source>&lt;no devices available&gt;</source>
         <comment>USB devices</comment>
         <translation>&lt;利用できるデバイスがありません&gt;</translation>
     </message>
     <message>
-        <location filename="../src/globals/VBoxGlobal.cpp" line="5463"/>
+        <location filename="../src/globals/VBoxGlobal.cpp" line="5470"/>
         <source>No supported devices connected to the host PC</source>
         <comment>USB device tooltip</comment>
         <translation>ホストマシンに接続されたデバイスはサポートされていません</translation>

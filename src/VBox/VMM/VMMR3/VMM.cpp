@@ -681,6 +681,11 @@ VMMR3_INT_DECL(int) VMMR3InitCompleted(PVM pVM, VMINITCOMPLETED enmWhat)
                 && HWACCMR3IsVmxPreemptionTimerUsed(pVM))
                 pVM->vmm.s.fUsePeriodicPreemptionTimers = false;
             LogRel(("VMM: fUsePeriodicPreemptionTimers=%RTbool\n", pVM->vmm.s.fUsePeriodicPreemptionTimers));
+
+            /*
+             * CPUM's post-initialization (print CPUIDs).
+             */
+            CPUMR3LogCpuIds(pVM);
             break;
         }
 

@@ -290,22 +290,20 @@ private:
     class AutoVMCallerBase
     {
     public:
-        AutoVMCallerBase(Console *aThat) : mThat(aThat), mRC(S_OK)
+        AutoVMCallerBase(Console *aThat) : mThat(aThat), mRC(E_FAIL)
         {
             Assert(aThat);
             mRC = aThat->addVMCaller(taQuiet, taAllowNullVM);
         }
         ~AutoVMCallerBase()
         {
-            if (SUCCEEDED(mRC))
-                mThat->releaseVMCaller();
+            doRelease();
         }
         /** Decreases the number of callers before the instance is destroyed. */
         void releaseCaller()
         {
-            AssertReturnVoid(SUCCEEDED(mRC));
-            mThat->releaseVMCaller();
-            mRC = E_FAIL;
+            Assert(SUCCEEDED(mRC));
+            doRelease();
         }
         /** Restores the number of callers after by #release(). #rc() must be
          *  rechecked to ensure the operation succeeded. */
@@ -320,8 +318,16 @@ private:
         bool isOk() const { return SUCCEEDED(mRC); }
     protected:
         Console *mThat;
-        HRESULT mRC;
+        void doRelease()
+        {
+            if (SUCCEEDED(mRC))
+            {
+                mThat->releaseVMCaller();
+                mRC = E_FAIL;
+            }
+        }
     private:
+        HRESULT mRC; /* Whether the caller was added. */
         DECLARE_CLS_COPY_CTOR_ASSIGN_NOOP(AutoVMCallerBase)
     };
 
@@ -381,15 +387,14 @@ private:
     {
         typedef AutoVMCallerBase<taQuiet, true> Base;
     public:
-        SafeVMPtrBase(Console *aThat) : Base(aThat), mpVM(NULL), mpUVM(NULL)
+        SafeVMPtrBase(Console *aThat) : Base(aThat), mRC(E_FAIL), mpVM(NULL), mpUVM(NULL)
         {
-            if (SUCCEEDED(Base::mRC))
-                Base::mRC = aThat->safeVMPtrRetainer(&mpVM, &mpUVM, taQuiet);
+            if (Base::isOk())
+                mRC = aThat->safeVMPtrRetainer(&mpVM, &mpUVM, taQuiet);
         }
         ~SafeVMPtrBase()
         {
-            if (SUCCEEDED(Base::mRC))
-                release();
+            doRelease();
         }
         /** Smart SaveVMPtr to PVM cast operator */
         operator PVM() const { return mpVM; }
@@ -400,12 +405,26 @@ private:
         /** Release the handles. */
         void release()
         {
-            AssertReturnVoid(SUCCEEDED(Base::mRC));
-            Base::mThat->safeVMPtrReleaser(&mpVM, &mpUVM);
-            Base::releaseCaller();
+            Assert(SUCCEEDED(mRC));
+            doRelease();
         }
 
+        /** The combined result of Console::addVMCaller() and Console::safeVMPtrRetainer */
+        HRESULT rc() const { return Base::isOk()? mRC: Base::rc(); }
+        /** Shortcut to SUCCEEDED(rc()) */
+        bool isOk() const { return SUCCEEDED(mRC) && Base::isOk(); }
+
     private:
+        void doRelease()
+        {
+            if (SUCCEEDED(mRC))
+            {
+                Base::mThat->safeVMPtrReleaser(&mpVM, &mpUVM);
+                mRC = E_FAIL;
+            }
+            Base::doRelease();
+        }
+        HRESULT mRC; /* Whether the VM ptr was retained. */
         PVM     mpVM;
         PUVM    mpUVM;
         DECLARE_CLS_COPY_CTOR_ASSIGN_NOOP(SafeVMPtrBase)

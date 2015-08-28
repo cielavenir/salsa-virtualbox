@@ -60,7 +60,7 @@ RTDECL(void *) RTMemExecAllocTag(size_t cb, const char *pszTag) RT_NO_THROW
          * only be used with mmap()'ed memory. Works on linux and OS/2 LIBC v0.6.
          */
         memset(pv, 0xcc, cb);
-        void   *pvProt = (void *)((uintptr_t)pv & ~PAGE_OFFSET_MASK);
+        void   *pvProt = (void *)((uintptr_t)pv & ~(uintptr_t)PAGE_OFFSET_MASK);
         size_t  cbProt = ((uintptr_t)pv & PAGE_OFFSET_MASK) + cb;
         cbProt = RT_ALIGN_Z(cbProt, PAGE_SIZE);
         DWORD fFlags = 0;
@@ -190,7 +190,7 @@ RTDECL(int) RTMemProtect(void *pv, size_t cb, unsigned fProtect) RT_NO_THROW
      * Align the request.
      */
     cb += (uintptr_t)pv & PAGE_OFFSET_MASK;
-    pv = (void *)((uintptr_t)pv & ~PAGE_OFFSET_MASK);
+    pv = (void *)((uintptr_t)pv & ~(uintptr_t)PAGE_OFFSET_MASK);
 
     /*
      * Change the page attributes.

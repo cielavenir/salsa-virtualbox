@@ -453,7 +453,7 @@ static int VBoxDrvSolarisOpen(dev_t *pDev, int fFlag, int fType, cred_t *pCred)
     /*
      * Create a new session.
      */
-    rc = supdrvCreateSession(&g_DevExt, true /* fUser */, &pSession);
+    rc = supdrvCreateSession(&g_DevExt, true /* fUser */, true /* fUnrestricted */, &pSession);
     if (RT_SUCCESS(rc))
     {
         pSession->Uid = crgetruid(pCred);
@@ -475,7 +475,7 @@ static int VBoxDrvSolarisOpen(dev_t *pDev, int fFlag, int fType, cred_t *pCred)
      * Sessions in Solaris driver are mostly useless. It's however needed
      * in VBoxDrvSolarisIOCtlSlow() while calling supdrvIOCtl()
      */
-    rc = supdrvCreateSession(&g_DevExt, true /* fUser */, &pSession);
+    rc = supdrvCreateSession(&g_DevExt, true /* fUser */, true /* fUnrestricted */, &pSession);
     if (RT_SUCCESS(rc))
     {
         RTSPINLOCKTMP   Tmp = RTSPINLOCKTMP_INITIALIZER;
@@ -592,7 +592,7 @@ static int VBoxDrvSolarisClose(dev_t Dev, int flag, int otyp, cred_t *cred)
     /*
      * Close the session.
      */
-    supdrvCloseSession(&g_DevExt, pSession);
+    supdrvSessionRelease(pSession);
     return 0;
 }
 
@@ -647,17 +647,15 @@ static int VBoxDrvSolarisIOCtl(dev_t Dev, int Cmd, intptr_t pArgs, int Mode, cre
     const RTPROCESS     Process = RTProcSelf();
     const unsigned      iHash = SESSION_HASH(Process);
     PSUPDRVSESSION      pSession;
+    const bool          fUnrestricted = getminor(Dev) == 0;
 
     /*
      * Find the session.
      */
     RTSpinlockAcquireNoInts(g_Spinlock, &Tmp);
     pSession = g_apSessionHashTab[iHash];
-    if (pSession && pSession->Process != Process)
-    {
-        do pSession = pSession->pNextHash;
-        while (pSession && pSession->Process != Process);
-    }
+    while (pSession && pSession->Process != Process && pSession->fUnrestricted == fUnrestricted);
+        pSession = pSession->pNextHash;
     RTSpinlockReleaseNoInts(g_Spinlock, &Tmp);
     if (!pSession)
     {
@@ -671,9 +669,10 @@ static int VBoxDrvSolarisIOCtl(dev_t Dev, int Cmd, intptr_t pArgs, int Mode, cre
      * Deal with the two high-speed IOCtl that takes it's arguments from
      * the session and iCmd, and only returns a VBox status code.
      */
-    if (    Cmd == SUP_IOCTL_FAST_DO_RAW_RUN
-        ||  Cmd == SUP_IOCTL_FAST_DO_HWACC_RUN
-        ||  Cmd == SUP_IOCTL_FAST_DO_NOP)
+    if (   (    Cmd == SUP_IOCTL_FAST_DO_RAW_RUN
+            ||  Cmd == SUP_IOCTL_FAST_DO_HWACC_RUN
+            ||  Cmd == SUP_IOCTL_FAST_DO_NOP)
+        && pSession->fUnrestricted)
     {
         *pVal = supdrvIOCtlFast(Cmd, pArgs, &g_DevExt, pSession);
         return 0;
@@ -768,7 +767,7 @@ static int VBoxDrvSolarisIOCtlSlow(PSUPDRVSESSION pSession, int iCmd, int Mode, 
     /*
      * Process the IOCtl.
      */
-    rc = supdrvIOCtl(iCmd, &g_DevExt, pSession, pHdr);
+    rc = supdrvIOCtl(iCmd, &g_DevExt, pSession, pHdr, cbBuf);
 
     /*
      * Copy ioctl data and output buffer back to user space.
@@ -856,6 +855,25 @@ static int VBoxSupDrvErr2SolarisErr(int rc)
     }
 
     return EPERM;
+}
+
+
+void VBOXCALL supdrvOSCleanupSession(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession)
+{
+    NOREF(pDevExt);
+    NOREF(pSession);
+}
+
+
+void VBOXCALL supdrvOSSessionHashTabInserted(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession, void *pvUser)
+{
+    NOREF(pDevExt); NOREF(pSession); NOREF(pvUser);
+}
+
+
+void VBOXCALL supdrvOSSessionHashTabRemoved(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession, void *pvUser)
+{
+    NOREF(pDevExt); NOREF(pSession); NOREF(pvUser);
 }
 
 

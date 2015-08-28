@@ -143,24 +143,39 @@ VMMR0DECL(int) ModuleInit(void)
                                 /*
                                  * Bail out.
                                  */
+                                LogRel(("ModuleInit: CPUMR0ModuleInit -> %Rrc\n", rc));
 #ifdef VBOX_WITH_PCI_PASSTHROUGH
                                 PciRawR0Term();
 #endif
                             }
+                            else
+                                LogRel(("ModuleInit: PciRawR0Init -> %Rrc\n", rc));
                             IntNetR0Term();
                         }
+                        else
+                            LogRel(("ModuleInit: IntNetR0Init -> %Rrc\n", rc));
 #ifdef VBOX_WITH_2X_4GB_ADDR_SPACE
                         PGMR0DynMapTerm();
 #endif
                     }
+                    else
+                        LogRel(("ModuleInit: PGMR0DynMapInit -> %Rrc\n", rc));
                     PGMDeregisterStringFormatTypes();
                 }
+                else
+                    LogRel(("ModuleInit: PGMRegisterStringFormatTypes -> %Rrc\n", rc));
                 HWACCMR0Term();
             }
+            else
+                LogRel(("ModuleInit: HWACCMR0Init -> %Rrc\n", rc));
             GMMR0Term();
         }
+        else
+            LogRel(("ModuleInit: GMMR0Init -> %Rrc\n", rc));
        GVMMR0Term();
     }
+    else
+        LogRel(("ModuleInit: GVMMR0Init -> %Rrc\n", rc));
 
     LogFlow(("ModuleInit: failed %Rrc\n", rc));
     return rc;
@@ -331,7 +346,7 @@ static int vmmR0InitVM(PVM pVM, uint32_t uSvnRev)
 
 
 /**
- * Terminates the R0 driver for a particular VM instance.
+ * Terminates the R0 bits for a particular VM instance.
  *
  * This is normally called by ring-3 as part of the VM termination process, but
  * may alternatively be called during the support driver session cleanup when
@@ -349,11 +364,14 @@ VMMR0DECL(int) VMMR0TermVM(PVM pVM, PGVM pGVM)
     PciRawR0TermVM(pVM);
 #endif
 
+
     /*
      * Tell GVMM what we're up to and check that we only do this once.
      */
     if (GVMMR0DoingTermVM(pVM, pGVM))
     {
+        /** @todo I wish to call PGMR0PhysFlushHandyPages(pVM, &pVM->aCpus[idCpu])
+         *        here to make sure we don't leak any shared pages if we crash... */
 #ifdef VBOX_WITH_2X_4GB_ADDR_SPACE
         PGMR0DynMapTermVM(pVM);
 #endif
@@ -621,7 +639,7 @@ VMMR0DECL(void) VMMR0EntryFast(PVM pVM, VMCPUID idCpu, VMMR0OPERATION enmOperati
                 RTThreadPreemptDisable(&PreemptState);
                 RTCPUID idHostCpu = RTMpCpuId();
 #ifdef VBOX_WITH_VMMR0_DISABLE_LAPIC_NMI
-                CPUMR0SetLApic(pVM, idHostCpu);
+                CPUMR0SetLApic(pVCpu, idHostCpu);
 #endif
                 ASMAtomicWriteU32(&pVCpu->idHostCpu, idHostCpu);
                 if (pVM->vmm.s.fUsePeriodicPreemptionTimers)
@@ -933,7 +951,7 @@ static int vmmR0EntryExWorker(PVM pVM, VMCPUID idCpu, VMMR0OPERATION enmOperatio
 
 #ifdef VBOX_WITH_VMMR0_DISABLE_LAPIC_NMI
             RTCPUID idHostCpu = RTMpCpuId();
-            CPUMR0SetLApic(pVM, idHostCpu);
+            CPUMR0SetLApic(&pVM->aCpus[0], idHostCpu);
 #endif
 
             /* We might need to disable VT-x if the active switcher turns off paging. */
@@ -958,6 +976,11 @@ static int vmmR0EntryExWorker(PVM pVM, VMCPUID idCpu, VMMR0OPERATION enmOperatio
             if (idCpu == NIL_VMCPUID)
                 return VERR_INVALID_CPU_ID;
             return PGMR0PhysAllocateHandyPages(pVM, &pVM->aCpus[idCpu]);
+
+        case VMMR0_DO_PGM_FLUSH_HANDY_PAGES:
+            if (idCpu == NIL_VMCPUID)
+                return VERR_INVALID_CPU_ID;
+            return PGMR0PhysFlushHandyPages(pVM, &pVM->aCpus[idCpu]);
 
         case VMMR0_DO_PGM_ALLOCATE_LARGE_HANDY_PAGE:
             if (idCpu == NIL_VMCPUID)

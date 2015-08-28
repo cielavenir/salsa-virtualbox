@@ -39,6 +39,12 @@ extern "C" {
 int vbi_init(void);
 
 /*
+ * Must be called to terminate the VBI structures and code paths. 
+ * Introduced in v10. 
+ */
+void vbi_term(void);
+
+/*
  * Private interfaces for VirtualBox access to Solaris kernel internal
  * facilities. The interface uses limited types when crossing the kernel
  * to hypervisor boundary. (void *) is for handles and function and other
@@ -378,36 +384,11 @@ extern page_t **vbi_pages_alloc(uint64_t *phys, size_t size);
 extern void vbi_pages_free(page_t **pp_pages, size_t size);
 
 /*
- * Prepare pages allocated via vbi_pages_alloc() to be mapped into
- * user or kernel space.
- *
- * return value is 0 on success, non-zero on failure.
- *
- * size is the amount allocated from which number of pages in the page array
- * will be computed.
- *
- * physaddrs on input is filled with the physical address of each corresponding page
- * that can be mapped in. Size of the array pointed to by physaddrs must correspond
- * to size.
- */
-extern int vbi_pages_premap(page_t **pp_pages, size_t size, uint64_t *physaddrs);
-
-/*
  * Returns the physical address for the 'i'th page in the array of page
  * structures in 'pp_pages'
  */
 extern uint64_t vbi_page_to_pa(page_t **pp_pages, pgcnt_t i);
 /* end of interfaces defined for version 8 */
-
-/*
- * Allocate, free and map one large page.
- *
- * The size of the large page is hardware specific and must be specified
- * correctly or we'll panic. :-)
- */
-extern page_t *vbi_large_page_alloc(uint64_t *pphys, size_t pgsize);
-extern void vbi_large_page_free(page_t *ppage, size_t pgsize);
-extern int vbi_large_page_premap(page_t *pproot, size_t pgsize);
 
 
 #ifdef	__cplusplus

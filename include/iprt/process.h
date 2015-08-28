@@ -361,6 +361,15 @@ RTR3DECL(int)   RTProcDaemonizeUsingFork(bool fNoChDir, bool fNoClose, const cha
  */
 RTR3DECL(bool)  RTProcIsRunningByName(const char *pszName);
 
+/**
+ * Queries the parent process ID.
+ *
+ * @returns IPRT status code
+ * @param   hProcess     The process to query the parent of.
+ * @param   phParent     Where to return the parent process ID.
+ */
+RTR3DECL(int) RTProcQueryParent(RTPROCESS hProcess, PRTPROCESS phParent);
+
 #endif /* IN_RING3 */
 
 /** @} */

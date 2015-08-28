@@ -159,6 +159,8 @@ void vboxClientUsage(const char *pcszFileName)
 int main(int argc, char *argv[])
 {
     int rcClipboard, rc;
+    if (!XInitThreads())
+        return 1;
     const char *pszFileName = RTPathFilename(argv[0]);
     bool fDaemonise = true;
     /* Have any fatal errors occurred yet? */

@@ -8,7 +8,7 @@
 /*
  * Contributed by Ivo Smits <Ivo@UFO-Net.nl>
  *
- * Copyright (C) 2006-2007 Oracle Corporation
+ * Copyright (C) 2006-2012 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -89,7 +89,12 @@ HRESULT VNCFB::init(const char *pszName)
     vncServer = rfbGetScreen(0, NULL, mWidth, mHeight, 8, 3, 1);
     vncServer->screenData = (void*)this;
     if (mVncPort)
+    {
         vncServer->port = mVncPort;
+#ifdef LIBVNCSERVER_IPv6
+        vncServer->ipv6port = mVncPort;
+#endif
+    }
     char *pszDesktopName;
     rc = RTStrAPrintf(&pszDesktopName, "%s - VirtualBox", pszName);
     if (rc >= 0)

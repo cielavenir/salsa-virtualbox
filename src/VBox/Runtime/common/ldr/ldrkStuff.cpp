@@ -118,23 +118,12 @@ static int      rtkldrRdrUnmap(   PKRDR pRdr, void *pvBase, KU32 cSegments, PCKL
 static void     rtkldrRdrDone(    PKRDR pRdr);
 
 
-static DECLCALLBACK(int) rtkldrClose(PRTLDRMODINTERNAL pMod);
-static DECLCALLBACK(int) rtkldrDone(PRTLDRMODINTERNAL pMod);
-static DECLCALLBACK(int) rtkldrEnumSymbols(PRTLDRMODINTERNAL pMod, unsigned fFlags, const void *pvBits,
-                                           RTUINTPTR BaseAddress,PFNRTLDRENUMSYMS pfnCallback, void *pvUser);
-static int rtkldrEnumSymbolsWrapper(PKLDRMOD pMod, uint32_t iSymbol,
-                                    const char *pchSymbol, KSIZE cchSymbol, const char *pszVersion,
-                                    KLDRADDR uValue, uint32_t fKind, void *pvUser);
-static DECLCALLBACK(size_t) rtkldrGetImageSize(PRTLDRMODINTERNAL pMod);
-static DECLCALLBACK(int) rtkldrGetBits(PRTLDRMODINTERNAL pMod, void *pvBits, RTUINTPTR BaseAddress,
-                                       PFNRTLDRIMPORT pfnGetImport, void *pvUser);
-static DECLCALLBACK(int) rtkldrRelocate(PRTLDRMODINTERNAL pMod, void *pvBits, RTUINTPTR NewBaseAddress,
-                                        RTUINTPTR OldBaseAddress, PFNRTLDRIMPORT pfnGetImport, void *pvUser);
-static int rtkldrGetImportWrapper(PKLDRMOD pMod, uint32_t iImport, uint32_t iSymbol, const char *pchSymbol, KSIZE cchSymbol,
-                                  const char *pszVersion, PKLDRADDR puValue, uint32_t *pfKind, void *pvUser);
+static int rtkldr_EnumSymbolsWrapper(PKLDRMOD pMod, uint32_t iSymbol,
+                                     const char *pchSymbol, KSIZE cchSymbol, const char *pszVersion,
+                                     KLDRADDR uValue, uint32_t fKind, void *pvUser);
+static int rtkldr_GetImportWrapper(PKLDRMOD pMod, uint32_t iImport, uint32_t iSymbol, const char *pchSymbol, KSIZE cchSymbol,
+                                   const char *pszVersion, PKLDRADDR puValue, uint32_t *pfKind, void *pvUser);
 
-static DECLCALLBACK(int) rtkldrGetSymbolEx(PRTLDRMODINTERNAL pMod, const void *pvBits, RTUINTPTR BaseAddress,
-                                           const char *pszSymbol, RTUINTPTR *pValue);
 
 
 
@@ -150,6 +139,7 @@ static int rtkldrConvertError(int krc)
         case KERR_INVALID_PARAMETER:                        return VERR_INVALID_PARAMETER;
         case KERR_INVALID_HANDLE:                           return VERR_INVALID_HANDLE;
         case KERR_NO_MEMORY:                                return VERR_NO_MEMORY;
+        case KLDR_ERR_CPU_ARCH_MISMATCH:                    return VERR_LDR_ARCH_MISMATCH;
 
 
         case KLDR_ERR_UNKNOWN_FORMAT:
@@ -190,7 +180,7 @@ static int rtkldrConvertError(int krc)
         case KRDR_ERR_TOO_MANY_MAPPINGS:
         case KLDR_ERR_NOT_DLL:
         case KLDR_ERR_NOT_EXE:
-            AssertMsgFailedReturn(("krc=%d (%#x): %s\n", krc, krc, kErrName(krc)), VERR_GENERAL_FAILURE);
+            AssertMsgFailedReturn(("krc=%d (%#x): %s\n", krc, krc, kErrName(krc)), VERR_LDR_GENERAL_FAILURE);
 
 
         case KLDR_ERR_PE_UNSUPPORTED_MACHINE:
@@ -201,7 +191,7 @@ static int rtkldrConvertError(int krc)
         case KLDR_ERR_PE_FORWARDER_IMPORT_NOT_FOUND:
         case KLDR_ERR_PE_BAD_FIXUP:
         case KLDR_ERR_PE_BAD_IMPORT:
-            AssertMsgFailedReturn(("krc=%d (%#x): %s\n", krc, krc, kErrName(krc)), VERR_GENERAL_FAILURE);
+            AssertMsgFailedReturn(("krc=%d (%#x): %s\n", krc, krc, kErrName(krc)), VERR_LDR_GENERAL_FAILURE);
 
         case KLDR_ERR_LX_BAD_HEADER:
         case KLDR_ERR_LX_BAD_LOADER_SECTION:
@@ -215,11 +205,11 @@ static int rtkldrConvertError(int krc)
         case KLDR_ERR_LX_BAD_SONAME:
         case KLDR_ERR_LX_BAD_FORWARDER:
         case KLDR_ERR_LX_NRICHAIN_NOT_SUPPORTED:
-            AssertMsgFailedReturn(("krc=%d (%#x): %s\n", krc, krc, kErrName(krc)), VERR_GENERAL_FAILURE);
+            AssertMsgFailedReturn(("krc=%d (%#x): %s\n", krc, krc, kErrName(krc)), VERR_LDR_GENERAL_FAILURE);
 
+        case KLDR_ERR_MACHO_UNSUPPORTED_FILE_TYPE:          return VERR_LDR_GENERAL_FAILURE;
         case KLDR_ERR_MACHO_OTHER_ENDIAN_NOT_SUPPORTED:
         case KLDR_ERR_MACHO_BAD_HEADER:
-        case KLDR_ERR_MACHO_UNSUPPORTED_FILE_TYPE:
         case KLDR_ERR_MACHO_UNSUPPORTED_MACHINE:
         case KLDR_ERR_MACHO_BAD_LOAD_COMMAND:
         case KLDR_ERR_MACHO_UNKNOWN_LOAD_COMMAND:
@@ -236,7 +226,7 @@ static int rtkldrConvertError(int krc)
         case KLDR_ERR_MACHO_BAD_OBJECT_FILE:
         case KLDR_ERR_MACHO_BAD_SYMBOL:
         case KLDR_ERR_MACHO_UNSUPPORTED_FIXUP_TYPE:
-            AssertMsgFailedReturn(("krc=%d (%#x): %s\n", krc, krc, kErrName(krc)), VERR_GENERAL_FAILURE);
+            AssertMsgFailedReturn(("krc=%d (%#x): %s\n", krc, krc, kErrName(krc)), VERR_LDR_GENERAL_FAILURE);
 
         default:
             if (RT_FAILURE(krc))
@@ -426,27 +416,9 @@ static void     rtkldrRdrDone(    PKRDR pRdr)
 
 
 
-/**
- * Operations for a kLdr module.
- */
-static const RTLDROPS g_rtkldrOps =
-{
-    "kLdr",
-    rtkldrClose,
-    NULL,
-    rtkldrDone,
-    rtkldrEnumSymbols,
-    /* ext */
-    rtkldrGetImageSize,
-    rtkldrGetBits,
-    rtkldrRelocate,
-    rtkldrGetSymbolEx,
-    42
-};
-
 
 /** @copydoc RTLDROPS::pfnClose */
-static DECLCALLBACK(int) rtkldrClose(PRTLDRMODINTERNAL pMod)
+static DECLCALLBACK(int) rtkldr_Close(PRTLDRMODINTERNAL pMod)
 {
     PKLDRMOD pModkLdr = ((PRTLDRMODKLDR)pMod)->pMod;
     int rc = kLdrModClose(pModkLdr);
@@ -455,7 +427,7 @@ static DECLCALLBACK(int) rtkldrClose(PRTLDRMODINTERNAL pMod)
 
 
 /** @copydoc RTLDROPS::pfnDone */
-static DECLCALLBACK(int) rtkldrDone(PRTLDRMODINTERNAL pMod)
+static DECLCALLBACK(int) rtkldr_Done(PRTLDRMODINTERNAL pMod)
 {
     PKLDRMOD pModkLdr = ((PRTLDRMODKLDR)pMod)->pMod;
     int rc = kLdrModMostlyDone(pModkLdr);
@@ -464,8 +436,8 @@ static DECLCALLBACK(int) rtkldrDone(PRTLDRMODINTERNAL pMod)
 
 
 /** @copydoc RTLDROPS::pfnEnumSymbols */
-static DECLCALLBACK(int) rtkldrEnumSymbols(PRTLDRMODINTERNAL pMod, unsigned fFlags, const void *pvBits, RTUINTPTR BaseAddress,
-                                           PFNRTLDRENUMSYMS pfnCallback, void *pvUser)
+static DECLCALLBACK(int) rtkldr_EnumSymbols(PRTLDRMODINTERNAL pMod, unsigned fFlags, const void *pvBits, RTUINTPTR BaseAddress,
+                                            PFNRTLDRENUMSYMS pfnCallback, void *pvUser)
 {
     PKLDRMOD pModkLdr = ((PRTLDRMODKLDR)pMod)->pMod;
     RTLDRMODKLDRARGS Args;
@@ -475,15 +447,15 @@ static DECLCALLBACK(int) rtkldrEnumSymbols(PRTLDRMODINTERNAL pMod, unsigned fFla
     Args.pvBits = pvBits;
     int rc = kLdrModEnumSymbols(pModkLdr, pvBits, BaseAddress,
                                 fFlags & RTLDR_ENUM_SYMBOL_FLAGS_ALL ? KLDRMOD_ENUM_SYMS_FLAGS_ALL : 0,
-                                rtkldrEnumSymbolsWrapper, &Args);
+                                rtkldr_EnumSymbolsWrapper, &Args);
     return rtkldrConvertError(rc);
 }
 
 
 /** @copydoc FNKLDRMODENUMSYMS */
-static int rtkldrEnumSymbolsWrapper(PKLDRMOD pMod, uint32_t iSymbol,
-                                    const char *pchSymbol, KSIZE cchSymbol, const char *pszVersion,
-                                    KLDRADDR uValue, uint32_t fKind, void *pvUser)
+static int rtkldr_EnumSymbolsWrapper(PKLDRMOD pMod, uint32_t iSymbol,
+                                     const char *pchSymbol, KSIZE cchSymbol, const char *pszVersion,
+                                     KLDRADDR uValue, uint32_t fKind, void *pvUser)
 {
     PRTLDRMODKLDRARGS pArgs = (PRTLDRMODKLDRARGS)pvUser;
 
@@ -511,7 +483,7 @@ static int rtkldrEnumSymbolsWrapper(PKLDRMOD pMod, uint32_t iSymbol,
 
 
 /** @copydoc RTLDROPS::pfnGetImageSize */
-static DECLCALLBACK(size_t) rtkldrGetImageSize(PRTLDRMODINTERNAL pMod)
+static DECLCALLBACK(size_t) rtkldr_GetImageSize(PRTLDRMODINTERNAL pMod)
 {
     PKLDRMOD pModkLdr = ((PRTLDRMODKLDR)pMod)->pMod;
     return kLdrModSize(pModkLdr);
@@ -519,8 +491,8 @@ static DECLCALLBACK(size_t) rtkldrGetImageSize(PRTLDRMODINTERNAL pMod)
 
 
 /** @copydoc RTLDROPS::pfnGetBits */
-static DECLCALLBACK(int) rtkldrGetBits(PRTLDRMODINTERNAL pMod, void *pvBits, RTUINTPTR BaseAddress,
-                                       PFNRTLDRIMPORT pfnGetImport, void *pvUser)
+static DECLCALLBACK(int) rtkldr_GetBits(PRTLDRMODINTERNAL pMod, void *pvBits, RTUINTPTR BaseAddress,
+                                        PFNRTLDRIMPORT pfnGetImport, void *pvUser)
 {
     PKLDRMOD pModkLdr = ((PRTLDRMODKLDR)pMod)->pMod;
     RTLDRMODKLDRARGS Args;
@@ -528,14 +500,14 @@ static DECLCALLBACK(int) rtkldrGetBits(PRTLDRMODINTERNAL pMod, void *pvBits, RTU
     Args.u.pfnGetImport = pfnGetImport;
     Args.pMod = (PRTLDRMODKLDR)pMod;
     Args.pvBits = pvBits;
-    int rc = kLdrModGetBits(pModkLdr, pvBits, BaseAddress, rtkldrGetImportWrapper, &Args);
+    int rc = kLdrModGetBits(pModkLdr, pvBits, BaseAddress, rtkldr_GetImportWrapper, &Args);
     return rtkldrConvertError(rc);
 }
 
 
 /** @copydoc RTLDROPS::pfnRelocate */
-static DECLCALLBACK(int) rtkldrRelocate(PRTLDRMODINTERNAL pMod, void *pvBits, RTUINTPTR NewBaseAddress,
-                                        RTUINTPTR OldBaseAddress, PFNRTLDRIMPORT pfnGetImport, void *pvUser)
+static DECLCALLBACK(int) rtkldr_Relocate(PRTLDRMODINTERNAL pMod, void *pvBits, RTUINTPTR NewBaseAddress,
+                                         RTUINTPTR OldBaseAddress, PFNRTLDRIMPORT pfnGetImport, void *pvUser)
 {
     PKLDRMOD pModkLdr = ((PRTLDRMODKLDR)pMod)->pMod;
     RTLDRMODKLDRARGS Args;
@@ -543,14 +515,14 @@ static DECLCALLBACK(int) rtkldrRelocate(PRTLDRMODINTERNAL pMod, void *pvBits, RT
     Args.u.pfnGetImport = pfnGetImport;
     Args.pMod = (PRTLDRMODKLDR)pMod;
     Args.pvBits = pvBits;
-    int rc = kLdrModRelocateBits(pModkLdr, pvBits, NewBaseAddress, OldBaseAddress, rtkldrGetImportWrapper, &Args);
+    int rc = kLdrModRelocateBits(pModkLdr, pvBits, NewBaseAddress, OldBaseAddress, rtkldr_GetImportWrapper, &Args);
     return rtkldrConvertError(rc);
 }
 
 
 /** @copydoc FNKLDRMODGETIMPORT */
-static int rtkldrGetImportWrapper(PKLDRMOD pMod, uint32_t iImport, uint32_t iSymbol, const char *pchSymbol, KSIZE cchSymbol,
-                                  const char *pszVersion, PKLDRADDR puValue, uint32_t *pfKind, void *pvUser)
+static int rtkldr_GetImportWrapper(PKLDRMOD pMod, uint32_t iImport, uint32_t iSymbol, const char *pchSymbol, KSIZE cchSymbol,
+                                   const char *pszVersion, PKLDRADDR puValue, uint32_t *pfKind, void *pvUser)
 {
     PRTLDRMODKLDRARGS pArgs = (PRTLDRMODKLDRARGS)pvUser;
 
@@ -595,8 +567,8 @@ static int rtkldrGetImportWrapper(PKLDRMOD pMod, uint32_t iImport, uint32_t iSym
 
 
 /** @copydoc RTLDROPS::pfnGetSymbolEx */
-static DECLCALLBACK(int) rtkldrGetSymbolEx(PRTLDRMODINTERNAL pMod, const void *pvBits, RTUINTPTR BaseAddress,
-                                           const char *pszSymbol, RTUINTPTR *pValue)
+static DECLCALLBACK(int) rtkldr_GetSymbolEx(PRTLDRMODINTERNAL pMod, const void *pvBits, RTUINTPTR BaseAddress,
+                                            uint32_t iOrdinal, const char *pszSymbol, RTUINTPTR *pValue)
 {
     PKLDRMOD pModkLdr = ((PRTLDRMODKLDR)pMod)->pMod;
     KLDRADDR uValue;
@@ -616,8 +588,10 @@ static DECLCALLBACK(int) rtkldrGetSymbolEx(PRTLDRMODINTERNAL pMod, const void *p
 #endif
 
     int rc = kLdrModQuerySymbol(pModkLdr, pvBits, BaseAddress,
-                                NIL_KLDRMOD_SYM_ORDINAL, pszSymbol, strlen(pszSymbol), NULL,
-                                NULL, NULL, &uValue, NULL);
+                                iOrdinal == UINT32_MAX ? NIL_KLDRMOD_SYM_ORDINAL : iOrdinal,
+                                pszSymbol, strlen(pszSymbol), NULL,
+                                NULL, NULL,
+                                &uValue, NULL);
     if (!rc)
     {
         *pValue = uValue;
@@ -628,6 +602,55 @@ static DECLCALLBACK(int) rtkldrGetSymbolEx(PRTLDRMODINTERNAL pMod, const void *p
 
 
 
+/** @interface_method_impl{RTLDROPS,pfnQueryProp} */
+static DECLCALLBACK(int) rtkldr_QueryProp(PRTLDRMODINTERNAL pMod, RTLDRPROP enmProp, void const *pvBits,
+                                          void *pvBuf, size_t cbBuf, size_t *pcbRet)
+{
+    PRTLDRMODKLDR pThis = (PRTLDRMODKLDR)pMod;
+#if 0
+    int           rc;
+#endif
+    switch (enmProp)
+    {
+        case RTLDRPROP_UUID:
+#if 0 /* Requires neewer kStuff version. */
+            rc = kLdrModQueryImageUuid(pThis->pMod, /*pvBits*/ NULL, (uint8_t *)pvBuf, cbBuf);
+            if (rc == KLDR_ERR_NO_IMAGE_UUID)
+                return VERR_NOT_FOUND;
+            AssertReturn(rc == 0, VERR_INVALID_PARAMETER);
+            break;
+#endif
+
+        default:
+            return VERR_NOT_FOUND;
+    }
+    return VINF_SUCCESS;
+}
+
+
+/**
+ * Operations for a kLdr module.
+ */
+static const RTLDROPS g_rtkldrOps =
+{
+    "kLdr",
+    rtkldr_Close,
+    NULL,
+    rtkldr_Done,
+    rtkldr_EnumSymbols,
+    /* ext */
+    rtkldr_GetImageSize,
+    rtkldr_GetBits,
+    rtkldr_Relocate,
+    rtkldr_GetSymbolEx,
+    NULL /*pfnQueryForwarderInfo*/,
+    rtkldr_QueryProp,
+    NULL,
+    NULL,
+    42
+};
+
+
 /**
  * Open a image using kLdr.
  *
@@ -636,8 +659,9 @@ static DECLCALLBACK(int) rtkldrGetSymbolEx(PRTLDRMODINTERNAL pMod, const void *p
  * @param   fFlags      Reserved, MBZ.
  * @param   enmArch     CPU architecture specifier for the image to be loaded.
  * @param   phLdrMod    Where to store the handle.
+ * @param   pErrInfo    Where to return extended error information. Optional.
  */
-int rtldrkLdrOpen(PRTLDRREADER pReader, uint32_t fFlags, RTLDRARCH enmArch, PRTLDRMOD phLdrMod)
+int rtldrkLdrOpen(PRTLDRREADER pReader, uint32_t fFlags, RTLDRARCH enmArch, PRTLDRMOD phLdrMod, PRTERRINFO pErrInfo)
 {
     /* Convert enmArch to k-speak. */
     KCPUARCH enmCpuArch;
@@ -655,6 +679,11 @@ int rtldrkLdrOpen(PRTLDRREADER pReader, uint32_t fFlags, RTLDRARCH enmArch, PRTL
         default:
             return VERR_INVALID_PARAMETER;
     }
+    KU32 fKFlags = 0;
+#ifdef KLDRMOD_OPEN_FLAGS_FOR_INFO
+    if (fFlags & RTLDR_O_FOR_DEBUG)
+        fKFlags |= KLDRMOD_OPEN_FLAGS_FOR_INFO;
+#endif
 
     /* Create a rtkldrRdr instance. */
     PRTKLDRRDR pRdr = (PRTKLDRRDR)RTMemAllocZ(sizeof(*pRdr));
@@ -666,7 +695,7 @@ int rtldrkLdrOpen(PRTLDRREADER pReader, uint32_t fFlags, RTLDRARCH enmArch, PRTL
 
     /* Try open it. */
     PKLDRMOD pMod;
-    int krc = kLdrModOpenFromRdr(&pRdr->Core, fFlags, enmCpuArch, &pMod);
+    int krc = kLdrModOpenFromRdr(&pRdr->Core, fKFlags, enmCpuArch, &pMod);
     if (!krc)
     {
         /* Create a module wrapper for it. */

@@ -31,7 +31,7 @@
 #include <VBox/sup.h>
 #include <VBox/err.h>
 #include <iprt/initterm.h>
-#include <iprt/stream.h>
+#include <iprt/message.h>
 
 
 int main(int argc, char **argv)
@@ -40,10 +40,17 @@ int main(int argc, char **argv)
     int rc = SUPR3Install();
     if (RT_SUCCESS(rc))
     {
-        RTPrintf("installed successfully\n");
-        return 0;
+        if (rc == VINF_SUCCESS)
+            RTMsgInfo("Installed successfully!");
+        else if (rc == VINF_ALREADY_INITIALIZED)
+            RTMsgInfo("Already loaded.");
+        else if (rc == VWRN_ALREADY_EXISTS)
+            RTMsgInfo("Service already existed; started successfully.");
+        else
+            RTMsgInfo("Unexpected status: %Rrc", rc);
+        return RTEXITCODE_SUCCESS;
     }
-    RTPrintf("installation failed. rc=%Rrc\n", rc);
+    RTMsgError("installation failed. rc=%Rrc\n", rc);
     return 1;
 }
 

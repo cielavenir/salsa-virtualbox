@@ -1236,35 +1236,35 @@ HRESULT Appliance::importFSOVF(TaskOVF *pTask, AutoWriteLockBase& writeLock)
     writeLock.release();
     try
     {
-        /* Create the necessary file access interfaces. */
-        pSha1Callbacks = Sha1CreateInterface();
-        if (!pSha1Callbacks)
-            throw E_OUTOFMEMORY;
         pFileCallbacks = FileCreateInterface();
         if (!pFileCallbacks)
             throw E_OUTOFMEMORY;
 
-        VDINTERFACE VDInterfaceIO;
-        SHA1STORAGE storage;
-        RT_ZERO(storage);
-        storage.fCreateDigest = true;
-        int vrc = VDInterfaceAdd(&VDInterfaceIO, "Appliance::IOFile",
-                                 VDINTERFACETYPE_IO, pFileCallbacks,
-                                 0, &storage.pVDImageIfaces);
-        if (RT_FAILURE(vrc))
-            throw E_FAIL;
-
-        size_t cbMfSize = 0;
         Utf8Str strMfFile = Utf8Str(pTask->locInfo.strPath).stripExt().append(".mf");
         /* Create the import stack for the rollback on errors. */
         ImportStack stack(pTask->locInfo, m->pReader->m_mapDisks, pTask->pProgress);
-        /* Do we need the digest information? */
-        storage.fCreateDigest = RTFileExists(strMfFile.c_str());
-        /* Now import the appliance. */
-        importMachines(stack, pSha1Callbacks, &storage);
-        /* Read & verify the manifest file, if there is one. */
-        if (storage.fCreateDigest)
+
+        if (RTFileExists(strMfFile.c_str()))
         {
+            /* Create the necessary file access interfaces. */
+            pSha1Callbacks = Sha1CreateInterface();
+            if (!pSha1Callbacks)
+                throw E_OUTOFMEMORY;
+
+            VDINTERFACE VDInterfaceIO;
+            SHA1STORAGE storage;
+            RT_ZERO(storage);
+            storage.fCreateDigest = true;
+            int vrc = VDInterfaceAdd(&VDInterfaceIO, "Appliance::IOFile",
+                                     VDINTERFACETYPE_IO, pFileCallbacks,
+                                     0, &storage.pVDImageIfaces);
+            if (RT_FAILURE(vrc))
+                throw E_FAIL;
+
+            size_t cbMfSize = 0;
+            /* Now import the appliance. */
+            importMachines(stack, pSha1Callbacks, &storage);
+
             /* Add the ovf file to the digest list. */
             stack.llSrcDisksDigest.push_front(STRPAIR(pTask->locInfo.strPath, m->strOVFSHA1Digest));
             rc = readManifestFile(strMfFile, &pvMfBuf, &cbMfSize, pSha1Callbacks, &storage);
@@ -1272,6 +1272,8 @@ HRESULT Appliance::importFSOVF(TaskOVF *pTask, AutoWriteLockBase& writeLock)
             rc = verifyManifestFile(strMfFile, stack, pvMfBuf, cbMfSize);
             if (FAILED(rc)) throw rc;
         }
+        else
+            importMachines(stack, pFileCallbacks, NULL);
     }
     catch (HRESULT rc2)
     {
@@ -1912,7 +1914,7 @@ void Appliance::importOneDiskImage(const ovf::DiskImage &di,
 
     /* Add the newly create disk path + a corresponding digest the our list for
      * later manifest verification. */
-    stack.llSrcDisksDigest.push_back(STRPAIR(strSrcFilePath, pStorage->strDigest));
+    stack.llSrcDisksDigest.push_back(STRPAIR(strSrcFilePath, pStorage ? pStorage->strDigest : ""));
 }
 
 /**
@@ -2829,7 +2831,8 @@ void Appliance::importMachines(ImportStack &stack,
     size_t i = 0;
     for (it = reader.m_llVirtualSystems.begin(),
          it1 = m->virtualSystemDescriptions.begin();
-         it != reader.m_llVirtualSystems.end();
+         it != reader.m_llVirtualSystems.end(),
+         it1 != m->virtualSystemDescriptions.end();
          ++it, ++it1, ++i)
     {
         const ovf::VirtualSystem &vsysThis = *it;

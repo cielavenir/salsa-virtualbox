@@ -158,11 +158,19 @@ STDMETHODIMP UIFrameBuffer::RequestResize(ULONG uScreenId, ULONG uPixelFormat,
         return E_FAIL;
 
     NOREF(uScreenId);
-    QApplication::postEvent (m_pMachineView,
-                             new UIResizeEvent(uPixelFormat, pVRAM, uBitsPerPixel,
-                                               uBytesPerLine, uWidth, uHeight));
-
     *pbFinished = FALSE;
+    lock();  /* See comment in setView(). */
+    if (m_pMachineView)
+        QApplication::postEvent(m_pMachineView,
+                                new UIResizeEvent(uPixelFormat, pVRAM,
+                                                  uBitsPerPixel, uBytesPerLine,
+                                                  uWidth, uHeight));
+    else
+        /* Report to the VM thread that we finished resizing and rely on the
+         * synchronisation when the new view is attached. */
+        *pbFinished = TRUE;
+    unlock();
+
     return S_OK;
 }
 
@@ -183,7 +191,12 @@ STDMETHODIMP UIFrameBuffer::VideoModeSupported(ULONG uWidth, ULONG uHeight, ULON
     if (!pbSupported)
         return E_POINTER;
     *pbSupported = TRUE;
-    QSize screen = m_pMachineView->desktopGeometry();
+
+    lock();  /* See comment in setView(). */
+    QSize screen;
+    if (m_pMachineView)
+        screen = m_pMachineView->desktopGeometry();
+    unlock();
     if ((screen.width() != 0) && (uWidth > (ULONG)screen.width()))
         *pbSupported = FALSE;
     if ((screen.height() != 0) && (uHeight > (ULONG)screen.height()))
@@ -225,7 +238,10 @@ STDMETHODIMP UIFrameBuffer::SetVisibleRegion(BYTE *pRectangles, ULONG uCount)
         reg += rect;
         ++ rects;
     }
-    QApplication::postEvent(m_pMachineView, new UISetRegionEvent(reg));
+    lock();  /* See comment in setView(). */
+    if (m_pMachineView)
+        QApplication::postEvent(m_pMachineView, new UISetRegionEvent(reg));
+    unlock();
 
     return S_OK;
 }
@@ -246,7 +262,13 @@ void UIFrameBuffer::doProcessVHWACommand(QEvent *pEvent)
 
 void UIFrameBuffer::setView(UIMachineView * pView)
 {
+    /* We are not supposed to use locking for things which are done
+     * on the GUI thread.  Unfortunately I am not clever enough to
+     * understand the original author's wise synchronisation logic
+     * so I will do it anyway. */
+    lock();
     m_pMachineView = pView;
     m_WinId = (m_pMachineView && m_pMachineView->viewport()) ? (LONG64)m_pMachineView->viewport()->winId() : 0;
+    unlock();
 }
 #endif

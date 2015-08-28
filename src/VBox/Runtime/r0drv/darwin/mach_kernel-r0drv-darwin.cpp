@@ -388,8 +388,6 @@ static uintptr_t rtR0MachKernelLookup(RTR0MACHKERNELINT *pThis, const char *pszS
 extern "C" void ev_try_lock(void);
 extern "C" void OSMalloc(void);
 extern "C" void OSlibkernInit(void);
-extern "C" int  osrelease;
-extern "C" int  ostype;
 extern "C" void kdp_set_interface(void);
 
 
@@ -736,7 +734,8 @@ static int rtR0MachKernelLoadCommands(RTR0MACHKERNELINT *pThis)
                 if (pSeg->flags & ~(SG_HIGHVM | SG_FVMLIB | SG_NORELOC | SG_PROTECTED_VERSION_1))
                     RETURN_VERR_BAD_EXE_FORMAT;
 
-                if (pSeg->vmaddr != 0)
+                if (   pSeg->vmaddr != 0
+                    || !strcmp(pSeg->segname, "__PAGEZERO"))
                 {
                     if (pSeg->vmaddr + RT_ALIGN_Z(pSeg->vmsize, RT_BIT_32(12)) < pSeg->vmaddr)
                         RETURN_VERR_BAD_EXE_FORMAT;
@@ -768,6 +767,7 @@ static int rtR0MachKernelLoadCommands(RTR0MACHKERNELINT *pThis)
                         case S_MOD_INIT_FUNC_POINTERS:
                         case S_MOD_TERM_FUNC_POINTERS:
                         case S_COALESCED:
+                        case S_4BYTE_LITERALS:
                             if (  pSeg->filesize != 0
                                 ? paSects[i].offset - pSeg->fileoff >= pSeg->filesize
                                 : paSects[i].offset - pSeg->fileoff != pSeg->filesize)
@@ -785,7 +785,6 @@ static int rtR0MachKernelLoadCommands(RTR0MACHKERNELINT *pThis)
                         /* not observed */
                         case S_SYMBOL_STUBS:
                         case S_INTERPOSING:
-                        case S_4BYTE_LITERALS:
                         case S_8BYTE_LITERALS:
                         case S_16BYTE_LITERALS:
                         case S_DTRACE_DOF:

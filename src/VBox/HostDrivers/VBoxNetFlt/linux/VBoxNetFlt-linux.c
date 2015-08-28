@@ -27,7 +27,12 @@
 #include <linux/etherdevice.h>
 #include <linux/rtnetlink.h>
 #include <linux/miscdevice.h>
+#include <linux/inetdevice.h>
+#include <linux/in.h>
 #include <linux/ip.h>
+#include <net/ipv6.h>
+#include <net/if_inet6.h>
+#include <net/addrconf.h>
 
 #include <VBox/log.h>
 #include <VBox/err.h>
@@ -58,6 +63,12 @@
 # endif /* VBOXNETFLT_WITH_QDISC */
 #endif
 
+typedef struct VBOXNETFLTNOTIFIER {
+    struct notifier_block Notifier;
+    PVBOXNETFLTINS pThis;
+} VBOXNETFLTNOTIFIER;
+typedef struct VBOXNETFLTNOTIFIER *PVBOXNETFLTNOTIFIER;
+
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -66,6 +77,26 @@
 #define VBOX_FLT_PT_TO_INST(pPT)    RT_FROM_MEMBER(pPT, VBOXNETFLTINS, u.s.PacketType)
 #ifndef VBOXNETFLT_LINUX_NO_XMIT_QUEUE
 # define VBOX_FLT_XT_TO_INST(pXT)   RT_FROM_MEMBER(pXT, VBOXNETFLTINS, u.s.XmitTask)
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 11, 0)
+# define VBOX_NETDEV_NOTIFIER_INFO_TO_DEV(ptr) netdev_notifier_info_to_dev(ptr)
+#else
+# define VBOX_NETDEV_NOTIFIER_INFO_TO_DEV(ptr) ((struct net_device *)ptr)
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 34)
+# define VBOX_NETDEV_NAME(dev)              netdev_name(dev)
+#else
+# define VBOX_NETDEV_NAME(dev)              ((dev)->reg_state != NETREG_REGISTERED ? "(unregistered net_device)" : (dev)->name)
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 25)
+# define VBOX_IPV4_IS_LOOPBACK(addr)        ipv4_is_loopback(addr)
+# define VBOX_IPV4_IS_LINKLOCAL_169(addr)   ipv4_is_linklocal_169(addr)
+#else
+# define VBOX_IPV4_IS_LOOPBACK(addr)        ((addr & htonl(IN_CLASSA_NET)) == htonl(0x7f000000))
+# define VBOX_IPV4_IS_LINKLOCAL_169(addr)   ((addr & htonl(IN_CLASSB_NET)) == htonl(0xa9fe0000))
 #endif
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 22)
@@ -1119,6 +1150,59 @@ DECLINLINE(bool) vboxNetFltLinuxSkBufIsOur(struct sk_buff *pBuf)
 
 
 /**
+ * Checks whether this SG list contains a GSO packet.
+ *
+ * @returns true / false accordingly.
+ * @param   pSG             The (scatter/)gather list.
+ */
+DECLINLINE(bool) vboxNetFltLinuxIsGso(PINTNETSG pSG)
+{
+#if defined(VBOXNETFLT_WITH_GSO_XMIT_WIRE) || defined(VBOXNETFLT_WITH_GSO_XMIT_HOST)
+    return !((PDMNETWORKGSOTYPE)pSG->GsoCtx.u8Type == PDMNETWORKGSOTYPE_INVALID);
+#else /* !VBOXNETFLT_WITH_GSO_XMIT_WIRE && !VBOXNETFLT_WITH_GSO_XMIT_HOST */
+    return false;
+#endif /* !VBOXNETFLT_WITH_GSO_XMIT_WIRE && !VBOXNETFLT_WITH_GSO_XMIT_HOST */
+}
+
+
+/**
+ * Find out the frame size (of a single segment in case of GSO frames).
+ *
+ * @returns the frame size.
+ * @param   pSG             The (scatter/)gather list.
+ */
+DECLINLINE(uint32_t) vboxNetFltLinuxFrameSize(PINTNETSG pSG)
+{
+    uint16_t u16Type = 0;
+    uint32_t cbVlanTag = 0;
+    if (pSG->aSegs[0].cb >= sizeof(RTNETETHERHDR))
+        u16Type = RT_BE2H_U16(((PCRTNETETHERHDR)pSG->aSegs[0].pv)->EtherType);
+    else if (pSG->cbTotal >= sizeof(RTNETETHERHDR))
+    {
+        uint32_t off = RT_OFFSETOF(RTNETETHERHDR, EtherType);
+        uint32_t i;
+        for (i = 0; i < pSG->cSegsUsed; ++i)
+        {
+            if (off <= pSG->aSegs[i].cb)
+            {
+                if (off + sizeof(uint16_t) <= pSG->aSegs[i].cb)
+                    u16Type = RT_BE2H_U16(*(uint16_t *)((uintptr_t)pSG->aSegs[i].pv + off));
+                else if (i + 1 < pSG->cSegsUsed)
+                    u16Type = RT_BE2H_U16(  ((uint16_t)( ((uint8_t *)pSG->aSegs[i].pv)[off] ) << 8)
+                                          + *(uint8_t *)pSG->aSegs[i + 1].pv); /* ASSUMES no empty segments! */
+                /* else: frame is too short. */
+                break;
+            }
+            off -= pSG->aSegs[i].cb;
+        }
+    }
+    if (u16Type == RTNET_ETHERTYPE_VLAN)
+        cbVlanTag = 4;
+    return (vboxNetFltLinuxIsGso(pSG) ? (uint32_t)pSG->GsoCtx.cbMaxSeg + pSG->GsoCtx.cbHdrs : pSG->cbTotal) - cbVlanTag;
+}
+
+
+/**
  * Internal worker that create a linux sk_buff for a
  * (scatter/)gather list.
  *
@@ -1136,6 +1220,17 @@ static struct sk_buff *vboxNetFltLinuxSkBufFromSG(PVBOXNETFLTINS pThis, PINTNETS
     if (pSG->cbTotal == 0)
     {
         LogRel(("VBoxNetFlt: Dropped empty packet coming from internal network.\n"));
+        return NULL;
+    }
+    Log5(("VBoxNetFlt: Packet to %s of %d bytes (frame=%d).\n", fDstWire?"wire":"host", pSG->cbTotal, vboxNetFltLinuxFrameSize(pSG)));
+    if (fDstWire && (vboxNetFltLinuxFrameSize(pSG) > ASMAtomicReadU32(&pThis->u.s.cbMtu) + 14))
+    {
+        static bool s_fOnce = true;
+        if (s_fOnce)
+        {
+            s_fOnce = false;
+            printk("VBoxNetFlt: Dropped over-sized packet (%d bytes) coming from internal network.\n", vboxNetFltLinuxFrameSize(pSG));
+        }
         return NULL;
     }
 
@@ -1362,6 +1457,7 @@ static int vboxNetFltLinuxPacketHandler(struct sk_buff *pBuf,
     if (pDev != pSkbDev)
     {
         Log(("vboxNetFltLinuxPacketHandler: Devices do not match, pThis may be wrong! pThis=%p\n", pThis));
+        kfree_skb(pBuf); /* This is a failure, so we use kfree_skb instead of dev_kfree_skb. */
         return 0;
     }
 
@@ -1379,7 +1475,7 @@ static int vboxNetFltLinuxPacketHandler(struct sk_buff *pBuf,
          * Get rid of fragmented packets, they cause too much trouble.
          */
         struct sk_buff *pCopy = skb_copy(pBuf, GFP_ATOMIC);
-        kfree_skb(pBuf);
+        dev_kfree_skb(pBuf);
         if (!pCopy)
         {
             LogRel(("VBoxNetFlt: Failed to allocate packet buffer, dropping the packet.\n"));
@@ -2056,6 +2152,8 @@ static int vboxNetFltLinuxAttachToInterface(PVBOXNETFLTINS pThis, struct net_dev
 
     /* Get the mac address while we still have a valid net_device reference. */
     memcpy(&pThis->u.s.MacAddr, pDev->dev_addr, sizeof(pThis->u.s.MacAddr));
+    /* Initialize MTU */
+    pThis->u.s.cbMtu = pDev->mtu;
 
     /*
      * Install a packet filter for this device with a protocol wildcard (ETH_P_ALL).
@@ -2217,6 +2315,24 @@ static int vboxNetFltLinuxDeviceGoingDown(PVBOXNETFLTINS pThis, struct net_devic
     return NOTIFY_OK;
 }
 
+/**
+ * Callback for listening to MTU change event.
+ *
+ * We need to track changes of host's inteface MTU to discard over-sized frames
+ * coming from the internal network as they may hang the TX queue of host's
+ * adapter.
+ *
+ * @returns NOTIFY_OK
+ * @param   pThis               The netfilter instance.
+ * @param   pDev                Pointer to device structure of host's interface.
+ */
+static int vboxNetFltLinuxDeviceMtuChange(PVBOXNETFLTINS pThis, struct net_device *pDev)
+{
+    ASMAtomicWriteU32(&pThis->u.s.cbMtu, pDev->mtu);
+    Log(("vboxNetFltLinuxDeviceMtuChange: set MTU for %s to %d\n", pThis->szName, pDev->mtu));
+    return NOTIFY_OK;
+}
+
 #ifdef LOG_ENABLED
 /** Stringify the NETDEV_XXX constants. */
 static const char *vboxNetFltLinuxGetNetDevEventName(unsigned long ulEventType)
@@ -2258,11 +2374,13 @@ static int vboxNetFltLinuxNotifierCallback(struct notifier_block *self, unsigned
 
 {
     PVBOXNETFLTINS      pThis = VBOX_FLT_NB_TO_INST(self);
-    struct net_device  *pDev  = (struct net_device *)ptr;
+    struct net_device  *pMyDev = ASMAtomicUoReadPtrT(&pThis->u.s.pDev, struct net_device *);
+    struct net_device  *pDev  = VBOX_NETDEV_NOTIFIER_INFO_TO_DEV(ptr);
     int                 rc    = NOTIFY_OK;
 
     Log(("VBoxNetFlt: got event %s(0x%lx) on %s, pDev=%p pThis=%p pThis->u.s.pDev=%p\n",
-         vboxNetFltLinuxGetNetDevEventName(ulEventType), ulEventType, pDev->name, pDev, pThis, ASMAtomicUoReadPtrT(&pThis->u.s.pDev, struct net_device *)));
+         vboxNetFltLinuxGetNetDevEventName(ulEventType), ulEventType, pDev->name, pDev, pThis, pMyDev));
+
     if (    ulEventType == NETDEV_REGISTER
         && !strcmp(pDev->name, pThis->szName))
     {
@@ -2270,8 +2388,7 @@ static int vboxNetFltLinuxNotifierCallback(struct notifier_block *self, unsigned
     }
     else
     {
-        pDev = ASMAtomicUoReadPtrT(&pThis->u.s.pDev, struct net_device *);
-        if (pDev == ptr)
+        if (pDev == pMyDev)
         {
             switch (ulEventType)
             {
@@ -2283,6 +2400,9 @@ static int vboxNetFltLinuxNotifierCallback(struct notifier_block *self, unsigned
                     break;
                 case NETDEV_GOING_DOWN:
                     rc = vboxNetFltLinuxDeviceGoingDown(pThis, pDev);
+                    break;
+                case NETDEV_CHANGEMTU:
+                    rc = vboxNetFltLinuxDeviceMtuChange(pThis, pDev);
                     break;
                 case NETDEV_CHANGENAME:
                     break;
@@ -2297,6 +2417,170 @@ static int vboxNetFltLinuxNotifierCallback(struct notifier_block *self, unsigned
 
     return rc;
 }
+
+/*
+ * Initial enumeration of netdevs.  Called with NETDEV_REGISTER by
+ * register_netdevice_notifier() under rtnl lock.
+ */
+static int vboxNetFltLinuxEnumeratorCallback(struct notifier_block *self, unsigned long ulEventType, void *ptr)
+{
+    PVBOXNETFLTINS pThis = ((PVBOXNETFLTNOTIFIER)self)->pThis;
+    struct net_device *dev  = VBOX_NETDEV_NOTIFIER_INFO_TO_DEV(ptr);
+    struct in_device *in_dev;
+    struct inet6_dev *in6_dev;
+
+    if (ulEventType != NETDEV_REGISTER)
+        return NOTIFY_OK;
+
+    if (RT_UNLIKELY(pThis->pSwitchPort->pfnNotifyHostAddress == NULL))
+        return NOTIFY_OK;
+
+    /*
+     * IPv4
+     */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 14)
+    in_dev = __in_dev_get_rtnl(dev);
+#else
+    in_dev = __in_dev_get(dev);
+#endif
+    if (in_dev != NULL)
+    {
+        for_ifa(in_dev) {
+            if (VBOX_IPV4_IS_LOOPBACK(ifa->ifa_address))
+                return NOTIFY_OK;
+
+            if (   dev != pThis->u.s.pDev
+                && VBOX_IPV4_IS_LINKLOCAL_169(ifa->ifa_address))
+                continue;
+
+            Log(("%s: %s: IPv4 addr %RTnaipv4 mask %RTnaipv4\n",
+                 __FUNCTION__, VBOX_NETDEV_NAME(dev),
+                 ifa->ifa_address, ifa->ifa_mask));
+            
+            pThis->pSwitchPort->pfnNotifyHostAddress(pThis->pSwitchPort,
+                /* :fAdded */ true, kIntNetAddrType_IPv4, &ifa->ifa_address);
+        } endfor_ifa(in_dev);
+    }
+
+    /*
+     * IPv6
+     */
+    in6_dev = __in6_dev_get(dev);
+    if (in6_dev != NULL)
+    {
+        struct inet6_ifaddr *ifa;
+
+        read_lock_bh(&in6_dev->lock);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 35)
+        list_for_each_entry(ifa, &in6_dev->addr_list, if_list)
+#else
+        for (ifa = in6_dev->addr_list; ifa != NULL; ifa = ifa->if_next)
+#endif
+        {
+            if (   dev != pThis->u.s.pDev
+                && ipv6_addr_type(&ifa->addr) & (IPV6_ADDR_LINKLOCAL | IPV6_ADDR_LOOPBACK))
+                continue;
+
+            Log(("%s: %s: IPv6 addr %RTnaipv6/%u\n",
+                 __FUNCTION__, VBOX_NETDEV_NAME(dev),
+                 &ifa->addr, (unsigned)ifa->prefix_len));
+
+            pThis->pSwitchPort->pfnNotifyHostAddress(pThis->pSwitchPort,
+                /* :fAdded */ true, kIntNetAddrType_IPv6, &ifa->addr);
+        }
+        read_unlock_bh(&in6_dev->lock);
+    }
+
+    return NOTIFY_OK;
+}
+
+
+static int vboxNetFltLinuxNotifierIPv4Callback(struct notifier_block *self, unsigned long ulEventType, void *ptr)
+{
+    PVBOXNETFLTINS     pThis = RT_FROM_MEMBER(self, VBOXNETFLTINS, u.s.NotifierIPv4);
+    struct net_device *pDev, *pEventDev;
+    struct in_ifaddr  *ifa   = (struct in_ifaddr *)ptr;
+    bool               fMyDev;
+    int                rc    = NOTIFY_OK;
+
+    pDev = vboxNetFltLinuxRetainNetDev(pThis);
+    pEventDev = ifa->ifa_dev->dev;
+    fMyDev = (pDev == pEventDev);
+    Log(("VBoxNetFlt: %s: IPv4 event %s(0x%lx) %s: addr %RTnaipv4 mask %RTnaipv4\n",
+         pDev ? VBOX_NETDEV_NAME(pDev) : "<???>",
+         vboxNetFltLinuxGetNetDevEventName(ulEventType), ulEventType,
+         pEventDev ? VBOX_NETDEV_NAME(pEventDev) : "<???>",
+         ifa->ifa_address, ifa->ifa_mask));
+
+    if (pDev != NULL)
+        vboxNetFltLinuxReleaseNetDev(pThis, pDev);
+
+    if (VBOX_IPV4_IS_LOOPBACK(ifa->ifa_address))
+        return NOTIFY_OK;
+
+    if (   !fMyDev
+        && VBOX_IPV4_IS_LINKLOCAL_169(ifa->ifa_address))
+        return NOTIFY_OK;
+
+    if (pThis->pSwitchPort->pfnNotifyHostAddress)
+    {
+        bool fAdded;
+        if (ulEventType == NETDEV_UP)
+            fAdded = true;
+        else if (ulEventType == NETDEV_DOWN)
+            fAdded = false;
+        else
+            return NOTIFY_OK;
+            
+        pThis->pSwitchPort->pfnNotifyHostAddress(pThis->pSwitchPort, fAdded,
+                                                 kIntNetAddrType_IPv4, &ifa->ifa_local);
+    }
+
+    return rc;
+}
+
+
+static int vboxNetFltLinuxNotifierIPv6Callback(struct notifier_block *self, unsigned long ulEventType, void *ptr)
+{
+    PVBOXNETFLTINS       pThis = RT_FROM_MEMBER(self, VBOXNETFLTINS, u.s.NotifierIPv6);
+    struct net_device   *pDev, *pEventDev;
+    struct inet6_ifaddr *ifa   = (struct inet6_ifaddr *)ptr;
+    bool                 fMyDev;
+    int                  rc    = NOTIFY_OK;
+
+    pDev = vboxNetFltLinuxRetainNetDev(pThis);
+    pEventDev = ifa->idev->dev;
+    fMyDev = (pDev == pEventDev);
+    Log(("VBoxNetFlt: %s: IPv6 event %s(0x%lx) %s: %RTnaipv6\n",
+         pDev ? VBOX_NETDEV_NAME(pDev) : "<???>",
+         vboxNetFltLinuxGetNetDevEventName(ulEventType), ulEventType,
+         pEventDev ? VBOX_NETDEV_NAME(pEventDev) : "<???>",
+         &ifa->addr));
+
+    if (pDev != NULL)
+        vboxNetFltLinuxReleaseNetDev(pThis, pDev);
+
+    if (   !fMyDev
+        && ipv6_addr_type(&ifa->addr) & (IPV6_ADDR_LINKLOCAL | IPV6_ADDR_LOOPBACK))
+        return NOTIFY_OK;
+
+    if (pThis->pSwitchPort->pfnNotifyHostAddress)
+    {
+        bool fAdded;
+        if (ulEventType == NETDEV_UP)
+            fAdded = true;
+        else if (ulEventType == NETDEV_DOWN)
+            fAdded = false;
+        else
+            return NOTIFY_OK;
+            
+        pThis->pSwitchPort->pfnNotifyHostAddress(pThis->pSwitchPort, fAdded,
+                                                 kIntNetAddrType_IPv6, &ifa->addr);
+    }
+
+    return rc;
+}
+
 
 bool vboxNetFltOsMaybeRediscovered(PVBOXNETFLTINS pThis)
 {
@@ -2497,6 +2781,10 @@ void vboxNetFltOsDeleteInstance(PVBOXNETFLTINS pThis)
              ));
         dev_put(pDev);
     }
+
+    unregister_inet6addr_notifier(&pThis->u.s.NotifierIPv6);
+    unregister_inetaddr_notifier(&pThis->u.s.NotifierIPv4);
+
     Log(("vboxNetFltOsDeleteInstance: this=%p: Notifier removed.\n", pThis));
     unregister_netdevice_notifier(&pThis->u.s.Notifier);
     module_put(THIS_MODULE);
@@ -2523,6 +2811,43 @@ int  vboxNetFltOsInitInstance(PVBOXNETFLTINS pThis, void *pvContext)
     if (   pThis->fDisconnectedFromHost
         || !try_module_get(THIS_MODULE))
         return VERR_INTNET_FLT_IF_FAILED;
+
+    if (pThis->pSwitchPort->pfnNotifyHostAddress)
+    {
+        VBOXNETFLTNOTIFIER Enumerator;
+
+        /*
+         * register_inetaddr_notifier() and register_inet6addr_notifier()
+         * do not call the callback for existing devices.  Enumerating
+         * all network devices explicitly is a bit of an ifdef mess,
+         * so co-opt register_netdevice_notifier() to do that for us.
+         */
+        RT_ZERO(Enumerator);
+        Enumerator.Notifier.notifier_call = vboxNetFltLinuxEnumeratorCallback;
+        Enumerator.pThis = pThis;
+
+        err = register_netdevice_notifier(&Enumerator.Notifier);
+        if (err)
+        {
+            LogRel(("%s: failed to enumerate network devices: error %d\n",
+                    __FUNCTION__, err));
+            return VINF_SUCCESS;
+        }
+
+        unregister_netdevice_notifier(&Enumerator.Notifier);
+
+        pThis->u.s.NotifierIPv4.notifier_call = vboxNetFltLinuxNotifierIPv4Callback;
+        err = register_inetaddr_notifier(&pThis->u.s.NotifierIPv4);
+        if (err)
+            LogRel(("%s: failed to register IPv4 notifier: error %d\n",
+                    __FUNCTION__, err));
+
+        pThis->u.s.NotifierIPv6.notifier_call = vboxNetFltLinuxNotifierIPv6Callback;
+        err = register_inet6addr_notifier(&pThis->u.s.NotifierIPv6);
+        if (err)
+            LogRel(("%s: failed to register IPv6 notifier: error %d\n",
+                    __FUNCTION__, err));
+    }
 
     return VINF_SUCCESS;
 }

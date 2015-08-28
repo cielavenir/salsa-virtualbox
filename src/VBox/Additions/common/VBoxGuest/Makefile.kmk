@@ -34,7 +34,6 @@ if1of ($(KBUILD_TARGET), freebsd $(if $(defined VBOX_WITH_ADDITION_DRIVERS),linu
  endif
  VBoxGuest_DEFS.linux    = KBUILD_MODNAME=KBUILD_STR\(vboxguest\) KBUILD_BASENAME=KBUILD_STR\(vboxguest\) DEBUG_HASH=2 DEBUG_HASH2=3 EXPORT_SYMTAB
  VBoxGuest_DEFS.solaris  = VBOX_SVN_REV=$(VBOX_SVN_REV)
- VBoxGuest_DEFS.win      = # VBOX_WITH_VRDP_SESSION_HANDLING
  ifeq ($(KBUILD_TYPE),release)
   # Allow stopping/removing the driver without a reboot
   # in debug mode; this is very useful for testing the shutdown stuff!
@@ -44,6 +43,8 @@ if1of ($(KBUILD_TARGET), freebsd $(if $(defined VBOX_WITH_ADDITION_DRIVERS),linu
   VBoxGuest_DEFS.win    += VBOX_WITH_GUEST_BUGCHECK_DETECTION
  endif
  #VBoxGuest_DEFS.win     += LOG_ENABLED LOG_TO_BACKDOOR
+ VBoxGuest_DEFS.win += \
+	$(if $(VBOX_WITH_DPC_LATENCY_CHECKER),VBOX_WITH_DPC_LATENCY_CHECKER,)
  VBoxGuest_DEPS.solaris += $(VBOX_SVN_REV_KMK)
  VBoxGuest_DEPS.linux   += $(VBOX_SVN_REV_HEADER)
  VBoxGuest_DEPS.freebsd += $(VBOX_SVN_REV_HEADER)

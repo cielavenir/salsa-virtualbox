@@ -3744,11 +3744,11 @@
     </message>
     <message>
         <source>&lt;p&gt;Failed to load the global GUI configuration from &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Het is niet gelukt de algemene GUI configuratie te laden vanuit &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Het programma wordt nu afgesloten.&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Het is niet gelukt de algemene GUI-configuratie te laden vanuit &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Het programma wordt nu afgesloten.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Failed to save the global GUI configuration to &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Het is niet gelukt de algemene GUI configuratie op te slaan in &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Het programma wordt nu afgesloten.&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Het is niet gelukt de algemene GUI-configuratie op te slaan in &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Het programma wordt nu afgesloten.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Failed to save the settings of the virtual machine &lt;b&gt;%1&lt;/b&gt; to &lt;b&gt;&lt;nobr&gt;%2&lt;/nobr&gt;&lt;/b&gt;.</source>
@@ -4210,7 +4210,7 @@
     <message numerus="yes">
         <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
         <translatorcomment>RL - Noodzakelijke %n place marker ontbreekt, old format - Bij ticket #10400 virtualbox.org gezet, afwachten (02.04.2012)</translatorcomment>
-        <translation type="unfinished">
+        <translation type="obsolete">
             <numerusform>&lt;p&gt;De virtuele machine &lt;b&gt;%1&lt;/b&gt; bevindt zich momenteel in opgeslagen staat.&lt;/p&gt;&lt;p&gt;Indien u doorgaat wordt de runtime staat van de geëxporteerde machine weggegooid. Weet dat de bestaande machine niet worden veranderd.&lt;/p&gt;</numerusform>
             <numerusform>&lt;p&gt;De virtuele machines &lt;b&gt;%1&lt;/b&gt; bevinden zich momenteel in opgeslagen staat.&lt;/p&gt;&lt;p&gt;Indien u doorgaat wordt de runtime staat van de geëxporteerde machines weggegooid. Weet dat de bestaande machines niet worden veranderd.&lt;/p&gt;</numerusform>
         </translation>
@@ -4445,6 +4445,18 @@
     <message>
         <source>&lt;p&gt;Failed to download the &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; from &lt;nobr&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;%3&lt;/p&gt;</source>
         <translation>&lt;p&gt;Het &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;b&gt; kon niet van &lt;nobr&gt;&lt;a href=&quot;%2&quot;&gt;%2&lt;/a&gt;&lt;/nobr&gt; worden gedownload&lt;/p&gt;&lt;p&gt;%3&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;Failed to initialize COM because the VirtualBox global configuration directory &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; is not accessible. Please check the permissions of this directory and of its parent directory.&lt;/p&gt;&lt;p&gt;The application will now terminate.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Initialisatie COM is mislukt omdat de VirtualBox algemene configuratiemap &lt;b&gt;&lt;nobr&gt;%1&lt;/nobr&gt;&lt;/b&gt; niet toegankelijk is. Controleer de rechten op deze map en op die van bovenliggende mappen.&lt;/p&gt;&lt;p&gt;Het programma zal nu afsluiten.&lt;/p&gt;</translation>
+    </message>
+    <message numerus="yes">
+        <source>&lt;p&gt;The %n following virtual machine(s) are currently in a saved state: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;If you continue the runtime state of the exported machine(s) will be discarded. The other machine(s) will not be changed.&lt;/p&gt;</source>
+        <comment>This text is never used with n == 0.  Feel free to drop the %n where possible, we only included it because of problems with Qt Linguist (but the user can see how many machines are in the list and doesn&apos;t need to be told).</comment>
+        <translation>
+            <numerusform>&lt;p&gt;De volgende virtuele machine bevindt zich momenteel in opgeslagen staat: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Indien u doorgaat wordt de runtime staat van de geëxporteerde machine weggegooid. Weet dat de bestaande machine niet wordt veranderd.&lt;/p&gt;</numerusform>
+            <numerusform>&lt;p&gt;De volgende virtuele machines bevinden zich momenteel in opgeslagen staat: &lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Indien u doorgaat wordt de runtime staat van de geëxporteerde machines weggegooid. Weet dat de bestaande machines niet worden veranderd.&lt;/p&gt;</numerusform>
+        </translation>
     </message>
 </context>
 <context>
@@ -6387,7 +6399,7 @@
     </message>
     <message>
         <source>and</source>
-        <translation>en</translation>
+        <translation type="obsolete">en</translation>
     </message>
     <message>
         <source>MB</source>

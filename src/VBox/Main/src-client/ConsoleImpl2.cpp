@@ -745,6 +745,7 @@ int Console::configConstructorInner(PVM pVM, AutoWriteLock *pAlock)
 
     Bstr osTypeId;
     hrc = pMachine->COMGETTER(OSTypeId)(osTypeId.asOutParam());                             H();
+    LogRel(("OS type: '%s'\n", Utf8Str(osTypeId).c_str()));
 
     BOOL fIOAPIC;
     hrc = biosSettings->COMGETTER(IOAPICEnabled)(&fIOAPIC);                                 H();
@@ -785,10 +786,11 @@ int Console::configConstructorInner(PVM pVM, AutoWriteLock *pAlock)
         InsertConfigInteger(pRoot, "PATMEnabled",          1);     /* boolean */
         InsertConfigInteger(pRoot, "CSAMEnabled",          1);     /* boolean */
 #endif
-        /* Not necessary, but to make sure these two settings end up in the release log. */
         BOOL fPageFusion = FALSE;
         hrc = pMachine->COMGETTER(PageFusionEnabled)(&fPageFusion);                         H();
-        InsertConfigInteger(pRoot, "PageFusion",           fPageFusion); /* boolean */
+        InsertConfigInteger(pRoot, "PageFusionAllowed",    fPageFusion); /* boolean */
+
+        /* Not necessary, but makes sure this setting ends up in the release log. */
         ULONG ulBalloonSize = 0;
         hrc = pMachine->COMGETTER(MemoryBalloonSize)(&ulBalloonSize);                       H();
         InsertConfigInteger(pRoot, "MemBalloonSize",       ulBalloonSize);
@@ -914,9 +916,9 @@ int Console::configConstructorInner(PVM pVM, AutoWriteLock *pAlock)
             if (    !fIsGuest64Bit
                 &&  fIOAPIC
                 &&  (   osTypeId == "WindowsNT4"
-                    || osTypeId == "Windows2000"
-                    || osTypeId == "WindowsXP"
-                    || osTypeId == "Windows2003"))
+                     || osTypeId == "Windows2000"
+                     || osTypeId == "WindowsXP"
+                     || osTypeId == "Windows2003"))
             {
                 /* Only allow TPR patching for NT, Win2k, XP and Windows Server 2003. (32 bits mode)
                  * We may want to consider adding more guest OSes (Solaris) later on.

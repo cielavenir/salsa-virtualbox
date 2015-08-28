@@ -1124,6 +1124,8 @@ HRESULT showVMInfo(ComPtr<IVirtualBox> virtualBox,
                     RTPrintf("macaddress%d=\"%lS\"\n", currentNIC + 1, strMACAddress.raw());
                     RTPrintf("cableconnected%d=\"%s\"\n", currentNIC + 1, fConnected ? "on" : "off");
                     RTPrintf("nic%d=\"%s\"\n", currentNIC + 1, strAttachment.c_str());
+                    RTPrintf("nictype%d=\"%s\"\n", currentNIC + 1, pszNICType);
+                    RTPrintf("nicspeed%d=\"%d\"\n", currentNIC + 1, ulLineSpeed);
                 }
                 else
                     RTPrintf("NIC %u:           MAC: %lS, Attachment: %s, Cable connected: %s, Trace: %s (file: %lS), Type: %s, Reported speed: %d Mbps, Boot priority: %d, Promisc Policy: %s\n",

@@ -572,7 +572,8 @@ RTDECL(size_t) RTStrFormatV(PFNRTSTROUTPUT pfnOutput, void *pvArgOutput, PFNSTRF
                         break;
                     }
 
-#ifdef IN_RING3
+#if defined(IN_RING3) && !defined(IN_SUP_HARDENED_R3)
+
                     case 'S':   /* Unicode string as current code page. */
                     {
                         if (chArgSize == 'l')

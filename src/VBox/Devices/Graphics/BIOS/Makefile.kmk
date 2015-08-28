@@ -27,7 +27,7 @@ VBOX_PATH_DEVICES_SRC ?= $(PATH_ROOT)/src/VBox/Devices
 # Build program for calculating the VGA BIOS checksums.
 #
 BLDPROGS += vbetables-gen
-vbetables-gen_TEMPLATE = VBOXBLDPROG
+vbetables-gen_TEMPLATE = VBoxBldProg
 vbetables-gen_SOURCES  = vbetables-gen.c
 
 #

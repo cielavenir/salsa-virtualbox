@@ -1982,9 +1982,17 @@ int pgmR3PhysRamTerm(PVM pVM)
     AssertRC(rc);
 
 #ifdef VBOX_WITH_PAGE_SHARING
-    /* Clear all registered shared modules. */
+    /*
+     * Clear all registered shared modules.
+     */
     rc = GMMR3ResetSharedModules(pVM);
     AssertRC(rc);
+
+    /*
+     * Flush the handy pages updates to make sure no shared pages are hiding
+     * in there.  (No unlikely if the VM shuts down, apparently.)
+     */
+    rc = VMMR3CallR0(pVM, VMMR0_DO_PGM_FLUSH_HANDY_PAGES, 0, NULL);
 #endif
 
     /*
@@ -2110,7 +2118,7 @@ VMMR3DECL(int) PGMR3PhysMMIORegister(PVM pVM, RTGCPHYS GCPhys, RTGCPHYS cb,
                 AssertLogRelMsgReturnStmt(   PGM_PAGE_GET_TYPE(pPage) == PGMPAGETYPE_RAM
                                           || PGM_PAGE_GET_TYPE(pPage) == PGMPAGETYPE_MMIO,
                                           ("%RGp-%RGp (MMIO/%s): %RGp is not a RAM or MMIO page - type=%d desc=%s\n",
-                                           GCPhys, GCPhysLast, pszDesc, PGM_PAGE_GET_TYPE(pPage), pRam->pszDesc),
+                                           GCPhys, GCPhysLast, pszDesc, pRam->GCPhys, PGM_PAGE_GET_TYPE(pPage), pRam->pszDesc),
                                           pgmUnlock(pVM),
                                           VERR_PGM_RAM_CONFLICT);
                 pPage++;

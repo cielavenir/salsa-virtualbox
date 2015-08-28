@@ -2653,8 +2653,8 @@ static int vhdAsyncWrite(void *pBackendData, uint64_t uOffset, size_t cbWrite,
                  */
                 rc = vhdFileWriteMetaAsync(pImage, pImage->uCurrentEndOfFile,
                                            pExpand->au8Bitmap,
-                                           pImage->cbDataBlockBitmap, pIoCtx,
-                                           vhdAsyncExpansionDataBlockBitmapComplete,
+                                           pImage->cDataBlockBitmapSectors * VHD_SECTOR_SIZE,
+                                           pIoCtx, vhdAsyncExpansionDataBlockBitmapComplete,
                                            pExpand);
                 if (RT_SUCCESS(rc))
                     VHDIMAGEEXPAND_STATUS_SET(pExpand->fFlags, VHDIMAGEEXPAND_BLOCKBITMAP_STATUS_SHIFT, VHDIMAGEEXPAND_STEP_SUCCESS);
@@ -2674,7 +2674,7 @@ static int vhdAsyncWrite(void *pBackendData, uint64_t uOffset, size_t cbWrite,
                  * Write the new block at the current end of the file.
                  */
                 rc = vhdFileWriteUserAsync(pImage,
-                                           pImage->uCurrentEndOfFile + pImage->cbDataBlockBitmap,
+                                           pImage->uCurrentEndOfFile + pImage->cDataBlockBitmapSectors * VHD_SECTOR_SIZE,
                                            pIoCtx, cbWrite,
                                            vhdAsyncExpansionDataComplete,
                                            pExpand);
@@ -2714,7 +2714,7 @@ static int vhdAsyncWrite(void *pBackendData, uint64_t uOffset, size_t cbWrite,
                  * Set the new end of the file and link the new block into the BAT.
                  */
                 pImage->pBlockAllocationTable[cBlockAllocationTableEntry] = pImage->uCurrentEndOfFile / VHD_SECTOR_SIZE;
-                pImage->uCurrentEndOfFile += pImage->cbDataBlockBitmap + pImage->cbDataBlock;
+                pImage->uCurrentEndOfFile += pImage->cDataBlockBitmapSectors * VHD_SECTOR_SIZE + pImage->cbDataBlock;
 
                 /* Update the footer. */
                 rc = vhdFileWriteMetaAsync(pImage, pImage->uCurrentEndOfFile,
@@ -3106,7 +3106,7 @@ static int vhdResize(void *pBackendData, uint64_t cbSize,
         {
             if (pImage->pBlockAllocationTable[idxBlock] != ~0U)
             {
-                uint64_t offStartBlock = pImage->pBlockAllocationTable[idxBlock] * VHD_SECTOR_SIZE;
+                uint64_t offStartBlock = (uint64_t)pImage->pBlockAllocationTable[idxBlock] * VHD_SECTOR_SIZE;
                 if (offStartBlock < offStartDataOld)
                     offStartDataOld = offStartBlock;
                 cBlocksAllocated++;

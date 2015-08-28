@@ -65,8 +65,10 @@
 
 
 
-int suplibOsInit(PSUPLIBDATA pThis, bool fPreInited)
+int suplibOsInit(PSUPLIBDATA pThis, bool fPreInited, bool fUnrestricted, SUPINITOP *penmWhat, PRTERRINFO pErrInfo)
 {
+    Assert(fUnrestricted);
+
     /*
      * Nothing to do if pre-inited.
      */

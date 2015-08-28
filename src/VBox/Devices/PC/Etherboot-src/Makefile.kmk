@@ -93,11 +93,11 @@ OTHER_CLEAN = \
 	$(PATH_TARGET)/bootlib.a
 
 
-nrv2b_TEMPLATE      = VBOXBLDPROG
+nrv2b_TEMPLATE      = VBoxBldProg
 nrv2b_SOURCES       = util/nrv2b.c
 nrv2b_DEFS          = ENCODE DECODE MAIN VERBOSE NDEBUG BITSIZE=32 ENDIAN=0
 
-makerom_TEMPLATE    = VBOXBLDPROG
+makerom_TEMPLATE    = VBoxBldProg
 makerom_SOURCES     = util/makerom.c
 makerom_SOURCES.win = util/getopt.c
 makerom_INCS.win    = util

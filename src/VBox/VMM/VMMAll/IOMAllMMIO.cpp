@@ -1696,7 +1696,14 @@ VMMDECL(VBOXSTRICTRC) IOMMMIOPhysHandler(PVM pVM, RTGCUINT uErrorCode, PCPUMCTXC
     if (rc2 == VERR_SEM_BUSY)
         return VINF_IOM_HC_MMIO_READ_WRITE;
 #endif
-    VBOXSTRICTRC rcStrict = iomMMIOHandler(pVM, (uint32_t)uErrorCode, pCtxCore, GCPhysFault, iomMmioGetRange(pVM, GCPhysFault));
+    PIOMMMIORANGE pRange = iomMmioGetRange(pVM, GCPhysFault);
+    if (RT_UNLIKELY(!pRange))
+    {
+        IOM_UNLOCK(pVM);
+        return VERR_IOM_MMIO_RANGE_NOT_FOUND;
+    }
+
+    VBOXSTRICTRC rcStrict = iomMMIOHandler(pVM, (uint32_t)uErrorCode, pCtxCore, GCPhysFault, pRange);
     IOM_UNLOCK(pVM);
     return VBOXSTRICTRC_VAL(rcStrict);
 }

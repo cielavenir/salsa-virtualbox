@@ -399,7 +399,7 @@ static DECLCALLBACK(int) pdmR3GetImportRC(RTLDRMOD hLdrMod, const char *pszModul
            )
         {
             /* Search for the symbol. */
-            int rc = RTLdrGetSymbolEx(pCur->hLdrMod, pCur->pvBits, pCur->ImageBase, pszSymbol, pValue);
+            int rc = RTLdrGetSymbolEx(pCur->hLdrMod, pCur->pvBits, pCur->ImageBase, UINT32_MAX, pszSymbol, pValue);
             if (RT_SUCCESS(rc))
             {
                 AssertMsg(*pValue - pCur->ImageBase < RTLdrSize(pCur->hLdrMod),
@@ -707,7 +707,7 @@ VMMR3DECL(int) PDMR3LdrGetSymbolR3(PVM pVM, const char *pszModule, const char *p
             &&  !strcmp(pModule->szName, pszModule))
         {
             RTUINTPTR Value = 0;
-            int rc = RTLdrGetSymbolEx(pModule->hLdrMod, pModule->pvBits, pModule->ImageBase, pszSymbol, &Value);
+            int rc = RTLdrGetSymbolEx(pModule->hLdrMod, pModule->pvBits, pModule->ImageBase, UINT32_MAX, pszSymbol, &Value);
             RTCritSectLeave(&pUVM->pdm.s.ListCritSect);
             if (RT_SUCCESS(rc))
             {
@@ -876,7 +876,7 @@ VMMR3DECL(int) PDMR3LdrGetSymbolRC(PVM pVM, const char *pszModule, const char *p
             &&  !strcmp(pModule->szName, pszModule))
         {
             RTUINTPTR Value;
-            int rc = RTLdrGetSymbolEx(pModule->hLdrMod, pModule->pvBits, pModule->ImageBase, pszSymbol, &Value);
+            int rc = RTLdrGetSymbolEx(pModule->hLdrMod, pModule->pvBits, pModule->ImageBase, UINT32_MAX, pszSymbol, &Value);
             RTCritSectLeave(&pUVM->pdm.s.ListCritSect);
             if (RT_SUCCESS(rc))
             {
@@ -1623,8 +1623,8 @@ VMMR3DECL(int) PDMR3LdrGetInterfaceSymbols(PVM pVM, void *pvInterface, size_t cb
                 }
                 else
                 {
-                    RTUINTPTR Value;
-                    rc = RTLdrGetSymbolEx(pModule->hLdrMod, pModule->pvBits, pModule->ImageBase, szSymbol, &Value);
+                    RTLDRADDR Value;
+                    rc = RTLdrGetSymbolEx(pModule->hLdrMod, pModule->pvBits, pModule->ImageBase, UINT32_MAX, szSymbol, &Value);
                     AssertMsgRCBreak(rc, ("Couldn't find symbol '%s' in module '%s'\n", szSymbol, pModule->szName));
 
                     PRTRCPTR pValue = (PRTRCPTR)((uintptr_t)pvInterface + offInterface);

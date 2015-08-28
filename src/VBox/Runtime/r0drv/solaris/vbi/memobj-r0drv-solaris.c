@@ -57,9 +57,6 @@ typedef struct RTR0MEMOBJSOLARIS
     void               *pvHandle;
     /** Access during locking. */
     int                 fAccess;
-    /** Set if large pages are involved in an RTR0MEMOBJTYPE_PHYS
-     *  allocation. */
-    bool                fLargePage;
 } RTR0MEMOBJSOLARIS, *PRTR0MEMOBJSOLARIS;
 
 
@@ -77,8 +74,6 @@ DECLHIDDEN(int) rtR0MemObjNativeFree(RTR0MEMOBJ pMem)
         case RTR0MEMOBJTYPE_PHYS:
             if (!pMemSolaris->Core.u.Phys.fAllocated)
             {   /* nothing to do here */;   }
-            else if (pMemSolaris->fLargePage)
-                vbi_large_page_free(pMemSolaris->pvHandle, pMemSolaris->Core.cb);
             else
                 vbi_phys_free(pMemSolaris->Core.pv, pMemSolaris->Core.cb);
             break;
@@ -207,63 +202,24 @@ DECLHIDDEN(int) rtR0MemObjNativeAllocPhys(PPRTR0MEMOBJINTERNAL ppMem, size_t cb,
         return VERR_NO_MEMORY;
 
     /*
-     * Allocating one large page gets special treatment.
+     * Allocate physically contiguous memory aligned as specified.
      */
-    static uint32_t s_cbLargePage = UINT32_MAX;
-    if (s_cbLargePage == UINT32_MAX)
+    AssertCompile(NIL_RTHCPHYS == UINT64_MAX);
+    uint64_t PhysAddr = PhysHighest;
+    caddr_t pvMem = vbi_phys_alloc(&PhysAddr, cb, uAlignment, 1 /* contiguous */);
+    if (RT_LIKELY(pvMem))
     {
-#if 0 /* currently not entirely stable, so disabled. */
-        if (page_num_pagesizes() > 1)
-            ASMAtomicWriteU32(&s_cbLargePage, page_get_pagesize(1));
-        else
-#endif
-            ASMAtomicWriteU32(&s_cbLargePage, 0);
-    }
-    uint64_t PhysAddr;
-    if (   cb == s_cbLargePage
-        && cb == uAlignment
-        && PhysHighest == NIL_RTHCPHYS)
-    {
-        /*
-         * Allocate one large page.
-         */
-        void *pvPages = vbi_large_page_alloc(&PhysAddr, cb);
-        if (pvPages)
-        {
-            AssertMsg(!(PhysAddr & (cb - 1)), ("%RHp\n", PhysAddr));
-            pMemSolaris->Core.pv                = NULL;
-            pMemSolaris->Core.u.Phys.PhysBase   = PhysAddr;
-            pMemSolaris->Core.u.Phys.fAllocated = true;
-            pMemSolaris->pvHandle               = pvPages;
-            pMemSolaris->fLargePage             = true;
+        Assert(!(PhysAddr & PAGE_OFFSET_MASK));
+        Assert(PhysAddr < PhysHighest);
+        Assert(PhysAddr + cb <= PhysHighest);
 
-            *ppMem = &pMemSolaris->Core;
-            return VINF_SUCCESS;
-        }
-    }
-    else
-    {
-        /*
-         * Allocate physically contiguous memory aligned as specified.
-         */
-        AssertCompile(NIL_RTHCPHYS == UINT64_MAX);
-        PhysAddr = PhysHighest;
-        caddr_t pvMem = vbi_phys_alloc(&PhysAddr, cb, uAlignment, 1 /* contiguous */);
-        if (RT_LIKELY(pvMem))
-        {
-            Assert(!(PhysAddr & PAGE_OFFSET_MASK));
-            Assert(PhysAddr < PhysHighest);
-            Assert(PhysAddr + cb <= PhysHighest);
+        pMemSolaris->Core.pv                = pvMem;
+        pMemSolaris->Core.u.Phys.PhysBase   = PhysAddr;
+        pMemSolaris->Core.u.Phys.fAllocated = true;
+        pMemSolaris->pvHandle               = NULL;
 
-            pMemSolaris->Core.pv                = pvMem;
-            pMemSolaris->Core.u.Phys.PhysBase   = PhysAddr;
-            pMemSolaris->Core.u.Phys.fAllocated = true;
-            pMemSolaris->pvHandle               = NULL;
-            pMemSolaris->fLargePage             = false;
-
-            *ppMem = &pMemSolaris->Core;
-            return VINF_SUCCESS;
-        }
+        *ppMem = &pMemSolaris->Core;
+        return VINF_SUCCESS;
     }
     rtR0MemObjDelete(&pMemSolaris->Core);
     return VERR_NO_CONT_MEMORY;
@@ -427,18 +383,11 @@ DECLHIDDEN(int) rtR0MemObjNativeMapUser(PPRTR0MEMOBJINTERNAL ppMem, PRTR0MEMOBJI
     uint64_t *paPhysAddrs = kmem_zalloc(sizeof(uint64_t) * cPages, KM_SLEEP);
     if (RT_LIKELY(paPhysAddrs))
     {
-        /*
-         * Prepare the pages according to type.
-         */
         if (pMemToMapSolaris->Core.enmType == RTR0MEMOBJTYPE_PHYS_NC)
-            rc = vbi_pages_premap(pMemToMapSolaris->pvHandle, cb, paPhysAddrs);
-        else if (   pMemToMapSolaris->Core.enmType == RTR0MEMOBJTYPE_PHYS
-                 && pMemToMapSolaris->fLargePage)
         {
-            RTHCPHYS Phys = pMemToMapSolaris->Core.u.Phys.PhysBase;
-            for (pgcnt_t iPage = 0; iPage < cPages; iPage++, Phys += PAGE_SIZE)
-                paPhysAddrs[iPage] = Phys;
-            rc = vbi_large_page_premap(pMemToMapSolaris->pvHandle, cb);
+            page_t **ppPages = pMemToMapSolaris->pvHandle;
+            for (size_t iPage = 0; iPage < cPages; iPage++)
+                paPhysAddrs[iPage] = vbi_page_to_pa(ppPages, iPage);
         }
         else
         {

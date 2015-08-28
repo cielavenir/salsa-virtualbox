@@ -143,8 +143,8 @@ DECL_FORCE_INLINE(bool) RTLocCIsPunct(int ch)
  */
 DECL_FORCE_INLINE(bool) RTLocCIsSpace(int ch)
 {
-    /* \t (9), \n (10), \v (11), \f (12), \r (13), ' ' (32). */
-    return (ch) == ' ' || ((ch) >= 9 && (ch) <= 13);
+    return ch == 0x20                 /* 20 (space) */
+        || (unsigned)ch - 0x09U < 5U; /* 09..0d */
 }
 
 /**

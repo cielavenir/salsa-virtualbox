@@ -104,5 +104,6 @@ DECLHIDDEN(int) rtR0InitNative(void)
 
 DECLHIDDEN(void) rtR0TermNative(void)
 {
+    vbi_term();
 }
 

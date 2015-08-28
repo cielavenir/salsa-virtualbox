@@ -675,7 +675,10 @@ static int createFakeVM(PVM *ppVM)
 }
 
 
-int main(int argc, char **argv)
+/**
+ *  Entry point.
+ */
+extern "C" DECLEXPORT(int) TrustedMain(int argc, char **argv, char **envp)
 {
     /*
      * Init runtime and static data.
@@ -907,4 +910,15 @@ int main(int argc, char **argv)
     RTPrintf("tstSSM: SUCCESS\n");
     return 0;
 }
+
+
+#if !defined(VBOX_WITH_HARDENING) || !defined(RT_OS_WINDOWS)
+/**
+ * Main entry point.
+ */
+int main(int argc, char **argv, char **envp)
+{
+    return TrustedMain(argc, argv, envp);
+}
+#endif
 

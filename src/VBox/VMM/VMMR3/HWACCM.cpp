@@ -1813,8 +1813,8 @@ DECLCALLBACK(VBOXSTRICTRC) hwaccmR3ReplaceTprInstr(PVM pVM, PVMCPU pVCpu, void *
     PHWACCMTPRPATCH pPatch = (PHWACCMTPRPATCH)RTAvloU32Get(&pVM->hwaccm.s.PatchTree, (AVLOU32KEY)pCtx->eip);
     if (pPatch)
         return VINF_SUCCESS;
-
-    Assert(pVM->hwaccm.s.cPatches < RT_ELEMENTS(pVM->hwaccm.s.aPatches));
+    if (pVM->hwaccm.s.cPatches >= RT_ELEMENTS(pVM->hwaccm.s.aPatches))
+        return VINF_SUCCESS;
 
     int rc = EMInterpretDisasOne(pVM, pVCpu, CPUMCTX2CORE(pCtx), pDis, &cbOp);
     AssertRC(rc);
@@ -1905,7 +1905,7 @@ DECLCALLBACK(VBOXSTRICTRC) hwaccmR3ReplaceTprInstr(PVM pVM, PVMCPU pVCpu, void *
             else
             {
                 pPatch->enmType     = HWACCMTPRINSTR_READ;
-                pPatch->uDstOperand = pDis->param1.base.reg_gen;
+                pPatch->uDstOperand = uMmioReg;
 
                 rc = PGMPhysSimpleWriteGCPtr(pVCpu, pCtx->rip, aVMMCall, sizeof(aVMMCall));
                 AssertRC(rc);
@@ -1979,6 +1979,8 @@ DECLCALLBACK(VBOXSTRICTRC) hwaccmR3PatchTprInstr(PVM pVM, PVMCPU pVCpu, void *pv
         Log(("hwaccmR3PatchTprInstr: already patched %RGv\n", pCtx->rip));
         return VINF_SUCCESS;
     }
+    if (pVM->hwaccm.s.cPatches >= RT_ELEMENTS(pVM->hwaccm.s.aPatches))
+        return VINF_SUCCESS;
 
     Log(("hwaccmR3PatchTprInstr %RGv\n", pCtx->rip));
 

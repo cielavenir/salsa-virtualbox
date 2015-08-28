@@ -1747,8 +1747,13 @@ biosfn_set_border_color:
   push  bx
   push  cx
   push  dx
+  push  ds
+  mov   dx, # BIOSMEM_SEG
+  mov   ds, dx
   mov   dx, # VGAREG_ACTL_RESET
   in    al, dx
+  cmp   byte ptr [ BIOSMEM_CURRENT_MODE ], #0x03
+  jbe   set_border_done
   mov   dx, # VGAREG_ACTL_ADDRESS
   mov   al, #0x00
   out   dx, al
@@ -1774,12 +1779,14 @@ set_intensity_loop:
   inc   cl
   cmp   cl, #0x04
   jne   set_intensity_loop
+set_border_done:
   mov   al, #0x20
   out   dx, al
 #ifdef VBOX
   mov   dx, # VGAREG_ACTL_RESET
   in    al, dx
 #endif /* VBOX */
+  pop   ds
   pop   dx
   pop   cx
   pop   bx

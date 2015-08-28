@@ -68,8 +68,12 @@ include $(PATH_SUB_CURRENT)/nls/ApprovedLanguages.kmk
 #
 VirtualBoxHardened_TEMPLATE = VBOXR3HARDENEDEXE
 VirtualBoxHardened_SOURCES = src/hardenedmain.cpp
+VirtualBoxHardened_SOURCES.win = src/platform/win/VirtualBoxHardened.rc
 VirtualBoxHardened_NAME = VirtualBox
 VirtualBoxHardened_INST.darwin = $(INST_BIN)VirtualBox $(INST_BIN)VirtualBoxVM
+VirtualBoxHardened_LDFLAGS.win = /SUBSYSTEM:$(if-expr "$(KBUILD_TYPE)" != "release",console,windows)
+src/platform/win/VirtualBoxHardened.rc_INCS  = $(VirtualBox_0_OUTDIR)
+src/platform/win/VirtualBoxHardened.rc_DEPS  = $(VirtualBox_0_OUTDIR)/VirtualBox-icon.rc
 
 
 #
@@ -131,6 +135,7 @@ VirtualBox_DEFS          += \
 	$(if $(VBOX_WITH_UDPTUNNEL),VBOX_WITH_UDPTUNNEL) \
 	$(if $(VBOX_WITH_EXTPACK),VBOX_WITH_EXTPACK) \
 	$(if $(VBOX_WITH_EHCI),VBOX_WITH_EHCI) \
+	$(if $(VBOX_WITH_HARDENING),VBOXR3_HARDENED_DLL) \
 	$(if $(VBOX_GUI_WITH_PIDFILE),VBOX_GUI_WITH_PIDFILE) \
 	$(if $(VBOX_GUI_WITH_KEYS_RESET_HANDLER),VBOX_GUI_WITH_KEYS_RESET_HANDLER) \
 	$(if $(VBOX_GUI_WITH_CUSTOMIZATIONS1),VBOX_GUI_WITH_CUSTOMIZATIONS1)
@@ -170,6 +175,7 @@ VirtualBox_src/main.cpp_DEFS += \
 endif
 
 
+
 VBOX_GUI_INC_DIRS = \
 	./src \
 	./src/globals \
@@ -207,6 +213,10 @@ VirtualBox_INCS = \
 
 # Necessary for the hdd backend enumeration
 VirtualBox_LIBS = $(LIB_DDU)
+
+if1of ($(KBUILD_TARGET), linux freebsd netbsd openbsd)
+ VirtualBox_LIBS += dl
+endif
 
 # This library is required for multi-monitor support
 VirtualBox_LIBS.linux += Xinerama
@@ -914,10 +924,10 @@ VirtualBoxVM.app_INST = $(VirtualBox.app_INST)Resources/VirtualBoxVM.app/Content
 VirtualBoxVM.app_MODE = 644
 VirtualBoxVM.app_SOURCES = \
 	src/platform/darwin/VM-PkgInfo=>PkgInfo \
-	$(VirtualBoxVM.app_0_OUTDIR)/VM-Info.plist=>Info.plist
+	$(VirtualBoxVM.app_0_OUTDIR)/VM-Info.plist=>Info.plist \
+       $(foreach mysrc,$(VirtualBox.app_SOURCES),$(if-expr $(pos =>Resources/,$(mysrc)) > 0,$(mysrc),))
 VirtualBoxVM.app_SYMLINKS = \
-	MacOS=>../../../MacOS/ \
-	Resources=>../../../Resources/
+	MacOS=>../../../MacOS/
 
 $$(VirtualBoxVM.app_0_OUTDIR)/VM-Info.plist: $(PATH_SUB_CURRENT)/src/platform/darwin/VM-Info.plist $(VBOX_VERSION_MK) | $$(@D)/
 	$(call MSG_GENERATE,VirtualBoxVM.app,$<,$@)
@@ -943,10 +953,10 @@ vmstarter.app_INST = $(VirtualBox.app_INST)Resources/vmstarter.app/Contents/
 vmstarter.app_MODE = 644
 vmstarter.app_SOURCES = \
 	src/platform/darwin/vmstarter-PkgInfo=>PkgInfo \
-	$(vmstarter.app_0_OUTDIR)/vmstarter-Info.plist=>Info.plist
+	$(vmstarter.app_0_OUTDIR)/vmstarter-Info.plist=>Info.plist \
+       $(foreach mysrc,$(VirtualBox.app_SOURCES),$(if-expr $(pos =>Resources/,$(mysrc)) > 0,$(mysrc),))
 vmstarter.app_SYMLINKS = \
-    MacOS=>../../../MacOS \
-    Resources=>../../../Resources
+	MacOS=>../../../MacOS \
 
 $$(vmstarter.app_0_OUTDIR)/vmstarter-Info.plist: $(PATH_SUB_CURRENT)/src/platform/darwin/vmstarter-Info.plist $(VBOX_VERSION_MK) | $$(@D)/
 	$(call MSG_GENERATE,vmstarter.app,$<,$@)

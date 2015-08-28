@@ -97,6 +97,9 @@ struct VBOXHGCMCMD
      */
     VBOXHGCMSVCPARM *paHostParms;
 
+    /* Number of elements in paHostParms */
+    uint32_t cHostParms;
+
     /* Linear pointer parameters information. */
     int cLinPtrs;
 
@@ -250,8 +253,6 @@ static int vmmdevHGCMSaveLinPtr (PPDMDEVINS pDevIns,
 {
     int rc = VINF_SUCCESS;
 
-    AssertRelease (u32Size > 0);
-
     VBOXHGCMLINPTR *pLinPtr = &paLinPtrs[iLinPtr];
 
     /* Take the offset into the current page also into account! */
@@ -294,8 +295,6 @@ static int vmmdevHGCMSaveLinPtr (PPDMDEVINS pDevIns,
         GCPtr += PAGE_SIZE;
     }
 
-    AssertRelease (iPage == cPages);
-
     return rc;
 }
 
@@ -310,7 +309,7 @@ static int vmmdevHGCMWriteLinPtr (PPDMDEVINS pDevIns,
 
     VBOXHGCMLINPTR *pLinPtr = &paLinPtrs[iLinPtr];
 
-    AssertRelease (u32Size > 0 && iParm == (uint32_t)pLinPtr->iParm);
+    AssertLogRelReturn(u32Size > 0 && iParm == (uint32_t)pLinPtr->iParm, VERR_INVALID_PARAMETER);
 
     RTGCPHYS GCPhysDst = pLinPtr->paPages[0] + pLinPtr->offFirstPage;
     uint8_t *pu8Src    = (uint8_t *)pvHost;
@@ -332,12 +331,17 @@ static int vmmdevHGCMWriteLinPtr (PPDMDEVINS pDevIns,
 
         if (cbWrite >= u32Size)
         {
-            PDMDevHlpPhysWrite(pDevIns, GCPhysDst, pu8Src, u32Size);
+            rc = PDMDevHlpPhysWrite(pDevIns, GCPhysDst, pu8Src, u32Size);
+            if (RT_FAILURE(rc))
+                break;
+
             u32Size = 0;
             break;
         }
 
         PDMDevHlpPhysWrite(pDevIns, GCPhysDst, pu8Src, cbWrite);
+        if (RT_FAILURE(rc))
+            break;
 
         /* next */
         u32Size    -= cbWrite;
@@ -346,8 +350,10 @@ static int vmmdevHGCMWriteLinPtr (PPDMDEVINS pDevIns,
         GCPhysDst   = pLinPtr->paPages[iPage];
     }
 
-    AssertRelease (iPage == pLinPtr->cPages);
-    Assert(u32Size == 0);
+    if (RT_SUCCESS(rc))
+    {
+        AssertLogRelReturn(iPage == pLinPtr->cPages, VERR_INVALID_PARAMETER);
+    }
 
     return rc;
 }
@@ -498,6 +504,9 @@ int vmmdevHGCMConnect (VMMDevState *pVMMDevState, VMMDevHGCMConnect *pHGCMConnec
         pHGCMConnectCopy->loc.type = VMMDevHGCMLoc_LocalHost_Existing;
 
         rc = pVMMDevState->pHGCMDrv->pfnConnect (pVMMDevState->pHGCMDrv, pCmd, &pHGCMConnectCopy->loc, &pHGCMConnectCopy->u32ClientID);
+
+        if (RT_FAILURE(rc))
+            vmmdevHGCMRemoveCommand(pVMMDevState, pCmd);
     }
     else
     {
@@ -537,6 +546,8 @@ static int vmmdevHGCMConnectSaved (VMMDevState *pVMMDevState, VMMDevHGCMConnect 
         {
             *pfHGCMCalled = true;
         }
+        /* else
+         *  ... the caller will also execute vmmdevHGCMRemoveCommand() for us */
     }
     else
     {
@@ -563,6 +574,9 @@ int vmmdevHGCMDisconnect (VMMDevState *pVMMDevState, VMMDevHGCMDisconnect *pHGCM
         pCmd->paLinPtrs = NULL;
 
         rc = pVMMDevState->pHGCMDrv->pfnDisconnect (pVMMDevState->pHGCMDrv, pCmd, pHGCMDisconnect->u32ClientID);
+
+        if (RT_FAILURE(rc))
+            vmmdevHGCMRemoveCommand(pVMMDevState, pCmd);
     }
     else
     {
@@ -597,6 +611,8 @@ static int vmmdevHGCMDisconnectSaved (VMMDevState *pVMMDevState, VMMDevHGCMDisco
         {
             *pfHGCMCalled = true;
         }
+        /* else
+         *  ... the caller will also execute vmmdevHGCMRemoveCommand() for us */
     }
     else
     {
@@ -621,6 +637,20 @@ int vmmdevHGCMCall (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCMCall, uint32
     uint32_t cParms = pHGCMCall->cParms;
 
     Log(("vmmdevHGCMCall: cParms = %d\n", cParms));
+
+    /*
+     * Sane upper limit.
+     */
+    if (cParms > VMMDEV_MAX_HGCM_PARMS)
+    {
+        static int s_cRelWarn;
+        if (s_cRelWarn < 50)
+        {
+            s_cRelWarn++;
+            LogRel(("VMMDev: request packet with too many parameters (%d). Refusing operation.\n", cParms));
+        }
+        return VERR_INVALID_PARAMETER;
+    }
 
     /*
      * Compute size of required memory buffer.
@@ -654,6 +684,12 @@ int vmmdevHGCMCall (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCMCall, uint32
                     if (pGuestParm->u.Pointer.size > 0)
                     {
                         /* Only pointers with some actual data are counted. */
+                        if (pGuestParm->u.Pointer.size > VMMDEV_MAX_HGCM_DATA_SIZE - cbCmdSize)
+                        {
+                            rc = VERR_INVALID_PARAMETER;
+                            break;
+                        }
+
                         cbCmdSize += pGuestParm->u.Pointer.size;
 
                         cLinPtrs++;
@@ -667,6 +703,12 @@ int vmmdevHGCMCall (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCMCall, uint32
 
                 case VMMDevHGCMParmType_PageList:
                 {
+                    if (pGuestParm->u.PageList.size > VMMDEV_MAX_HGCM_DATA_SIZE - cbCmdSize)
+                    {
+                        rc = VERR_INVALID_PARAMETER;
+                        break;
+                    }
+
                     cbCmdSize += pGuestParm->u.PageList.size;
                     Log(("vmmdevHGCMCall: pagelist size = %d\n", pGuestParm->u.PageList.size));
                 } break;
@@ -706,6 +748,12 @@ int vmmdevHGCMCall (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCMCall, uint32
                     if (pGuestParm->u.Pointer.size > 0)
                     {
                         /* Only pointers with some actual data are counted. */
+                        if (pGuestParm->u.Pointer.size > VMMDEV_MAX_HGCM_DATA_SIZE - cbCmdSize)
+                        {
+                            rc = VERR_INVALID_PARAMETER;
+                            break;
+                        }
+
                         cbCmdSize += pGuestParm->u.Pointer.size;
 
                         cLinPtrs++;
@@ -719,6 +767,12 @@ int vmmdevHGCMCall (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCMCall, uint32
 
                 case VMMDevHGCMParmType_PageList:
                 {
+                    if (pGuestParm->u.PageList.size > VMMDEV_MAX_HGCM_DATA_SIZE - cbCmdSize)
+                    {
+                        rc = VERR_INVALID_PARAMETER;
+                        break;
+                    }
+
                     cbCmdSize += pGuestParm->u.PageList.size;
                     Log(("vmmdevHGCMCall: pagelist size = %d\n", pGuestParm->u.PageList.size));
                 } break;
@@ -743,14 +797,12 @@ int vmmdevHGCMCall (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCMCall, uint32
         return rc;
     }
 
-    PVBOXHGCMCMD pCmd = (PVBOXHGCMCMD)RTMemAlloc (cbCmdSize);
+    PVBOXHGCMCMD pCmd = (PVBOXHGCMCMD)RTMemAllocZ(cbCmdSize);
 
     if (pCmd == NULL)
     {
         return VERR_NO_MEMORY;
     }
-
-    memset (pCmd, 0, sizeof (*pCmd));
 
     pCmd->paHostParms = NULL;
     pCmd->cLinPtrs    = cLinPtrs;
@@ -758,8 +810,8 @@ int vmmdevHGCMCall (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCMCall, uint32
 
     if (cLinPtrs > 0)
     {
-        pCmd->paLinPtrs = (VBOXHGCMLINPTR *)RTMemAlloc (  sizeof (VBOXHGCMLINPTR) * cLinPtrs
-                                                          + sizeof (RTGCPHYS) * cLinPtrPages);
+        pCmd->paLinPtrs = (VBOXHGCMLINPTR *)RTMemAllocZ(  sizeof (VBOXHGCMLINPTR) * cLinPtrs
+                                                        + sizeof (RTGCPHYS) * cLinPtrPages);
 
         if (pCmd->paLinPtrs == NULL)
         {
@@ -787,6 +839,7 @@ int vmmdevHGCMCall (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCMCall, uint32
         uint8_t *pcBuf = (uint8_t *)pHostParm + cParms * sizeof (VBOXHGCMSVCPARM);
 
         pCmd->paHostParms = pHostParm;
+        pCmd->cHostParms  = cParms;
 
         uint32_t iLinPtr = 0;
         RTGCPHYS *pPages  = (RTGCPHYS *)((uint8_t *)pCmd->paLinPtrs + sizeof (VBOXHGCMLINPTR) *cLinPtrs);
@@ -1135,6 +1188,20 @@ static int vmmdevHGCMCallSaved (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCM
     Log(("vmmdevHGCMCall: cParms = %d\n", cParms));
 
     /*
+     * Sane upper limit.
+     */
+    if (cParms > VMMDEV_MAX_HGCM_PARMS)
+    {
+        static int s_cRelWarn;
+        if (s_cRelWarn < 50)
+        {
+            s_cRelWarn++;
+            LogRel(("VMMDev: request packet with too many parameters (%d). Refusing operation.\n", cParms));
+        }
+        return VERR_INVALID_PARAMETER;
+    }
+
+    /*
      * Compute size of required memory buffer.
      */
 
@@ -1289,6 +1356,7 @@ static int vmmdevHGCMCallSaved (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCM
         uint8_t *pu8Buf = (uint8_t *)pHostParm + cParms * sizeof (VBOXHGCMSVCPARM);
 
         pCmd->paHostParms = pHostParm;
+        pCmd->cHostParms  = cParms;
 
         uint32_t iParm;
         int iLinPtr = 0;
@@ -1664,6 +1732,8 @@ static int vmmdevHGCMCallSaved (VMMDevState *pVMMDevState, VMMDevHGCMCall *pHGCM
         {
             *pfHGCMCalled = true;
         }
+        /* else
+         *  ... the caller will also execute vmmdevHGCMRemoveCommand() for us */
     }
 
     return rc;
@@ -1756,6 +1826,88 @@ static int vmmdevHGCMCmdVerify (PVBOXHGCMCMD pCmd, VMMDevHGCMRequestHeader *pHea
     LogRel(("VMMDEV: Invalid HGCM command: pCmd->enmCmdType = 0x%08X, pHeader->header.requestType = 0x%08X\n",
           pCmd->enmCmdType, pHeader->header.requestType));
     return VERR_INVALID_PARAMETER;
+}
+
+#ifdef VBOX_WITH_64_BITS_GUESTS
+static int vmmdevHGCMParmVerify64(HGCMFunctionParameter64 *pGuestParm, VBOXHGCMSVCPARM *pHostParm)
+{
+    int rc = VERR_INVALID_PARAMETER;
+
+    switch (pGuestParm->type)
+    {
+        case VMMDevHGCMParmType_32bit:
+            if (pHostParm->type == VBOX_HGCM_SVC_PARM_32BIT)
+                rc = VINF_SUCCESS;
+            break;
+
+        case VMMDevHGCMParmType_64bit:
+            if (pHostParm->type == VBOX_HGCM_SVC_PARM_64BIT)
+                rc = VINF_SUCCESS;
+            break;
+
+        case VMMDevHGCMParmType_LinAddr_In:  /* In (read) */
+        case VMMDevHGCMParmType_LinAddr_Out: /* Out (write) */
+        case VMMDevHGCMParmType_LinAddr:     /* In & Out */
+            if (   pHostParm->type == VBOX_HGCM_SVC_PARM_PTR
+                && pGuestParm->u.Pointer.size >= pHostParm->u.pointer.size)
+                rc = VINF_SUCCESS;
+            break;
+
+        case VMMDevHGCMParmType_PageList:
+            if (   pHostParm->type == VBOX_HGCM_SVC_PARM_PTR
+                && pGuestParm->u.PageList.size >= pHostParm->u.pointer.size)
+                rc = VINF_SUCCESS;
+            break;
+
+        default:
+            AssertLogRelMsgFailed(("hgcmCompleted: invalid parameter type %08X\n", pGuestParm->type));
+            break;
+    }
+
+    return rc;
+}
+#endif /* VBOX_WITH_64_BITS_GUESTS */
+
+#ifdef VBOX_WITH_64_BITS_GUESTS
+static int vmmdevHGCMParmVerify32(HGCMFunctionParameter32 *pGuestParm, VBOXHGCMSVCPARM *pHostParm)
+#else
+static int vmmdevHGCMParmVerify32(HGCMFunctionParameter *pGuestParm, VBOXHGCMSVCPARM *pHostParm)
+#endif
+{
+    int rc = VERR_INVALID_PARAMETER;
+
+    switch (pGuestParm->type)
+    {
+        case VMMDevHGCMParmType_32bit:
+            if (pHostParm->type == VBOX_HGCM_SVC_PARM_32BIT)
+                rc = VINF_SUCCESS;
+            break;
+
+        case VMMDevHGCMParmType_64bit:
+            if (pHostParm->type == VBOX_HGCM_SVC_PARM_64BIT)
+                rc = VINF_SUCCESS;
+            break;
+
+        case VMMDevHGCMParmType_LinAddr_In:  /* In (read) */
+        case VMMDevHGCMParmType_LinAddr_Out: /* Out (write) */
+        case VMMDevHGCMParmType_LinAddr:     /* In & Out */
+            if (   pHostParm->type == VBOX_HGCM_SVC_PARM_PTR
+                && pGuestParm->u.Pointer.size >= pHostParm->u.pointer.size)
+                rc = VINF_SUCCESS;
+            break;
+
+        case VMMDevHGCMParmType_PageList:
+            if (   pHostParm->type == VBOX_HGCM_SVC_PARM_PTR
+                && pGuestParm->u.PageList.size >= pHostParm->u.pointer.size)
+                rc = VINF_SUCCESS;
+            break;
+
+        default:
+            AssertLogRelMsgFailed(("hgcmCompleted: invalid parameter type %08X\n", pGuestParm->type));
+            break;
+    }
+
+    return rc;
 }
 
 #define PDMIHGCMPORT_2_VMMDEVSTATE(pInterface) ( (VMMDevState *) ((uintptr_t)pInterface - RT_OFFSETOF(VMMDevState, IHGCMPort)) )
@@ -1858,6 +2010,8 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                 VMMDevHGCMCall *pHGCMCall = (VMMDevHGCMCall *)pHeader;
 
                 uint32_t cParms = pHGCMCall->cParms;
+                if (cParms != pCmd->cHostParms)
+                    rc = VERR_INVALID_PARAMETER;
 
                 VBOXHGCMSVCPARM *pHostParm = pCmd->paHostParms;
 
@@ -1866,8 +2020,12 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
 
                 HGCMFunctionParameter64 *pGuestParm = VMMDEV_HGCM_CALL_PARMS64(pHGCMCall);
 
-                for (i = 0; i < cParms; i++, pGuestParm++, pHostParm++)
+                for (i = 0; i < cParms && RT_SUCCESS(rc); i++, pGuestParm++, pHostParm++)
                 {
+                    rc = vmmdevHGCMParmVerify64(pGuestParm, pHostParm);
+                    if (RT_FAILURE(rc))
+                        break;
+
                     switch (pGuestParm->type)
                     {
                         case VMMDevHGCMParmType_32bit:
@@ -1894,7 +2052,6 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                                     /* Use the saved page list to write data back to the guest RAM. */
                                     rc = vmmdevHGCMWriteLinPtr (pVMMDevState->pDevIns, i, pHostParm->u.pointer.addr,
                                                                 size, iLinPtr, pCmd->paLinPtrs);
-                                    AssertReleaseRC(rc);
                                 }
 
                                 /* All linptrs with size > 0 were saved. Advance the index to the next linptr. */
@@ -1945,7 +2102,8 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                         default:
                         {
                             /* This indicates that the guest request memory was corrupted. */
-                            AssertReleaseMsgFailed(("hgcmCompleted: invalid parameter type %08X\n", pGuestParm->type));
+                            rc = VERR_INVALID_PARAMETER;
+                            break;
                         }
                     }
                 }
@@ -1961,6 +2119,8 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                 VMMDevHGCMCall *pHGCMCall = (VMMDevHGCMCall *)pHeader;
 
                 uint32_t cParms = pHGCMCall->cParms;
+                if (cParms != pCmd->cHostParms)
+                    rc = VERR_INVALID_PARAMETER;
 
                 VBOXHGCMSVCPARM *pHostParm = pCmd->paHostParms;
 
@@ -1969,8 +2129,12 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
 
                 HGCMFunctionParameter32 *pGuestParm = VMMDEV_HGCM_CALL_PARMS32(pHGCMCall);
 
-                for (i = 0; i < cParms; i++, pGuestParm++, pHostParm++)
+                for (i = 0; i < cParms && RT_SUCCESS(rc); i++, pGuestParm++, pHostParm++)
                 {
+                    rc = vmmdevHGCMParmVerify32(pGuestParm, pHostParm);
+                    if (RT_FAILURE(rc))
+                        break;
+
                     switch (pGuestParm->type)
                     {
                         case VMMDevHGCMParmType_32bit:
@@ -1996,7 +2160,6 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                                 {
                                     /* Use the saved page list to write data back to the guest RAM. */
                                     rc = vmmdevHGCMWriteLinPtr (pVMMDevState->pDevIns, i, pHostParm->u.pointer.addr, size, iLinPtr, pCmd->paLinPtrs);
-                                    AssertReleaseRC(rc);
                                 }
 
                                 /* All linptrs with size > 0 were saved. Advance the index to the next linptr. */
@@ -2047,7 +2210,8 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                         default:
                         {
                             /* This indicates that the guest request memory was corrupted. */
-                            AssertReleaseMsgFailed(("hgcmCompleted: invalid parameter type %08X\n", pGuestParm->type));
+                            rc = VERR_INVALID_PARAMETER;
+                            break;
                         }
                     }
                 }
@@ -2063,6 +2227,8 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                 VMMDevHGCMCall *pHGCMCall = (VMMDevHGCMCall *)pHeader;
 
                 uint32_t cParms = pHGCMCall->cParms;
+                if (cParms != pCmd->cHostParms)
+                    rc = VERR_INVALID_PARAMETER;
 
                 VBOXHGCMSVCPARM *pHostParm = pCmd->paHostParms;
 
@@ -2071,8 +2237,12 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
 
                 HGCMFunctionParameter *pGuestParm = VMMDEV_HGCM_CALL_PARMS(pHGCMCall);
 
-                for (i = 0; i < cParms; i++, pGuestParm++, pHostParm++)
+                for (i = 0; i < cParms && RT_SUCCESS(rc); i++, pGuestParm++, pHostParm++)
                 {
+                    rc = vmmdevHGCMParmVerify32(pGuestParm, pHostParm);
+                    if (RT_FAILURE(rc))
+                        break;
+
                     switch (pGuestParm->type)
                     {
                         case VMMDevHGCMParmType_32bit:
@@ -2098,7 +2268,6 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                                 {
                                     /* Use the saved page list to write data back to the guest RAM. */
                                     rc = vmmdevHGCMWriteLinPtr (pVMMDevState->pDevIns, i, pHostParm->u.pointer.addr, size, iLinPtr, pCmd->paLinPtrs);
-                                    AssertReleaseRC(rc);
                                 }
 
                                 /* All linptrs with size > 0 were saved. Advance the index to the next linptr. */
@@ -2149,7 +2318,8 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                         default:
                         {
                             /* This indicates that the guest request memory was corrupted. */
-                            AssertReleaseMsgFailed(("hgcmCompleted: invalid parameter type %08X\n", pGuestParm->type));
+                            rc = VERR_INVALID_PARAMETER;
+                            break;
                         }
                     }
                 }
@@ -2175,10 +2345,11 @@ DECLCALLBACK(void) hgcmCompletedWorker (PPDMIHGCMPORT pInterface, int32_t result
                 break;
             }
         }
-        else
+
+        if (RT_FAILURE(rc))
         {
-            /* Command type is wrong. Return error to the guest. */
-            pHeader->header.rc = rc;
+            /* Command is wrong. Return HGCM error result to the guest. */
+            pHeader->result = rc;
         }
 
         /* Mark request as processed. */

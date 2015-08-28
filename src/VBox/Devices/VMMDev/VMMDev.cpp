@@ -535,6 +535,9 @@ static int vmmdevReqHandler_ReportGuestInfo2(VMMDevState *pThis, VMMDevRequestHe
     if (pThis->pDrv && pThis->pDrv->pfnUpdateGuestInfo2)
         pThis->pDrv->pfnUpdateGuestInfo2(pThis->pDrv, uFullVersion, pszName, pInfo2->additionsRevision, pInfo2->additionsFeatures);
 
+    /* Clear our IRQ in case it was high for whatever reason. */
+    PDMDevHlpPCISetIrqNoWait (pThis->pDevIns, 0, 0);
+
     return VINF_SUCCESS;
 }
 
@@ -795,6 +798,20 @@ static int vmmdevReqHandler_DebugIsPageShared(PPDMDEVINS pDevIns, VMMDevPageIsSh
 
 #endif /* VBOX_WITH_PAGE_SHARING */
 
+static int vmmdevVerifyPointerShape(VMMDevReqMousePointer *pReq)
+{
+    /* Should be enough for most mouse pointers. */
+    if (pReq->width > 8192 || pReq->height > 8192)
+        return VERR_INVALID_PARAMETER;
+
+    uint32_t cbShape = (pReq->width + 7) / 8 * pReq->height; /* size of the AND mask */
+    cbShape = ((cbShape + 3) & ~3) + pReq->width * 4 * pReq->height; /* + gap + size of the XOR mask */
+    if (RT_UOFFSETOF(VMMDevReqMousePointer, pointerData) + cbShape > pReq->header.size)
+        return VERR_INVALID_PARAMETER;
+
+    return VINF_SUCCESS;
+}
+
 /**
  * Port I/O Handler for the generic request interface
  * @see FNIOMIOPORTOUT for details.
@@ -922,7 +939,11 @@ static DECLCALLBACK(int) vmmdevRequestHandler(PPDMDEVINS pDevIns, void *pvUser, 
             }
 
             if (pThis->fu32AdditionsOk)
+            {
                 pRequestHeader->rc = VINF_SUCCESS;
+                /* Clear our IRQ in case it was high for whatever reason. */
+                PDMDevHlpPCISetIrqNoWait (pThis->pDevIns, 0, 0);
+            }
             else
                 pRequestHeader->rc = VERR_VERSION_MISMATCH;
             break;
@@ -1163,6 +1184,10 @@ static DECLCALLBACK(int) vmmdevRequestHandler(PPDMDEVINS pDevIns, void *pvUser, 
                 /* forward call to driver */
                 if (fShape)
                 {
+                    pRequestHeader->rc = vmmdevVerifyPointerShape(pointerShape);
+                    if (RT_FAILURE(pRequestHeader->rc))
+                        break;
+
                     pThis->pDrv->pfnUpdatePointerShape(pThis->pDrv,
                                                        fVisible,
                                                        fAlpha,

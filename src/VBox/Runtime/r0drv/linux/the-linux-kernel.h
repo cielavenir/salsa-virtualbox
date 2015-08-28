@@ -35,7 +35,7 @@
 #define bool linux_bool
 
 #include <linux/version.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,6,33)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 33)
 # include <generated/autoconf.h>
 #else
 # ifndef AUTOCONF_INCLUDED
@@ -90,6 +90,9 @@
 #include <linux/slab.h>
 #include <linux/time.h>
 #include <linux/sched.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 9, 0)
+# include <linux/sched/rt.h>
+#endif
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 7)
 # include <linux/jiffies.h>
 #endif

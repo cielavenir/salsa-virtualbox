@@ -1262,7 +1262,7 @@ static int PortTaskFileData_r(PAHCI ahci, PAHCIPort pAhciPort, uint32_t iReg, ui
  */
 static int PortCmd_r(PAHCI ahci, PAHCIPort pAhciPort, uint32_t iReg, uint32_t *pu32Value)
 {
-    ahciLog(("%s: read regCMD=%#010x\n", __FUNCTION__, pAhciPort->regCMD));
+    ahciLog(("%s: read regCMD=%#010x\n", __FUNCTION__, pAhciPort->regCMD | AHCI_PORT_CMD_CCS_SHIFT(pAhciPort->u32CurrentCommandSlot)));
     ahciLog(("%s: ICC=%d ASP=%d ALPE=%d DLAE=%d ATAPI=%d CPD=%d ISP=%d HPCP=%d PMA=%d CPS=%d CR=%d FR=%d ISS=%d CCS=%d FRE=%d CLO=%d POD=%d SUD=%d ST=%d\n",
              __FUNCTION__, (pAhciPort->regCMD & AHCI_PORT_CMD_ICC) >> 28, (pAhciPort->regCMD & AHCI_PORT_CMD_ASP) >> 27,
              (pAhciPort->regCMD & AHCI_PORT_CMD_ALPE) >> 26, (pAhciPort->regCMD & AHCI_PORT_CMD_DLAE) >> 25,
@@ -1296,6 +1296,9 @@ static int PortCmd_w(PAHCI ahci, PAHCIPort pAhciPort, uint32_t iReg, uint32_t u3
              (u32Value & AHCI_PORT_CMD_FRE) >> 4, (u32Value & AHCI_PORT_CMD_CLO) >> 3,
              (u32Value & AHCI_PORT_CMD_POD) >> 2, (u32Value & AHCI_PORT_CMD_SUD) >> 1,
              (u32Value & AHCI_PORT_CMD_ST)));
+
+    /* The PxCMD.CCS bits are R/O and maintained separately. */
+    u32Value &= ~AHCI_PORT_CMD_CCS;
 
     if (pAhciPort->fPoweredOn && pAhciPort->fSpunUp)
     {
@@ -2432,6 +2435,8 @@ PDMBOTHCBDECL(int) ahciIdxDataRead(PPDMDEVINS pDevIns, void *pvUser, RTIOPORT Po
             rc = ahciRegisterRead(pAhci, pAhci->regIdx, pu32, cb);
             if (rc == VINF_IOM_HC_MMIO_READ)
                 rc = VINF_IOM_HC_IOPORT_READ;
+            else if (rc == VINF_IOM_MMIO_UNUSED_00)
+                rc = VERR_IOM_IOPORT_UNUSED;
         }
     }
     else
@@ -3848,7 +3853,7 @@ static int atapiReadTOCRawSS(PAHCIPORTTASKSTATE pAhciPortTaskState, PAHCIPort pA
 /**
  * Sets the given media track type.
  */
-static uint32_t ataMediumTypeSet(PAHCIPort pAhciPort, uint32_t MediaTrackType)
+static uint32_t ahciMediumTypeSet(PAHCIPort pAhciPort, uint32_t MediaTrackType)
 {
     return ASMAtomicXchgU32(&pAhciPort->MediaTrackType, MediaTrackType);
 }
@@ -4012,13 +4017,15 @@ static int atapiPassthroughSS(PAHCIPORTTASKSTATE pAhciPortTaskState, PAHCIPort p
                 ataSCSIPadStr((uint8_t *)pAhciPortTaskState->pSGListHead[0].pvSeg + 16, "CD-ROM", 16);
                 ataSCSIPadStr((uint8_t *)pAhciPortTaskState->pSGListHead[0].pvSeg + 32, "1.0", 4);
             }
-            else if (pAhciPortTaskState->aATAPICmd[0] == SCSI_READ_TOC_PMA_ATIP)
+            else if (   pAhciPortTaskState->aATAPICmd[0] == SCSI_READ_TOC_PMA_ATIP
+                     && (pAhciPortTaskState->aATAPICmd[2] & 0xf) != 0x05
+                     && pAhciPortTaskState->aATAPICmd[6] != 0xaa)
             {
                 /* Set the media type if we can detect it. */
                 uint8_t *pbBuf = (uint8_t *)pAhciPortTaskState->pSGListHead[0].pvSeg;
 
                 /** @todo: Implemented only for formatted TOC now. */
-                if (   (pAhciPortTaskState->aATAPICmd[1] & 0xf) == 0
+                if (   (pAhciPortTaskState->aATAPICmd[2] & 0xf) == 0
                     && cbTransfer >= 6)
                 {
                     uint32_t NewMediaType;
@@ -4029,7 +4036,7 @@ static int atapiPassthroughSS(PAHCIPORTTASKSTATE pAhciPortTaskState, PAHCIPort p
                     else
                         NewMediaType = ATA_MEDIA_TYPE_CDDA;
 
-                    OldMediaType = ataMediumTypeSet(pAhciPort, NewMediaType);
+                    OldMediaType = ahciMediumTypeSet(pAhciPort, NewMediaType);
 
                     if (OldMediaType != NewMediaType)
                         LogRel(("AHCI: LUN#%d: CD-ROM passthrough, detected %s CD\n",
@@ -4039,7 +4046,7 @@ static int atapiPassthroughSS(PAHCIPORTTASKSTATE pAhciPortTaskState, PAHCIPort p
                                 : "audio"));
                 }
                 else /* Play safe and set to unknown. */
-                    ataMediumTypeSet(pAhciPort, ATA_MEDIA_TYPE_UNKNOWN);
+                    ahciMediumTypeSet(pAhciPort, ATA_MEDIA_TYPE_UNKNOWN);
             }
             if (cbTransfer)
                 Log3(("ATAPI PT data read (%d): %.*Rhxs\n", cbTransfer, cbTransfer, (uint8_t *)pAhciPortTaskState->pSGListHead[0].pvSeg));
@@ -7669,7 +7676,7 @@ static DECLCALLBACK(void) ahciMountNotify(PPDMIMOUNTNOTIFY pInterface)
         if (pAhciPort->cNotifiedMediaChange < 2)
             pAhciPort->cNotifiedMediaChange = 2;
         ahciMediumInserted(pAhciPort);
-        ataMediumTypeSet(pAhciPort, ATA_MEDIA_TYPE_UNKNOWN);
+        ahciMediumTypeSet(pAhciPort, ATA_MEDIA_TYPE_UNKNOWN);
     }
     else
         AssertMsgFailed(("Hard disks don't have a mount interface!\n"));
@@ -7696,7 +7703,7 @@ static DECLCALLBACK(void) ahciUnmountNotify(PPDMIMOUNTNOTIFY pInterface)
          */
         pAhciPort->cNotifiedMediaChange = 4;
         ahciMediumRemoved(pAhciPort);
-        ataMediumTypeSet(pAhciPort, ATA_MEDIA_TYPE_UNKNOWN);
+        ahciMediumTypeSet(pAhciPort, ATA_MEDIA_TYPE_UNKNOWN);
     }
     else
         AssertMsgFailed(("Hard disks don't have a mount interface!\n"));
@@ -8111,7 +8118,15 @@ static DECLCALLBACK(int)  ahciR3Attach(PPDMDEVINS pDevIns, unsigned iLUN, uint32
      */
     rc = PDMDevHlpDriverAttach(pDevIns, pAhciPort->iLUN, &pAhciPort->IBase, &pAhciPort->pDrvBase, NULL);
     if (RT_SUCCESS(rc))
+    {
         rc = ahciR3ConfigureLUN(pDevIns, pAhciPort);
+
+        /*
+         * In case there is a medium inserted.
+         */
+        ahciMediumInserted(pAhciPort);
+        ahciMediumTypeSet(pAhciPort, ATA_MEDIA_TYPE_UNKNOWN);
+    }
     else
         AssertMsgFailed(("Failed to attach LUN#%d. rc=%Rrc\n", pAhciPort->iLUN, rc));
 
@@ -8778,7 +8793,8 @@ const PDMDEVREG g_DeviceAHCI =
     "Intel AHCI controller.\n",
     /* fFlags */
     PDM_DEVREG_FLAGS_DEFAULT_BITS | PDM_DEVREG_FLAGS_RC | PDM_DEVREG_FLAGS_R0 |
-    PDM_DEVREG_FLAGS_FIRST_SUSPEND_NOTIFICATION | PDM_DEVREG_FLAGS_FIRST_POWEROFF_NOTIFICATION,
+    PDM_DEVREG_FLAGS_FIRST_SUSPEND_NOTIFICATION | PDM_DEVREG_FLAGS_FIRST_POWEROFF_NOTIFICATION |
+    PDM_DEVREG_FLAGS_FIRST_RESET_NOTIFICATION,
     /* fClass */
     PDM_DEVREG_CLASS_STORAGE,
     /* cMaxInstances */

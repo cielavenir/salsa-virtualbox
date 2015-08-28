@@ -1,4 +1,4 @@
-/* $Rev: 74359 $ */
+/* $Rev: 97220 $ */
 /** @file
  * VBoxGuest - Linux specifics.
  *
@@ -203,7 +203,11 @@ static struct miscdevice        g_MiscDeviceUser =
 
 
 /** PCI hotplug structure. */
-static const struct pci_device_id __devinitdata g_VBoxGuestPciId[] =
+static const struct pci_device_id
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 8, 0)
+__devinitdata
+#endif
+g_VBoxGuestPciId[] =
 {
     {
         vendor:     VMMDEV_VENDORID,
@@ -496,10 +500,11 @@ static int __init vboxguestLinuxCreateInputDevice(void)
 static void vboxguestLinuxTermInputDevice(void)
 {
     VbglGRFree(&g_pMouseStatusReq->header);
+    /* See documentation of input_register_device(): input_free_device()
+     * should not be called after a device has been registered. */
     input_unregister_device(g_pInputDevice);
-    input_free_device(g_pInputDevice);
 }
-#endif
+#endif /* VBOXGUEST_WITH_INPUT_DRIVER */
 
 
 /**

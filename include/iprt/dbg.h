@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2008-2009 Oracle Corporation
+ * Copyright (C) 2008-2013 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -29,6 +29,7 @@
 
 #include <iprt/types.h>
 #include <iprt/stdarg.h>
+#include <iprt/ldr.h>
 
 RT_C_DECLS_BEGIN
 

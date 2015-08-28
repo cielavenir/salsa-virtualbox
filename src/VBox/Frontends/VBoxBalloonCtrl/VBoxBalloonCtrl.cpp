@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2011 Oracle Corporation
+ * Copyright (C) 2011-2013 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -27,7 +27,7 @@
 # include <VBox/com/ErrorInfo.h>
 # include <VBox/com/errorprint.h>
 
-# include <VBox/com/EventQueue.h>
+# include <VBox/com/NativeEventQueue.h>
 # include <VBox/com/listeners.h>
 # include <VBox/com/VirtualBox.h>
 #endif /* !VBOX_ONLY_DOCS */
@@ -134,7 +134,7 @@ static ComPtr<IEventListener> g_pVBoxEventListener = NULL;
 # ifdef VBOX_BALLOONCTRL_GLOBAL_PERFCOL
 static ComPtr<IPerformanceCollector> g_pPerfCollector = NULL;
 # endif
-static EventQueue *g_pEventQ = NULL;
+static NativeEventQueue *g_pEventQ = NULL;
 
 /** A machine's internal entry. */
 typedef struct VBOXBALLOONCTRL_MACHINE
@@ -984,7 +984,7 @@ static RTEXITCODE balloonCtrlMain(HandlerArg *a)
         int vrc = VINF_SUCCESS;
 
         /* Initialize global weak references. */
-        g_pEventQ = com::EventQueue::getMainEventQueue();
+        g_pEventQ = com::NativeEventQueue::getMainEventQueue();
 
         RTCritSectInit(&g_MapCritSect);
 
@@ -1121,6 +1121,7 @@ static void logHeaderFooter(PRTLOGGER pLoggerRelease, RTLOGPHASE enmPhase, PFNRT
             vrc = RTSystemQueryOSInfo(RTSYSOSINFO_VERSION, szTmp, sizeof(szTmp));
             if (RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW)
                 pfnLog(pLoggerRelease, "OS Version: %s\n", szTmp);
+            vrc = RTSystemQueryOSInfo(RTSYSOSINFO_SERVICE_PACK, szTmp, sizeof(szTmp));
             if (RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW)
                 pfnLog(pLoggerRelease, "OS Service Pack: %s\n", szTmp);
 
@@ -1463,7 +1464,7 @@ int main(int argc, char *argv[])
     HandlerArg handlerArg = { argc, argv };
     RTEXITCODE rcExit = balloonCtrlMain(&handlerArg);
 
-    EventQueue::getMainEventQueue()->processEventQueue(0);
+    NativeEventQueue::getMainEventQueue()->processEventQueue(0);
 
     deleteGlobalObjects();
 

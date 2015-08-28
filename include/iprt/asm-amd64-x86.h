@@ -68,6 +68,10 @@
 #  pragma intrinsic(__readcr8)
 #  pragma intrinsic(__writecr8)
 # endif
+# if RT_INLINE_ASM_USES_INTRIN >= 15
+#  pragma intrinsic(__readeflags)
+#  pragma intrinsic(__writeeflags)
+# endif
 #endif
 
 
@@ -353,7 +357,7 @@ DECLINLINE(RTSEL) ASMGetTR(void)
  * Get the [RE]FLAGS register.
  * @returns [RE]FLAGS.
  */
-#if RT_INLINE_ASM_EXTERNAL
+#if RT_INLINE_ASM_EXTERNAL && RT_INLINE_ASM_USES_INTRIN < 15
 DECLASM(RTCCUINTREG) ASMGetFlags(void);
 #else
 DECLINLINE(RTCCUINTREG) ASMGetFlags(void)
@@ -369,6 +373,8 @@ DECLINLINE(RTCCUINTREG) ASMGetFlags(void)
                          "popl  %0\n\t"
                          : "=r" (uFlags));
 #  endif
+# elif RT_INLINE_ASM_USES_INTRIN >= 15
+    uFlags = __readeflags();
 # else
     __asm
     {
@@ -390,7 +396,7 @@ DECLINLINE(RTCCUINTREG) ASMGetFlags(void)
  * Set the [RE]FLAGS register.
  * @param   uFlags      The new [RE]FLAGS value.
  */
-#if RT_INLINE_ASM_EXTERNAL
+#if RT_INLINE_ASM_EXTERNAL && RT_INLINE_ASM_USES_INTRIN < 15
 DECLASM(void) ASMSetFlags(RTCCUINTREG uFlags);
 #else
 DECLINLINE(void) ASMSetFlags(RTCCUINTREG uFlags)
@@ -405,6 +411,8 @@ DECLINLINE(void) ASMSetFlags(RTCCUINTREG uFlags)
                          "popfl\n\t"
                          : : "g" (uFlags));
 #  endif
+# elif RT_INLINE_ASM_USES_INTRIN >= 15
+    __writeeflags(uFlags);
 # else
     __asm
     {
@@ -524,8 +532,8 @@ DECLINLINE(void) ASMCpuId(uint32_t uOperator, void *pvEAX, void *pvEBX, void *pv
 
 
 /**
- * Performs the cpuid instruction returning all registers.
- * Some subfunctions of cpuid take ECX as additional parameter (currently known for EAX=4)
+ * Performs the CPUID instruction with EAX and ECX input returning ALL output
+ * registers.
  *
  * @param   uOperator   CPUID operation (eax).
  * @param   uIdxECX     ecx index
@@ -535,7 +543,7 @@ DECLINLINE(void) ASMCpuId(uint32_t uOperator, void *pvEAX, void *pvEBX, void *pv
  * @param   pvEDX       Where to store edx.
  * @remark  We're using void pointers to ease the use of special bitfield structures and such.
  */
-#if RT_INLINE_ASM_EXTERNAL && !RT_INLINE_ASM_USES_INTRIN
+#if RT_INLINE_ASM_EXTERNAL || RT_INLINE_ASM_USES_INTRIN
 DECLASM(void) ASMCpuId_Idx_ECX(uint32_t uOperator, uint32_t uIdxECX, void *pvEAX, void *pvEBX, void *pvECX, void *pvEDX);
 #else
 DECLINLINE(void) ASMCpuId_Idx_ECX(uint32_t uOperator, uint32_t uIdxECX, void *pvEAX, void *pvEBX, void *pvECX, void *pvEDX)
@@ -568,8 +576,7 @@ DECLINLINE(void) ASMCpuId_Idx_ECX(uint32_t uOperator, uint32_t uIdxECX, void *pv
 
 # elif RT_INLINE_ASM_USES_INTRIN
     int aInfo[4];
-    /* ??? another intrinsic ??? */
-    __cpuid(aInfo, uOperator);
+    __cpuidex(aInfo, uOperator, uIdxECX);
     *(uint32_t *)pvEAX = aInfo[0];
     *(uint32_t *)pvEBX = aInfo[1];
     *(uint32_t *)pvECX = aInfo[2];
@@ -979,7 +986,7 @@ DECLINLINE(bool) ASMIsIntelCpu(void)
 
 
 /**
- * Tests if it a authentic AMD CPU based on the ASMCpuId(0) output.
+ * Tests if it an authentic AMD CPU based on the ASMCpuId(0) output.
  *
  * @returns true/false.
  * @param   uEBX    EBX return from ASMCpuId(0)
@@ -1005,6 +1012,71 @@ DECLINLINE(bool) ASMIsAmdCpu(void)
     uint32_t uEAX, uEBX, uECX, uEDX;
     ASMCpuId(0, &uEAX, &uEBX, &uECX, &uEDX);
     return ASMIsAmdCpuEx(uEBX, uECX, uEDX);
+}
+
+
+/**
+ * Tests if it a centaur hauling VIA CPU based on the ASMCpuId(0) output.
+ *
+ * @returns true/false.
+ * @param   uEBX    EBX return from ASMCpuId(0).
+ * @param   uECX    ECX return from ASMCpuId(0).
+ * @param   uEDX    EDX return from ASMCpuId(0).
+ */
+DECLINLINE(bool) ASMIsViaCentaurCpuEx(uint32_t uEBX, uint32_t uECX, uint32_t uEDX)
+{
+    return uEBX == UINT32_C(0x746e6543)
+        && uECX == UINT32_C(0x736c7561)
+        && uEDX == UINT32_C(0x48727561);
+}
+
+
+/**
+ * Tests if this is a centaur hauling VIA CPU.
+ *
+ * @returns true/false.
+ * @remarks ASSUMES that cpuid is supported by the CPU.
+ */
+DECLINLINE(bool) ASMIsViaCentaurCpu(void)
+{
+    uint32_t uEAX, uEBX, uECX, uEDX;
+    ASMCpuId(0, &uEAX, &uEBX, &uECX, &uEDX);
+    return ASMIsAmdCpuEx(uEBX, uECX, uEDX);
+}
+
+
+/**
+ * Checks whether ASMCpuId_EAX(0x00000000) indicates a valid range.
+ *
+ *
+ * @returns true/false.
+ * @param   uEAX    The EAX value of CPUID leaf 0x00000000.
+ *
+ * @note    This only succeeds if there are at least two leaves in the range.
+ * @remarks The upper range limit is just some half reasonable value we've
+ *          picked out of thin air.
+ */
+DECLINLINE(bool) ASMIsValidStdRange(uint32_t uEAX)
+{
+    return uEAX >= UINT32_C(0x00000001) && uEAX <= UINT32_C(0x000fffff);
+}
+
+
+/**
+ * Checks whether ASMCpuId_EAX(0x80000000) indicates a valid range.
+ *
+ * This only succeeds if there are at least two leaves in the range.
+ *
+ * @returns true/false.
+ * @param   uEAX    The EAX value of CPUID leaf 0x80000000.
+ *
+ * @note    This only succeeds if there are at least two leaves in the range.
+ * @remarks The upper range limit is just some half reasonable value we've
+ *          picked out of thin air.
+ */
+DECLINLINE(bool) ASMIsValidExtRange(uint32_t uEAX)
+{
+    return uEAX >= UINT32_C(0x80000001) && uEAX <= UINT32_C(0x800fffff);
 }
 
 

@@ -110,7 +110,8 @@ PFNDISPARSE  pfnFullDisasm[IDX_ParseMax] =
     ParseImmByteSX,
     ParseImmZ,
     ParseThreeByteEsc4,
-    ParseThreeByteEsc5
+    ParseThreeByteEsc5,
+    ParseImmAddrF
 };
 
 PFNDISPARSE  pfnCalcSize[IDX_ParseMax] =
@@ -154,7 +155,8 @@ PFNDISPARSE  pfnCalcSize[IDX_ParseMax] =
     ParseImmByteSX_SizeOnly,
     ParseImmZ_SizeOnly,
     ParseThreeByteEsc4,
-    ParseThreeByteEsc5
+    ParseThreeByteEsc5,
+    ParseImmAddrF_SizeOnly
 };
 
 /**
@@ -273,7 +275,7 @@ static int disCoreOne(PDISCPUSTATE pCpu, RTUINTPTR InstructionAddr, unsigned *pc
         pCpu->opmode     = pCpu->mode;
     }
 
-#ifdef IN_RING3
+#if defined(IN_RING3) && !defined(IN_SUP_HARDENED_R3)
 # ifndef __L4ENV__  /* Unfortunately, we have no exception handling in l4env */
     try
 # else
@@ -374,7 +376,7 @@ static int disCoreOne(PDISCPUSTATE pCpu, RTUINTPTR InstructionAddr, unsigned *pc
             unsigned uIdx = iByte;
             iByte += sizeof(uint8_t); //first opcode byte
 
-            pCpu->opaddr = InstructionAddr + uIdx;
+            pCpu->opaddr = InstructionAddr;
             pCpu->opcode = codebyte;
 
             cbInc = ParseInstruction(InstructionAddr + iByte, &paOneByteMap[pCpu->opcode], pCpu);
@@ -382,7 +384,7 @@ static int disCoreOne(PDISCPUSTATE pCpu, RTUINTPTR InstructionAddr, unsigned *pc
             break;
         }
     }
-#ifdef IN_RING3
+#if defined(IN_RING3) && !defined(IN_SUP_HARDENED_R3)
 # ifndef __L4ENV__
     catch(...)
 # else
@@ -1554,6 +1556,55 @@ unsigned ParseImmAddr_SizeOnly(RTUINTPTR lpszCodeBlock, PCOPCODE pOp, POP_PARAME
 }
 //*****************************************************************************
 //*****************************************************************************
+unsigned ParseImmAddrF(RTUINTPTR lpszCodeBlock, PCOPCODE pOp, POP_PARAMETER pParam, PDISCPUSTATE pCpu)
+{
+    disasmGetPtrString(pCpu, pOp, pParam);
+    // immediate far pointers - only 16:16 or 16:32; determined by operand, *not* address size!
+    Assert(pCpu->opmode == CPUMODE_16BIT || pCpu->opmode == CPUMODE_32BIT);
+    Assert(OP_PARM_VSUBTYPE(pParam->param) == OP_PARM_p);
+    if (pCpu->opmode == CPUMODE_32BIT)
+    {
+        // far 16:32 pointer
+        pParam->parval = DISReadDWord(pCpu, lpszCodeBlock);
+        *((uint32_t*)&pParam->parval+1) = DISReadWord(pCpu, lpszCodeBlock+sizeof(uint32_t));
+        pParam->flags  |= USE_IMMEDIATE_ADDR_16_32;
+        pParam->size   = sizeof(uint16_t) + sizeof(uint32_t);
+
+        disasmAddStringF2(pParam->szParam, "0%04X:0%08Xh", (uint32_t)(pParam->parval>>32), (uint32_t)pParam->parval);
+        return sizeof(uint32_t) + sizeof(uint16_t);
+    }
+    else
+    {
+        // far 16:16 pointer
+        pParam->parval = DISReadDWord(pCpu, lpszCodeBlock);
+        pParam->flags |= USE_IMMEDIATE_ADDR_16_16;
+        pParam->size   = 2*sizeof(uint16_t);
+
+        disasmAddStringF2(pParam->szParam, "0%04X:0%04Xh", (uint32_t)(pParam->parval>>16), (uint16_t)pParam->parval );
+        return sizeof(uint32_t);
+    }
+}
+//*****************************************************************************
+//*****************************************************************************
+unsigned ParseImmAddrF_SizeOnly(RTUINTPTR lpszCodeBlock, PCOPCODE pOp, POP_PARAMETER pParam, PDISCPUSTATE pCpu)
+{
+    NOREF(lpszCodeBlock); NOREF(pOp);
+    // immediate far pointers - only 16:16 or 16:32
+    Assert(pCpu->opmode == CPUMODE_16BIT || pCpu->opmode == CPUMODE_32BIT);
+    Assert(OP_PARM_VSUBTYPE(pParam->param) == OP_PARM_p);
+    if (pCpu->opmode == CPUMODE_32BIT)
+    {
+        // far 16:32 pointer
+        return sizeof(uint32_t) + sizeof(uint16_t);
+    }
+    else
+    {
+        // far 16:16 pointer
+        return sizeof(uint32_t);
+    }
+}
+//*****************************************************************************
+//*****************************************************************************
 unsigned ParseFixedReg(RTUINTPTR lpszCodeBlock, PCOPCODE pOp, POP_PARAMETER pParam, PDISCPUSTATE pCpu)
 {
     /*
@@ -2369,7 +2420,7 @@ void disasmModRMReg(PDISCPUSTATE pCpu, PCOPCODE pOp, unsigned idx, POP_PARAMETER
         break;
 
     default:
-#ifdef IN_RING3
+#if defined(IN_RING3) && !defined(IN_SUP_HARDENED_R3)
         Log(("disasmModRMReg %x:%x failed!!\n", type, subtype));
         DIS_THROW(ExceptionInvalidModRM);
 #else
@@ -2398,7 +2449,7 @@ void disasmModRMSReg(PDISCPUSTATE pCpu, PCOPCODE pOp, unsigned idx, POP_PARAMETE
 #if 0 //def DEBUG_Sander
     AssertMsg(idx < RT_ELEMENTS(szModRMSegReg), ("idx=%d\n", idx));
 #endif
-#ifdef IN_RING3
+#if defined(IN_RING3) && !defined(IN_SUP_HARDENED_R3)
     if (idx >= RT_ELEMENTS(szModRMSegReg))
     {
         Log(("disasmModRMSReg %d failed!!\n", idx));

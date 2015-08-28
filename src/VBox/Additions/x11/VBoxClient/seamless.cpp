@@ -33,12 +33,6 @@ public:
     }
     virtual int run(bool fDaemonised /* = false */)
     {
-        /* Initialise threading in X11 and in Xt. */
-        if (!XInitThreads())
-        {
-            LogRel(("VBoxClient: error initialising threads in X11, exiting.\n"));
-            return VERR_NOT_SUPPORTED;
-        }
         mSeamless.init();
         /* Stay running as long as X does... */
         Display *pDisplay = XOpenDisplay(NULL);

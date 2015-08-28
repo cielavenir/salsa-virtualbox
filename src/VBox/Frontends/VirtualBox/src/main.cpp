@@ -44,6 +44,7 @@
 
 #ifdef Q_WS_X11
 # include <X11/Xlib.h>
+# include <dlfcn.h>
 #endif
 
 #include <iprt/buildconfig.h>
@@ -294,12 +295,32 @@ static void showHelp()
     /** @todo Show this as a dialog on windows. */
 }
 
+#ifdef Q_WS_X11
+/** This is a workaround for a bug on old libX11 versions, fixed in commit
+ * 	941f02ede63baa46f93ed8abccebe76fb29c0789 and released in version 1.1. */
+Status VBoxXInitThreads(void)
+{
+    void *pvProcess = dlopen(NULL, RTLD_GLOBAL | RTLD_LAZY);
+    Status rc = 1;
+    if (pvProcess && dlsym(pvProcess, "xcb_connect"))
+        rc = XInitThreads();
+    if (pvProcess)
+        dlclose(pvProcess);
+    return rc;
+}
+#endif
+
 extern "C" DECLEXPORT(int) TrustedMain (int argc, char **argv, char ** /*envp*/)
 {
     LogFlowFuncEnter();
 # if defined(RT_OS_DARWIN)
     ShutUpAppKit();
 # endif
+
+#ifdef Q_WS_X11
+    if (!VBoxXInitThreads())
+        return 1;
+#endif
 
     for (int i=0; i<argc; i++)
         if (   !strcmp(argv[i], "-h")
@@ -320,6 +341,11 @@ extern "C" DECLEXPORT(int) TrustedMain (int argc, char **argv, char ** /*envp*/)
     sigaction (SIGSEGV, &sa, NULL);
     sigaction (SIGBUS, &sa, NULL);
     sigaction (SIGUSR1, &sa, NULL);
+#endif
+
+#ifdef VBOX_WITH_HARDENING
+    /* Make sure the image verification code works (VBoxDbg.dll and other plugins). */
+    SUPR3HardenedVerifyInit();
 #endif
 
 #ifdef QT_MAC_USE_COCOA
@@ -554,6 +580,10 @@ int main (int argc, char **argv, char **envp)
      * are really about to start a VM. Don't do this if we are only starting
      * the selector window. */
     bool fInitSUPLib = false;
+#ifdef Q_WS_X11
+    if (!VBoxXInitThreads())
+        return 1;
+#endif
     for (int i = 1; i < argc; i++)
     {
         /* NOTE: the check here must match the corresponding check for the
@@ -639,7 +669,7 @@ int main (int argc, char **argv, char **envp)
  * @remarks Do not call IPRT here unless really required, it might not be
  *          initialized.
  */
-extern "C" DECLEXPORT(void) TrustedError (const char *pszWhere, SUPINITOP enmWhat, int rc, const char *pszMsgFmt, va_list va)
+extern "C" DECLEXPORT(void) TrustedError(const char *pszWhere, SUPINITOP enmWhat, int rc, const char *pszMsgFmt, va_list va)
 {
 # if defined(RT_OS_DARWIN)
     ShutUpAppKit();
@@ -658,44 +688,46 @@ extern "C" DECLEXPORT(void) TrustedError (const char *pszWhere, SUPINITOP enmWha
      */
     QString msgTitle = QApplication::tr ("VirtualBox - Error In %1").arg (pszWhere);
 
-    char msgBuf[1024];
-    vsprintf (msgBuf, pszMsgFmt, va);
+    char szMsgBuf[1024];
+    RTStrPrintfV(szMsgBuf, sizeof(szMsgBuf), pszMsgFmt, va);
+    QString strText = QApplication::tr("<html><b>%1 (rc=%2)</b><br/><br/>").arg(szMsgBuf).arg(rc);
+    strText.replace(QString("\n"), QString("<br>"));
 
-    QString msgText = QApplication::tr (
-            "<html><b>%1 (rc=%2)</b><br/><br/>").arg (msgBuf).arg (rc);
     switch (enmWhat)
     {
         case kSupInitOp_Driver:
 # ifdef RT_OS_LINUX
-            msgText += g_QStrHintLinuxNoDriver;
+            strText += g_QStrHintLinuxNoDriver;
 # else
-            msgText += g_QStrHintOtherNoDriver;
+            strText += g_QStrHintOtherNoDriver;
 # endif
             break;
 # ifdef RT_OS_LINUX
         case kSupInitOp_IPRT:
+        case kSupInitOp_Misc:
             if (rc == VERR_NO_MEMORY)
-                msgText += g_QStrHintLinuxNoMemory;
+                strText += g_QStrHintLinuxNoMemory;
             else
 # endif
             if (rc == VERR_VM_DRIVER_VERSION_MISMATCH)
 # ifdef RT_OS_LINUX
-                msgText += g_QStrHintLinuxWrongDriverVersion;
+                strText += g_QStrHintLinuxWrongDriverVersion;
 # else
-                msgText += g_QStrHintOtherWrongDriverVersion;
+                strText += g_QStrHintOtherWrongDriverVersion;
 # endif
             else
-                msgText += g_QStrHintReinstall;
+                strText += g_QStrHintReinstall;
             break;
         case kSupInitOp_Integrity:
         case kSupInitOp_RootCheck:
-            msgText += g_QStrHintReinstall;
+            strText += g_QStrHintReinstall;
             break;
         default:
             /* no hints here */
             break;
     }
-    msgText += "</html>";
+
+    strText += "</html>";
 
 # ifdef RT_OS_LINUX
     sleep(2);
@@ -703,10 +735,10 @@ extern "C" DECLEXPORT(void) TrustedError (const char *pszWhere, SUPINITOP enmWha
     QMessageBox::critical (
         0,                      /* parent */
         msgTitle,               /* title */
-        msgText,                /* text */
+        strText,                /* text */
         QMessageBox::Abort,     /* button0 */
         0);                     /* button1 */
-    qFatal ("%s", msgText.toAscii().constData());
+    qFatal ("%s", strText.toAscii().constData());
 }
 
 #endif /* VBOX_WITH_HARDENING */

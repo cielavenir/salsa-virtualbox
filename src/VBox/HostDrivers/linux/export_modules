@@ -90,7 +90,6 @@ for f in $FILES_VBOXDRV_BIN; do
 done
 sed -e "s;_VERSION_;$VBOX_VERSION_STRING;g" < $PATH_LINUX/build_in_tmp > $PATH_TMP/vboxdrv/build_in_tmp
 chmod 0755 $PATH_TMP/vboxdrv/build_in_tmp
-sed -e "s;_VERSION_;$VBOX_VERSION_STRING;g" < $PATH_VBOXDRV/linux/dkms.conf > $PATH_TMP/vboxdrv/dkms.conf
 if [ -n "$VBOX_WITH_HARDENING" ]; then
     cat                                   $PATH_VBOXDRV/linux/Makefile > $PATH_TMP/vboxdrv/Makefile
 else
@@ -104,7 +103,6 @@ for f in $VBOX_VBOXNETFLT_SOURCES; do
 done
 sed -e "s;_VERSION_;$VBOX_VERSION_STRING;g" < $PATH_LINUX/build_in_tmp > $PATH_TMP/vboxnetflt/build_in_tmp
 chmod 0755 $PATH_TMP/vboxnetflt/build_in_tmp
-sed -e "s;_VERSION_;$VBOX_VERSION_STRING;g" < $PATH_VBOXNET/linux/dkms.conf > $PATH_TMP/vboxnetflt/dkms.conf
 if [ -n "$VBOX_WITH_HARDENING" ]; then
     cat                                   $PATH_VBOXNET/linux/Makefile > $PATH_TMP/vboxnetflt/Makefile
 else
@@ -118,7 +116,6 @@ for f in $VBOX_VBOXNETADP_SOURCES; do
 done
 sed -e "s;_VERSION_;$VBOX_VERSION_STRING;g" < $PATH_LINUX/build_in_tmp > $PATH_TMP/vboxnetadp/build_in_tmp
 chmod 0755 $PATH_TMP/vboxnetadp/build_in_tmp
-sed -e "s;_VERSION_;$VBOX_VERSION_STRING;g" < $PATH_VBOXADP/linux/dkms.conf > $PATH_TMP/vboxnetadp/dkms.conf
 if [ -n "$VBOX_WITH_HARDENING" ]; then
     cat                                   $PATH_VBOXADP/linux/Makefile > $PATH_TMP/vboxnetadp/Makefile
 else
@@ -132,7 +129,6 @@ for f in $VBOX_VBOXPCI_SOURCES; do
 done
 sed -e "s;_VERSION_;$VBOX_VERSION_STRING;g" < $PATH_LINUX/build_in_tmp > $PATH_TMP/vboxpci/build_in_tmp
 chmod 0755 $PATH_TMP/vboxpci/build_in_tmp
-sed -e "s;_VERSION_;$VBOX_VERSION_STRING;g" < $PATH_VBOXPCI/linux/dkms.conf > $PATH_TMP/vboxpci/dkms.conf
 if [ -n "$VBOX_WITH_HARDENING" ]; then
     cat                                   $PATH_VBOXPCI/linux/Makefile > $PATH_TMP/vboxpci/Makefile
 else

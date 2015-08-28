@@ -62,10 +62,10 @@
 #endif
 #include <stdlib.h>
 
+#include "init.h"
 #include "internal/alignmentchecks.h"
 #include "internal/path.h"
 #include "internal/process.h"
-#include "internal/thread.h"
 #include "internal/thread.h"
 #include "internal/time.h"
 
@@ -125,6 +125,14 @@ DECLHIDDEN(bool volatile)   g_frtAtExitCalled = false;
  * This is set if the environment variable IPRT_ALIGNMENT_CHECKS is 1.
  */
 RTDATADECL(bool) g_fRTAlignmentChecks = false;
+#endif
+
+
+#if defined(RT_OS_DARWIN) || defined(RT_OS_FREEBSD) || defined(RT_OS_HAIKU) \
+ || defined(RT_OS_LINUX)  || defined(RT_OS_OS2)     || defined(RT_OS_SOLARIS) /** @todo add host init hooks everywhere. */
+/* Stubs */
+DECLHIDDEN(int)  rtR3InitNativeFirst(uint32_t fFlags) { return VINF_SUCCESS; }
+DECLHIDDEN(int)  rtR3InitNativeFinal(uint32_t fFlags) { return VINF_SUCCESS; }
 #endif
 
 
@@ -241,6 +249,12 @@ static void rtR3SigChildHandler(int iSignal)
 static int rtR3InitBody(bool fInitSUPLib, const char *pszProgramPath)
 {
     /*
+     * Early native initialization.
+     */
+    int rc = rtR3InitNativeFirst(0 /*fFlags*/);
+    AssertMsgRCReturn(rc, ("rtR3InitNativeFirst failed with %Rrc\n", rc), rc);
+
+    /*
      * Init C runtime locale before we do anything that may end up converting
      * paths or we'll end up using the "C" locale for path conversion.
      */
@@ -278,7 +292,7 @@ static int rtR3InitBody(bool fInitSUPLib, const char *pszProgramPath)
      * This must be done before everything else or else we'll call into threading
      * without having initialized TLS entries and suchlike.
      */
-    int rc = rtThreadInit();
+    rc = rtThreadInit();
     AssertMsgRCReturn(rc, ("Failed to initialize threads, rc=%Rrc!\n", rc), rc);
 
 #if !defined(IN_GUEST) && !defined(RT_NO_GIP)
@@ -376,6 +390,12 @@ static int rtR3InitBody(bool fInitSUPLib, const char *pszProgramPath)
     if (g_fRTAlignmentChecks)
         IPRT_ALIGNMENT_CHECKS_ENABLE();
 #endif
+
+    /*
+     * Final native initialization.
+     */
+    rc = rtR3InitNativeFinal(0 /*fFlags*/);
+    AssertMsgRCReturn(rc, ("rtR3InitNativeFinal failed with %Rrc\n", rc), rc);
 
     return VINF_SUCCESS;
 }

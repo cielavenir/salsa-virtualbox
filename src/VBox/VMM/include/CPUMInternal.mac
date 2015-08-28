@@ -85,11 +85,6 @@ struc CPUM
     .abPadding2           resb    4
 %endif
 
-%ifdef VBOX_WITH_VMMR0_DISABLE_LAPIC_NMI
-    .pvApicBase           RTR0PTR_RES 1
-    .fApicDisVectors      resd    1
-%endif
-
     alignb 64
     ; CPUMCTX debug stuff...
     .GuestEntry           resb   1024
@@ -425,15 +420,21 @@ struc CPUMCPU
     .fChanged             resd    1
     .offCPUM              resd    1
     .u32RetCode           resd    1
+
+    .abPadding1           resb    4
+
+%ifdef VBOX_WITH_VMMR0_DISABLE_LAPIC_NMI
+    .pvApicBase           RTR0PTR_RES 1
+    .fApicDisVectors      resd    1
+    .fX2Apic              resb    1
+%else
+    .abPadding3           resb    (RTR0PTR_CB + 4 + 1)
+%endif
+
     .fRawEntered          resb    1
     .fRemEntered          resb    1
 
-%if RTHCPTR_CB == 8
-    .abPadding2           resb    26
-%else
-    .abPadding2           resb    34
-%endif
-
+    .abPadding2           resb    (64 - RTR3PTR_CB - RTR0PTR_CB - RTRCPTR_CB - 20 - RTR0PTR_CB - 4 - 1 - 2)
 endstruc
 
 
