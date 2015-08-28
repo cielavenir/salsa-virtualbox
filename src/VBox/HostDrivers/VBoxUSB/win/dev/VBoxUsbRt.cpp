@@ -611,6 +611,7 @@ static NTSTATUS vboxUsbRtSetConfig(PVBOXUSBDEV_EXT pDevExt, uint8_t uConfigurati
             break;
         }
     }
+    pIfLe[pCfgDr->bNumInterfaces].InterfaceDescriptor = NULL;
 
     if (NT_SUCCESS(Status))
     {
@@ -632,7 +633,7 @@ static NTSTATUS vboxUsbRtSetConfig(PVBOXUSBDEV_EXT pDevExt, uint8_t uConfigurati
                     Assert(NT_SUCCESS(Status));
                     for (i = 0; i < pDevExt->Rt.uNumInterfaces; i++)
                     {
-                        uint32_t uTotalIfaceInfoLength = sizeof (struct _URB_SELECT_INTERFACE) + ((pIfLe[i].Interface->NumberOfPipes > 0) ? (pIfLe[i].Interface->NumberOfPipes - 1) : 0) * sizeof(USBD_PIPE_INFORMATION);
+                        size_t uTotalIfaceInfoLength = GET_USBD_INTERFACE_SIZE(pIfLe[i].Interface->NumberOfPipes);
                         pDevExt->Rt.pVBIfaceInfo[i].pInterfaceInfo = (PUSBD_INTERFACE_INFORMATION)vboxUsbMemAlloc(uTotalIfaceInfoLength);
                         if (!pDevExt->Rt.pVBIfaceInfo[i].pInterfaceInfo)
                         {
@@ -656,11 +657,10 @@ static NTSTATUS vboxUsbRtSetConfig(PVBOXUSBDEV_EXT pDevExt, uint8_t uConfigurati
                             pDevExt->Rt.pVBIfaceInfo[i].pPipeInfo = NULL;
                         }
 
-                        *pDevExt->Rt.pVBIfaceInfo[i].pInterfaceInfo = *pIfLe[i].Interface;
+                        RtlCopyMemory(pDevExt->Rt.pVBIfaceInfo[i].pInterfaceInfo, pIfLe[i].Interface, uTotalIfaceInfoLength);
 
                         for (ULONG j = 0; j < pIfLe[i].Interface->NumberOfPipes; j++)
                         {
-                            pDevExt->Rt.pVBIfaceInfo[i].pInterfaceInfo->Pipes[j] = pIfLe[i].Interface->Pipes[j];
                             pDevExt->Rt.pVBIfaceInfo[i].pPipeInfo[j].EndpointAddress = pIfLe[i].Interface->Pipes[j].EndpointAddress;
                             pDevExt->Rt.pVBIfaceInfo[i].pPipeInfo[j].NextScheduledFrame = 0;
                         }
@@ -823,7 +823,6 @@ static NTSTATUS vboxUsbRtSetInterface(PVBOXUSBDEV_EXT pDevExt, uint32_t Interfac
                 Assert(pIfInfo->NumberOfPipes == pIfDr->bNumEndpoints);
                 for(ULONG i = 0; i < pIfInfo->NumberOfPipes; i++)
                 {
-                    pDevExt->Rt.pVBIfaceInfo[InterfaceNumber].pInterfaceInfo->Pipes[i] = pIfInfo->Pipes[i];
                     pDevExt->Rt.pVBIfaceInfo[InterfaceNumber].pPipeInfo[i].EndpointAddress = pIfInfo->Pipes[i].EndpointAddress;
                     pDevExt->Rt.pVBIfaceInfo[InterfaceNumber].pPipeInfo[i].NextScheduledFrame = 0;
                 }

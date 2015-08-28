@@ -1,4 +1,4 @@
-/* $Rev: 95888 $ */
+/* $Rev: 99005 $ */
 /** @file
  * VBoxDrv - The VirtualBox Support Driver - Linux specifics.
  */
@@ -59,6 +59,7 @@
 #ifdef VBOX_WITH_SUSPEND_NOTIFICATION
 # include <linux/platform_device.h>
 #endif
+#include <iprt/asm-amd64-x86.h>
 
 
 /*******************************************************************************
@@ -622,6 +623,7 @@ static int VBoxDrvLinuxIOCtl(struct inode *pInode, struct file *pFilp, unsigned 
 #endif
 {
     PSUPDRVSESSION pSession = (PSUPDRVSESSION)pFilp->private_data;
+    int rc;
 
     /*
      * Deal with the two high-speed IOCtl that takes it's arguments from
@@ -632,12 +634,15 @@ static int VBoxDrvLinuxIOCtl(struct inode *pInode, struct file *pFilp, unsigned 
                       || uCmd == SUP_IOCTL_FAST_DO_HM_RUN
                       || uCmd == SUP_IOCTL_FAST_DO_NOP)
                   && pSession->fUnrestricted == true))
-        return supdrvIOCtlFast(uCmd, ulArg, &g_DevExt, pSession);
+    {
+        stac();
+        rc = supdrvIOCtlFast(uCmd, ulArg, &g_DevExt, pSession);
+        clac();
+        return rc;
+    }
     return VBoxDrvLinuxIOCtlSlow(pFilp, uCmd, ulArg, pSession);
 
 #else   /* !HAVE_UNLOCKED_IOCTL */
-
-    int rc;
     unlock_kernel();
     if (RT_LIKELY(   (   uCmd == SUP_IOCTL_FAST_DO_RAW_RUN
                       || uCmd == SUP_IOCTL_FAST_DO_HM_RUN
@@ -715,7 +720,9 @@ static int VBoxDrvLinuxIOCtlSlow(struct file *pFilp, unsigned int uCmd, unsigned
     /*
      * Process the IOCtl.
      */
+    stac();
     rc = supdrvIOCtl(uCmd, &g_DevExt, pSession, pHdr, cbBuf);
+    clac();
 
     /*
      * Copy ioctl data and output buffer back to user space.
@@ -782,6 +789,26 @@ int VBOXCALL SUPDrvLinuxIDC(uint32_t uReq, PSUPDRVIDCREQHDR pReq)
 }
 
 EXPORT_SYMBOL(SUPDrvLinuxIDC);
+
+
+RTCCUINTREG VBOXCALL supdrvOSChangeCR4(RTCCUINTREG fOrMask, RTCCUINTREG fAndMask)
+{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 20, 0)
+    RTCCUINTREG uOld = this_cpu_read(cpu_tlbstate.cr4);
+    RTCCUINTREG uNew = (uOld & fAndMask) | fOrMask;
+    if (uNew != uOld)
+    {
+        this_cpu_write(cpu_tlbstate.cr4, uNew);
+        __write_cr4(uNew);
+    }
+#else
+    RTCCUINTREG uOld = ASMGetCR4();
+    RTCCUINTREG uNew = (uOld & fAndMask) | fOrMask;
+    if (uNew != uOld)
+        ASMSetCR4(uNew);
+#endif
+    return uOld;
+}
 
 
 void VBOXCALL supdrvOSCleanupSession(PSUPDRVDEVEXT pDevExt, PSUPDRVSESSION pSession)

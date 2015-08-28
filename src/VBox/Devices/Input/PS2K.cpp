@@ -596,7 +596,7 @@ static void ps2kInsertQueue(GeneriQ *pQ, uint8_t val)
     /* Check if queue is full. */
     if (pQ->cUsed >= pQ->cSize)
     {
-        LogFlowFunc(("queue %p full (%d entries)\n", pQ, pQ->cUsed));
+        LogRelFlowFunc(("queue %p full (%d entries)\n", pQ, pQ->cUsed));
         return;
     }
     /* Insert data and update circular buffer write position. */
@@ -604,7 +604,7 @@ static void ps2kInsertQueue(GeneriQ *pQ, uint8_t val)
     if (++pQ->wpos == pQ->cSize)
         pQ->wpos = 0;   /* Roll over. */
     ++pQ->cUsed;
-    LogFlowFunc(("inserted 0x%02X into queue %p\n", val, pQ));
+    LogRelFlowFunc(("inserted 0x%02X into queue %p\n", val, pQ));
 }
 
 #ifdef IN_RING3
@@ -663,6 +663,27 @@ static int ps2kLoadQueue(PSSMHANDLE pSSM, GeneriQ *pQ)
     return rc;
 }
 
+/**
+ * Notify listener about LEDs state change.
+ *
+ * @param   pThis           The PS/2 keyboard instance data.
+ * @param   u8State         Bitfield which reflects LEDs state.
+ */
+static void ps2kNotifyLedsState(PPS2K pThis, uint8_t u8State)
+{
+
+    PDMKEYBLEDS enmLeds = PDMKEYBLEDS_NONE;
+
+    if (u8State & 0x01)
+        enmLeds = (PDMKEYBLEDS)(enmLeds | PDMKEYBLEDS_SCROLLLOCK);
+    if (u8State & 0x02)
+        enmLeds = (PDMKEYBLEDS)(enmLeds | PDMKEYBLEDS_NUMLOCK);
+    if (u8State & 0x04)
+        enmLeds = (PDMKEYBLEDS)(enmLeds | PDMKEYBLEDS_CAPSLOCK);
+
+    pThis->Keyboard.pDrv->pfnLedStatusChange(pThis->Keyboard.pDrv, enmLeds);
+
+}
 #endif /* IN_RING3 */
 
 /**
@@ -803,15 +824,7 @@ int PS2KByteToKbd(PPS2K pThis, uint8_t cmd)
                     return VINF_IOM_R3_IOPORT_WRITE;
 #else
                     {
-                        PDMKEYBLEDS enmLeds = PDMKEYBLEDS_NONE;
-
-                        if (cmd & 0x01)
-                            enmLeds = (PDMKEYBLEDS)(enmLeds | PDMKEYBLEDS_SCROLLLOCK);
-                        if (cmd & 0x02)
-                            enmLeds = (PDMKEYBLEDS)(enmLeds | PDMKEYBLEDS_NUMLOCK);
-                        if (cmd & 0x04)
-                            enmLeds = (PDMKEYBLEDS)(enmLeds | PDMKEYBLEDS_CAPSLOCK);
-                        pThis->Keyboard.pDrv->pfnLedStatusChange(pThis->Keyboard.pDrv, enmLeds);
+                        ps2kNotifyLedsState(pThis, cmd);
                         pThis->fNumLockOn = !!(cmd & 0x02); /* Sync internal Num Lock state. */
                         ps2kInsertQueue((GeneriQ *)&pThis->cmdQ, KRSP_ACK);
                         pThis->u8LEDs = cmd;
@@ -1260,7 +1273,7 @@ static DECLCALLBACK(int) ps2kPutEventWrapper(PPDMIKEYBOARDPORT pInterface, uint8
     uint32_t    u32Usage = 0;
     int         rc;
 
-    LogFlowFunc(("key code %02X\n", u8KeyCode));
+    LogRelFlowFunc(("key code %02X\n", u8KeyCode));
 
     /* The 'BAT fail' scancode is reused as a signal to release keys. No actual
      * key is allowed to use this scancode.
@@ -1454,6 +1467,7 @@ int PS2KLoadDone(PPS2K pThis, PSSMHANDLE pSSM)
      * interrupts and change the interrupt controller state.
      */
     ps2kReleaseKeys(pThis);
+    ps2kNotifyLedsState(pThis, pThis->u8LEDs);
     return VINF_SUCCESS;
 }
 

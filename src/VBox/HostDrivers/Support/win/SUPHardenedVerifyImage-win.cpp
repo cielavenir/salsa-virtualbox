@@ -97,6 +97,9 @@ typedef HCERTSTORE (WINAPI *PFNCERTOPENSTORE)(PCSTR pszStoreProvider, DWORD dwEn
                                               DWORD dwFlags, const void *pvParam);
 typedef BOOL (WINAPI *PFNCERTCLOSESTORE)(HCERTSTORE hCertStore, DWORD dwFlags);
 typedef PCCERT_CONTEXT (WINAPI *PFNCERTENUMCERTIFICATESINSTORE)(HCERTSTORE hCertStore, PCCERT_CONTEXT pPrevCertContext);
+
+typedef NTSTATUS (WINAPI *PFNBCRYPTOPENALGORTIHMPROVIDER)(BCRYPT_ALG_HANDLE *phAlgo, PCWSTR pwszAlgoId,
+                                                          PCWSTR pwszImpl, DWORD dwFlags);
 #endif
 
 
@@ -197,7 +200,7 @@ static uint32_t volatile                g_idActiveThread = UINT32_MAX;
 *******************************************************************************/
 #ifdef IN_RING3
 static int supR3HardNtViCallWinVerifyTrust(HANDLE hFile, PCRTUTF16 pwszName, uint32_t fFlags, PRTERRINFO pErrInfo,
-                                           PFNWINVERIFYTRUST pfnWinVerifyTrust);
+                                           PFNWINVERIFYTRUST pfnWinVerifyTrust, HRESULT *phrcWinVerifyTrust);
 static int supR3HardNtViCallWinVerifyTrustCatFile(HANDLE hFile, PCRTUTF16 pwszName, uint32_t fFlags, PRTERRINFO pErrInfo,
                                                   PFNWINVERIFYTRUST pfnWinVerifyTrust);
 #endif
@@ -1232,11 +1235,12 @@ DECLHIDDEN(int) supHardenedWinVerifyImageByHandle(HANDLE hFile, PCRTUTF16 pwszNa
         /*
          * Open the image.
          */
-        RTLDRMOD hLdrMod;
-        RTLDRARCH enmArch = fFlags & SUPHNTVI_F_RC_IMAGE ? RTLDRARCH_X86_32 : RTLDRARCH_HOST;
-        if (fFlags & SUPHNTVI_F_RESOURCE_IMAGE)
-            enmArch = RTLDRARCH_WHATEVER;
-        rc = RTLdrOpenWithReader(&pNtViRdr->Core, RTLDR_O_FOR_VALIDATION, enmArch, &hLdrMod, pErrInfo);
+        RTLDRMOD  hLdrMod;
+        RTLDRARCH enmArch   = fFlags & SUPHNTVI_F_RC_IMAGE ? RTLDRARCH_X86_32 : RTLDRARCH_HOST;
+        uint32_t  fLdrFlags = RTLDR_O_FOR_VALIDATION | RTLDR_O_IGNORE_ARCH_IF_NO_CODE;
+        if (fFlags & SUPHNTVI_F_IGNORE_ARCHITECTURE)
+            fLdrFlags |= RTLDR_O_IGNORE_ARCH_IF_NO_CODE;
+        rc = RTLdrOpenWithReader(&pNtViRdr->Core, fLdrFlags, enmArch, &hLdrMod, pErrInfo);
         if (RT_SUCCESS(rc))
         {
             /*
@@ -1904,10 +1908,11 @@ static bool supR3HardenedWinIsDesiredRootCA(PCRTCRX509CERTIFICATE pCert)
 /**
  * Loads a module in the system32 directory.
  *
- * @returns Module handle on success. Won't return on faliure.
+ * @returns Module handle on success. Won't return on failure if fMandatory = true.
  * @param   pszName             The name of the DLL to load.
+ * @param   fMandatory          Whether the library is mandatory.
  */
-DECLHIDDEN(HMODULE) supR3HardenedWinLoadSystem32Dll(const char *pszName)
+DECLHIDDEN(HMODULE) supR3HardenedWinLoadSystem32Dll(const char *pszName, bool fMandatory)
 {
     WCHAR wszName[200+60];
     UINT cwcDir = GetSystemDirectoryW(wszName, RT_ELEMENTS(wszName) - 60);
@@ -1926,7 +1931,8 @@ DECLHIDDEN(HMODULE) supR3HardenedWinLoadSystem32Dll(const char *pszName)
         fFlags = 0;
         hMod = LoadLibraryExW(wszName, NULL, fFlags);
     }
-    if (hMod == NULL)
+    if (   hMod == NULL
+        && fMandatory)
         supR3HardenedFatal("Error loading '%s': %u [%ls]", pszName, RtlGetLastWin32Error(), wszName);
     return hMod;
 }
@@ -1945,7 +1951,7 @@ static void supR3HardenedWinRetrieveTrustedRootCAs(void)
     /*
      * Load crypt32.dll and resolve the APIs we need.
      */
-    HMODULE hCrypt32 = supR3HardenedWinLoadSystem32Dll("crypt32.dll");
+    HMODULE hCrypt32 = supR3HardenedWinLoadSystem32Dll("crypt32.dll", true /*fMandatory*/);
 
 #define RESOLVE_CRYPT32_API(a_Name, a_pfnType) \
     a_pfnType pfn##a_Name = (a_pfnType)GetProcAddress(hCrypt32, #a_Name); \
@@ -2049,9 +2055,9 @@ DECLHIDDEN(void) supR3HardenedWinResolveVerifyTrustApiAndHookThreadCreation(cons
         supR3HardenedError(RtlGetLastWin32Error(), false /*fFatal*/, "TlsAlloc failed");
 
     /*
-     * Resolve it.
+     * Resolve the imports we need.
      */
-    HMODULE hWintrust = supR3HardenedWinLoadSystem32Dll("Wintrust.dll");
+    HMODULE hWintrust = supR3HardenedWinLoadSystem32Dll("Wintrust.dll", true /*fMandatory*/);
 #define RESOLVE_CRYPT_API(a_Name, a_pfnType, a_uMinWinVer) \
     do { \
         g_pfn##a_Name = (a_pfnType)GetProcAddress(hWintrust, #a_Name); \
@@ -2073,23 +2079,59 @@ DECLHIDDEN(void) supR3HardenedWinResolveVerifyTrustApiAndHookThreadCreation(cons
     RESOLVE_CRYPT_API(CryptCATAdminAcquireContext2,          PFNCRYPTCATADMINACQUIRECONTEXT2,         SUP_NT_VER_W80);
     RESOLVE_CRYPT_API(CryptCATAdminCalcHashFromFileHandle2,  PFNCRYPTCATADMINCALCHASHFROMFILEHANDLE2, SUP_NT_VER_W80);
 
-    /*
-     * Call it on ourselves and ntdll to make sure it loads all the providers
-     * now, we would otherwise geting into recursive trouble in the
-     * NtCreateSection hook.
-     */
 # ifdef IN_SUP_HARDENED_R3
+    /*
+     * Load bcrypt.dll and instantiate a few hashing and signing providers to
+     * make sure the providers are cached for later us.  Avoid recursion issues.
+     */
+    HMODULE hBCrypt = supR3HardenedWinLoadSystem32Dll("bcrypt.dll", false /*fMandatory*/);
+    if (hBCrypt)
+    {
+        PFNBCRYPTOPENALGORTIHMPROVIDER pfnOpenAlgoProvider;
+        pfnOpenAlgoProvider = (PFNBCRYPTOPENALGORTIHMPROVIDER)GetProcAddress(hBCrypt, "BCryptOpenAlgorithmProvider");
+        if (pfnOpenAlgoProvider)
+        {
+            SUP_DPRINTF(("bcrypt.dll loaded at %p, BCryptOpenAlgorithmProvider at %p, preloading providers:\n",
+                         hBCrypt, pfnOpenAlgoProvider));
+#  define PRELOAD_ALGO_PROVIDER(a_Name) \
+                do { \
+                    BCRYPT_ALG_HANDLE hAlgo = NULL; \
+                    NTSTATUS rcNt = pfnOpenAlgoProvider(&hAlgo, a_Name, NULL, 0); \
+                    SUP_DPRINTF(("%sBCryptOpenAlgorithmProvider(,'%ls',0,0) -> %#x (hAlgo=%p)\n", \
+                                 NT_SUCCESS(rcNt) ? "    " : "warning: ", a_Name, rcNt, hAlgo)); \
+                } while (0)
+            PRELOAD_ALGO_PROVIDER(BCRYPT_MD2_ALGORITHM);
+            PRELOAD_ALGO_PROVIDER(BCRYPT_MD4_ALGORITHM);
+            PRELOAD_ALGO_PROVIDER(BCRYPT_MD5_ALGORITHM);
+            PRELOAD_ALGO_PROVIDER(BCRYPT_SHA1_ALGORITHM);
+            PRELOAD_ALGO_PROVIDER(BCRYPT_SHA256_ALGORITHM);
+            PRELOAD_ALGO_PROVIDER(BCRYPT_SHA512_ALGORITHM);
+            PRELOAD_ALGO_PROVIDER(BCRYPT_RSA_ALGORITHM);
+            PRELOAD_ALGO_PROVIDER(BCRYPT_DSA_ALGORITHM);
+#  undef PRELOAD_ALGO_PROVIDER
+        }
+        else
+            SUP_DPRINTF(("Warning! Failed to find BCryptOpenAlgorithmProvider in bcrypt.dll\n"));
+    }
+    else
+        SUP_DPRINTF(("Warning! Failed to load bcrypt.dll\n"));
+
+    /*
+     * Call the verification API on ourselves and ntdll to make sure it works
+     * and loads more stuff it needs, preventing any recursive fun we'd run
+     * into after we set g_pfnWinVerifyTrust.
+     */
     RTERRINFOSTATIC ErrInfoStatic;
     RTErrInfoInitStatic(&ErrInfoStatic);
     int rc = supR3HardNtViCallWinVerifyTrust(NULL, g_SupLibHardenedExeNtPath.UniStr.Buffer, 0,
-                                             &ErrInfoStatic.Core, pfnWinVerifyTrust);
+                                             &ErrInfoStatic.Core, pfnWinVerifyTrust, NULL);
     if (RT_FAILURE(rc))
         supR3HardenedFatalMsg(pszProgName, kSupInitOp_Integrity, rc,
                               "WinVerifyTrust failed on stub executable: %s", ErrInfoStatic.szMsg);
 # endif
 
     if (g_uNtVerCombined >= SUP_MAKE_NT_VER_SIMPLE(6, 0)) /* ntdll isn't signed on XP, assuming this is the case on W2K3 for now. */
-        supR3HardNtViCallWinVerifyTrust(NULL, L"\\SystemRoot\\System32\\ntdll.dll", 0, NULL, pfnWinVerifyTrust);
+        supR3HardNtViCallWinVerifyTrust(NULL, L"\\SystemRoot\\System32\\ntdll.dll", 0, NULL, pfnWinVerifyTrust, NULL);
     supR3HardNtViCallWinVerifyTrustCatFile(NULL, L"\\SystemRoot\\System32\\ntdll.dll", 0, NULL, pfnWinVerifyTrust);
 
     g_pfnWinVerifyTrust = pfnWinVerifyTrust;
@@ -2141,10 +2183,15 @@ static int supR3HardNtViNtToWinPath(PCRTUTF16 pwszNtName, PCRTUTF16 *ppwszWinPat
  * @param   fFlags              Flags, SUPHNTVI_F_XXX.
  * @param   pErrInfo            Pointer to error info structure. Optional.
  * @param   pfnWinVerifyTrust   Pointer to the API.
+ * @param   phrcWinVerifyTrust  Where to WinVerifyTrust error status on failure,
+ *                              optional.
  */
 static int supR3HardNtViCallWinVerifyTrust(HANDLE hFile, PCRTUTF16 pwszName, uint32_t fFlags, PRTERRINFO pErrInfo,
-                                           PFNWINVERIFYTRUST pfnWinVerifyTrust)
+                                           PFNWINVERIFYTRUST pfnWinVerifyTrust, HRESULT *phrcWinVerifyTrust)
 {
+    if (phrcWinVerifyTrust)
+        *phrcWinVerifyTrust = S_OK;
+
     /*
      * Convert the name into a Windows name.
      */
@@ -2222,6 +2269,8 @@ static int supR3HardNtViCallWinVerifyTrust(HANDLE hFile, PCRTUTF16 pwszName, uin
                                "WinVerifyTrust failed with hrc=%Rhrc on '%ls'", hrc, pwszName);
         SUP_DPRINTF(("supR3HardNtViCallWinVerifyTrust: WinVerifyTrust failed with %#x (%s) on '%ls'\n",
                      hrc, pszErrConst, pwszName));
+        if (phrcWinVerifyTrust)
+            *phrcWinVerifyTrust = hrc;
     }
 
     /* clean up state data. */
@@ -2573,62 +2622,91 @@ DECLHIDDEN(int) supHardenedWinVerifyImageTrust(HANDLE hFile, PCRTUTF16 pwszName,
      */
     if (g_pfnWinVerifyTrust != NULL)
     {
-        /* Check for recursion. */
-        bool fNoRecursion;
-        if (g_iTlsWinVerifyTrustRecursion != UINT32_MAX)
-        {
-            fNoRecursion = TlsGetValue(g_iTlsWinVerifyTrustRecursion) == 0;
-            if (fNoRecursion)
-                TlsSetValue(g_iTlsWinVerifyTrustRecursion, (void *)1);
-        }
-        else
-        {
-            uint32_t const idCurrentThread = RTNtCurrentThreadId();
-            fNoRecursion = ASMAtomicCmpXchgU32(&g_idActiveThread, idCurrentThread, UINT32_MAX);
-        }
-        if (fNoRecursion)
-        {
-            /* We can call WinVerifyTrust. */
-            if (pfWinVerifyTrust)
-                *pfWinVerifyTrust = true;
+        uint32_t const idCurrentThread = RTNtCurrentThreadId();
 
-            if (rc != VERR_LDRVI_NOT_SIGNED)
+        /* Check if loader lock owner. */
+        struct _RTL_CRITICAL_SECTION volatile *pLoaderLock = NtCurrentPeb()->LoaderLock;
+        bool fOwnsLoaderLock = pLoaderLock
+                            && pLoaderLock->OwningThread == (HANDLE)(uintptr_t)idCurrentThread
+                            && pLoaderLock->RecursionCount > 0;
+        if (!fOwnsLoaderLock)
+        {
+            /* Check for recursion. */
+            bool fNoRecursion;
+            if (g_iTlsWinVerifyTrustRecursion != UINT32_MAX)
             {
-                if (rc == VINF_LDRVI_NOT_SIGNED)
+                fNoRecursion = TlsGetValue(g_iTlsWinVerifyTrustRecursion) == 0;
+                if (fNoRecursion)
+                    TlsSetValue(g_iTlsWinVerifyTrustRecursion, (void *)1);
+            }
+            else
+                fNoRecursion = ASMAtomicCmpXchgU32(&g_idActiveThread, idCurrentThread, UINT32_MAX);
+
+            if (fNoRecursion && !fOwnsLoaderLock)
+            {
+                /* We can call WinVerifyTrust. */
+                if (pfWinVerifyTrust)
+                    *pfWinVerifyTrust = true;
+
+                if (rc != VERR_LDRVI_NOT_SIGNED)
                 {
-                    if (fFlags & SUPHNTVI_F_ALLOW_CAT_FILE_VERIFICATION)
+                    if (rc == VINF_LDRVI_NOT_SIGNED)
                     {
-                        int rc2 = supR3HardNtViCallWinVerifyTrustCatFile(hFile, pwszName, fFlags, pErrInfo, g_pfnWinVerifyTrust);
-                        SUP_DPRINTF(("supR3HardNtViCallWinVerifyTrustCatFile -> %d (org %d)\n", rc2, rc));
-                        rc = rc2;
+                        if (fFlags & SUPHNTVI_F_ALLOW_CAT_FILE_VERIFICATION)
+                        {
+                            int rc2 = supR3HardNtViCallWinVerifyTrustCatFile(hFile, pwszName, fFlags, pErrInfo,
+                                                                             g_pfnWinVerifyTrust);
+                            SUP_DPRINTF(("supR3HardNtViCallWinVerifyTrustCatFile -> %d (org %d)\n", rc2, rc));
+                            rc = rc2;
+                        }
+                        else
+                        {
+                            AssertFailed();
+                            rc = VERR_LDRVI_NOT_SIGNED;
+                        }
+                    }
+                    else if (RT_SUCCESS(rc))
+                    {
+                        HRESULT hrcWinVerifyTrust;
+                        rc = supR3HardNtViCallWinVerifyTrust(hFile, pwszName, fFlags, pErrInfo, g_pfnWinVerifyTrust,
+                                                             &hrcWinVerifyTrust);
+
+                        /* DLLs signed with special roots, like "Microsoft Digital Media Authority 2005",
+                           may fail here because the root cert is not in the normal certificate stores
+                           (if any).  Our verification code has the basics of these certificates included
+                           and can verify them, which is why we end up here instead of in the
+                           VINF_LDRVI_NOT_SIGNED case above.  Current workaround is to do as above.
+                           (Intel graphics driver DLLs, like igdusc64.dll. */
+                        if (   RT_FAILURE(rc)
+                            && hrcWinVerifyTrust == CERT_E_CHAINING
+                            && (fFlags & SUPHNTVI_F_ALLOW_CAT_FILE_VERIFICATION))
+                        {
+                            rc = supR3HardNtViCallWinVerifyTrustCatFile(hFile, pwszName, fFlags, pErrInfo, g_pfnWinVerifyTrust);
+                            SUP_DPRINTF(("supR3HardNtViCallWinVerifyTrustCatFile -> %d (was CERT_E_CHAINING)\n", rc));
+                        }
                     }
                     else
                     {
-                        AssertFailed();
-                        rc = VERR_LDRVI_NOT_SIGNED;
+                        int rc2 = supR3HardNtViCallWinVerifyTrust(hFile, pwszName, fFlags, pErrInfo, g_pfnWinVerifyTrust, NULL);
+                        AssertMsg(RT_FAILURE_NP(rc2),
+                                  ("rc=%Rrc, rc2=%Rrc %s", rc, rc2, pErrInfo ? pErrInfo->pszMsg : "<no-err-info>"));
                     }
                 }
-                else if (RT_SUCCESS(rc))
-                {
-                    /** @todo having trouble with a 32-bit windows box when letting these calls thru */
-                    rc = supR3HardNtViCallWinVerifyTrust(hFile, pwszName, fFlags, pErrInfo, g_pfnWinVerifyTrust);
-                }
-                else
-                {
-                    int rc2 = supR3HardNtViCallWinVerifyTrust(hFile, pwszName, fFlags, pErrInfo, g_pfnWinVerifyTrust);
-                    AssertMsg(RT_FAILURE_NP(rc2),
-                              ("rc=%Rrc, rc2=%Rrc %s", rc, rc2, pErrInfo ? pErrInfo->pszMsg : "<no-err-info>"));
-                }
-            }
 
-            /* Unwind recursion. */
-            if (g_iTlsWinVerifyTrustRecursion != UINT32_MAX)
-                TlsSetValue(g_iTlsWinVerifyTrustRecursion, (void *)0);
+                /* Unwind recursion. */
+                if (g_iTlsWinVerifyTrustRecursion != UINT32_MAX)
+                    TlsSetValue(g_iTlsWinVerifyTrustRecursion, (void *)0);
+                else
+                    ASMAtomicWriteU32(&g_idActiveThread, UINT32_MAX);
+            }
+            /*
+             * No can do.
+             */
             else
-                ASMAtomicWriteU32(&g_idActiveThread, UINT32_MAX);
+                SUP_DPRINTF(("Detected WinVerifyTrust recursion: rc=%Rrc '%ls'.\n", rc, pwszName));
         }
         else
-            SUP_DPRINTF(("Detected WinVerifyTrust recursion: rc=%Rrc '%ls'.\n", rc, pwszName));
+            SUP_DPRINTF(("Detected loader lock ownership: rc=%Rrc '%ls'.\n", rc, pwszName));
     }
     return rc;
 }

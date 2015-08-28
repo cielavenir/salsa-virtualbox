@@ -114,6 +114,8 @@ public:
     GuruMeditationHandlerType guruMeditationHandlerType() const { return m_guruMeditationHandlerType; }
     /** Returns HiDPI optimization type. */
     HiDPIOptimizationType hiDPIOptimizationType() const { return m_hiDPIOptimizationType; }
+    /** Returns whether hovered machine-window should be activated. */
+    bool activateHoveredMachineWindow() const { return m_fActivateHoveredMachineWindow; }
     /** @} */
 
     /** @name Extension Pack stuff.
@@ -190,7 +192,9 @@ public:
 
     /* Guest additions state getters: */
     bool isGuestAdditionsActive() const { return (m_ulGuestAdditionsRunLevel > AdditionsRunLevelType_None); }
-    bool isGuestSupportsGraphics() const { return isGuestAdditionsActive() && m_fIsGuestSupportsGraphics; }
+    bool isGuestSupportsGraphics() const { return m_fIsGuestSupportsGraphics; }
+    /* The double check below is correct, even though it is an implementation
+     * detail of the Additions which the GUI should not ideally have to know. */
     bool isGuestSupportsSeamless() const { return isGuestSupportsGraphics() && m_fIsGuestSupportsSeamless; }
 
     /* Keyboard getters: */
@@ -252,6 +256,7 @@ signals:
     void sigKeyboardLedsChange();
     void sigMachineStateChange();
     void sigAdditionsStateChange();
+    void sigAdditionsStateActualChange();
     void sigNetworkAdapterChange(const CNetworkAdapter &networkAdapter);
     void sigMediumChange(const CMediumAttachment &mediumAttachment);
     void sigVRDEChange();
@@ -382,6 +387,8 @@ private:
     GuruMeditationHandlerType m_guruMeditationHandlerType;
     /** Holds HiDPI optimization type. */
     HiDPIOptimizationType m_hiDPIOptimizationType;
+    /** Holds whether hovered machine-window should be activated. */
+    bool m_fActivateHoveredMachineWindow;
     /** @} */
 
     /** @name Extension Pack variables.

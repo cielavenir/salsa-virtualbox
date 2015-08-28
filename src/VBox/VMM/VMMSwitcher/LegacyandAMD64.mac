@@ -177,6 +177,7 @@ BEGINPROC vmmR0ToRawMode
     cmp     byte [edx + CPUMCPU.fX2Apic], 1
     je      gth_x2apic
 
+    ; Legacy xAPIC mode:
     mov     edx, [edx + CPUMCPU.pvApicBase]
     shr     ecx, 1
     jnc     gth_nolint0
@@ -194,8 +195,13 @@ gth_nopc:
     jnc     gth_notherm
     and     dword [edx + APIC_REG_LVT_THMR], ~APIC_REG_LVT_MASKED
 gth_notherm:
+    shr     ecx, 1
+    jnc     gth_nocmci
+    and     dword [edx + APIC_REG_LVT_CMCI], ~APIC_REG_LVT_MASKED
+gth_nocmci:
     jmp     gth_apic_done
 
+    ; x2APIC mode:
 gth_x2apic:
     ;DEBUG_CMOS_STACK32 7ch
     push    eax                         ; save eax
@@ -230,6 +236,13 @@ gth_x2_nopc:
     and     eax, ~APIC_REG_LVT_MASKED
     wrmsr
 gth_x2_notherm:
+    shr     ebx, 1
+    jnc     gth_x2_nocmci
+    mov     ecx, MSR_IA32_X2APIC_START + (APIC_REG_LVT_CMCI >> 4)
+    rdmsr
+    and     eax, ~APIC_REG_LVT_MASKED
+    wrmsr
+gth_x2_nocmci:
     pop     edx
     pop     ebx
     pop     eax
@@ -312,11 +325,13 @@ BEGINPROC vmmR0ToRawModeAsm
 %endif
 
 %ifdef VBOX_WITH_VMMR0_DISABLE_LAPIC_NMI
+    ; Block Local APIC NMI vectors
     DEBUG32_S_CHAR('f')
     DEBUG32_S_CHAR(';')
-    cmp     byte [edx + CPUMCPU.pvApicBase], 1
+    cmp     byte [edx + CPUMCPU.fX2Apic], 1
     je      htg_x2apic
 
+    ; Legacy xAPIC mode:
     mov     ebx, [edx + CPUMCPU.pvApicBase]
     or      ebx, ebx
     jz      htg_apic_done
@@ -354,6 +369,17 @@ htg_nopc:
     shr     eax, 16
     cmp     al, 5
     jb      htg_notherm
+    je      htg_nocmci
+    mov     eax, [ebx + APIC_REG_LVT_CMCI]
+    mov     ecx, eax
+    and     ecx, (APIC_REG_LVT_MASKED | APIC_REG_LVT_MODE_MASK)
+    cmp     ecx, APIC_REG_LVT_MODE_NMI
+    jne     htg_nocmci
+    or      edi, 0x10
+    or      eax, APIC_REG_LVT_MASKED
+    mov     [ebx + APIC_REG_LVT_CMCI], eax
+    mov     eax, [ebx + APIC_REG_LVT_CMCI] ; write completion
+htg_nocmci:
     mov     eax, [ebx + APIC_REG_LVT_THMR]
     mov     ecx, eax
     and     ecx, (APIC_REG_LVT_MASKED | APIC_REG_LVT_MODE_MASK)
@@ -367,6 +393,7 @@ htg_notherm:
     mov     [edx + CPUMCPU.fApicDisVectors], edi
     jmp     htg_apic_done
 
+    ; x2APIC mode:
 htg_x2apic:
     mov     esi, edx                    ; Save edx.
     xor     edi, edi                    ; fApicDisVectors
@@ -406,6 +433,17 @@ htg_x2_nopc:
     shr     eax, 16
     cmp     al, 5
     jb      htg_x2_notherm
+    je      htg_x2_nocmci
+    mov     ecx, MSR_IA32_X2APIC_START + (APIC_REG_LVT_CMCI >> 4)
+    rdmsr
+    mov     ebx, eax
+    and     ebx, (APIC_REG_LVT_MASKED | APIC_REG_LVT_MODE_MASK)
+    cmp     ebx, APIC_REG_LVT_MODE_NMI
+    jne     htg_x2_nocmci
+    or      edi, 0x10
+    or      eax, APIC_REG_LVT_MASKED
+    wrmsr
+htg_x2_nocmci:
     mov     ecx, MSR_IA32_X2APIC_START + (APIC_REG_LVT_THMR >> 4)
     rdmsr
     mov     ebx, eax

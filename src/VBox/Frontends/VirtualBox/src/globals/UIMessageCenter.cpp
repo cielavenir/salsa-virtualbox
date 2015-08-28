@@ -1715,7 +1715,7 @@ bool UIMessageCenter::remindAboutGuruMeditation(const QString &strLogFolder)
                              "machine and the machine execution has been stopped.</p>"
                              ""
                              "<p>For help, please see the Community section on "
-                             "<a href=http://www.virtualbox.org>http://www.virtualbox.org</a> "
+                             "<a href=https://www.virtualbox.org>https://www.virtualbox.org</a> "
                              "or your support contract. Please provide the contents of the "
                              "log file <tt>VBox.log</tt> and the image file <tt>VBox.png</tt>, "
                              "which you can find in the <nobr><b>%1</b></nobr> directory, "
@@ -2003,7 +2003,7 @@ void UIMessageCenter::showUpdateSuccess(const QString &strVersion, const QString
 {
     alert(windowManager().networkManagerOrMainWindowShown(), MessageType_Info,
           tr("<p>A new version of VirtualBox has been released! Version <b>%1</b> is available "
-             "at <a href=\"http://www.virtualbox.org/\">virtualbox.org</a>.</p>"
+             "at <a href=\"https://www.virtualbox.org/\">virtualbox.org</a>.</p>"
              "<p>You can download this version using the link:</p>"
              "<p><a href=%2>%3</a></p>")
              .arg(strVersion, strLink, strLink));
@@ -2456,7 +2456,7 @@ QString UIMessageCenter::formatErrorInfo(const COMResult &rc)
 
 void UIMessageCenter::sltShowHelpWebDialog()
 {
-    vboxGlobal().openURL("http://www.virtualbox.org");
+    vboxGlobal().openURL("https://www.virtualbox.org");
 }
 
 void UIMessageCenter::sltShowHelpAboutDialog()
@@ -2488,7 +2488,7 @@ void UIMessageCenter::sltShowHelpHelpDialog()
     /* For OSE version we have to check if it present first: */
     QString strUserManualFileName1 = vboxGlobal().helpFile();
     QString strShortFileName = QFileInfo(strUserManualFileName1).fileName();
-    QString strUserManualFileName2 = QDir(vboxGlobal().virtualBox().GetHomeFolder()).absoluteFilePath(strShortFileName);
+    QString strUserManualFileName2 = QDir(vboxGlobal().homeFolder()).absoluteFilePath(strShortFileName);
     /* Show if user manual already present: */
     if (QFile::exists(strUserManualFileName1))
         sltShowUserManual(strUserManualFileName1);

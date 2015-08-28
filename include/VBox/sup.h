@@ -1083,6 +1083,18 @@ SUPR3DECL(int) SUPR3LoadServiceModule(const char *pszFilename, const char *pszMo
 SUPR3DECL(int) SUPR3FreeModule(void *pvImageBase);
 
 /**
+ * Lock down the module loader interface.
+ *
+ * This will lock down the module loader interface. No new modules can be
+ * loaded and all loaded modules can no longer be freed.
+ *
+ * @returns VBox status code.
+ * @param   pErrInfo        Where to return extended error information.
+ *                          Optional.
+ */
+SUPR3DECL(int) SUPR3LockDownLoader(PRTERRINFO pErrInfo);
+
+/**
  * Get the address of a symbol in a ring-0 module.
  *
  * @returns VBox status code.
@@ -1420,6 +1432,7 @@ SUPR0DECL(int) SUPR0GipUnmap(PSUPDRVSESSION pSession);
 SUPR0DECL(int) SUPR0Printf(const char *pszFormat, ...);
 SUPR0DECL(SUPPAGINGMODE) SUPR0GetPagingMode(void);
 SUPR0DECL(uint32_t) SUPR0GetKernelFeatures(void);
+SUPR0DECL(RTCCUINTREG) SUPR0ChangeCR4(RTCCUINTREG fOrMask, RTCCUINTREG fAndMask);
 SUPR0DECL(int) SUPR0EnableVTx(bool fEnable);
 SUPR0DECL(bool) SUPR0SuspendVTxOnCpu(void);
 SUPR0DECL(void) SUPR0ResumeVTxOnCpu(bool fSuspended);

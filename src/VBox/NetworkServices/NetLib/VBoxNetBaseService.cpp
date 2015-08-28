@@ -73,9 +73,9 @@
 *******************************************************************************/
 struct VBoxNetBaseService::Data
 {
-    Data(const std::string& aName, const std::string& aNetworkName):
-      m_Name(aName),
-      m_Network(aNetworkName),
+    Data(const std::string& aServiceName, const std::string& aNetworkName):
+      m_ServiceName(aServiceName),
+      m_NetworkName(aNetworkName),
       m_enmTrunkType(kIntNetTrunkType_WhateverNone),
       m_pSession(NIL_RTR0PTR),
       m_cbSendBuf(128 * _1K),
@@ -92,8 +92,8 @@ struct VBoxNetBaseService::Data
         AssertRC(rc);
     };
 
-    std::string         m_Name;
-    std::string         m_Network;
+    std::string         m_ServiceName;
+    std::string         m_NetworkName;
     std::string         m_TrunkName;
     INTNETTRUNKTYPE     m_enmTrunkType;
 
@@ -182,7 +182,7 @@ VBoxNetBaseService::~VBoxNetBaseService()
             CloseReq.pSession = m->m_pSession;
             CloseReq.hIf = m->m_hIf;
             m->m_hIf = INTNET_HANDLE_INVALID;
-            int rc = SUPR3CallVMMR0Ex(NIL_RTR0PTR, NIL_RTCPUID, VMMR0_DO_INTNET_IF_CLOSE, 0, &CloseReq.Hdr);
+            int rc = SUPR3CallVMMR0Ex(NIL_RTR0PTR, NIL_VMCPUID, VMMR0_DO_INTNET_IF_CLOSE, 0, &CloseReq.Hdr);
             AssertRC(rc);
         }
 
@@ -266,11 +266,11 @@ int VBoxNetBaseService::parseArgs(int argc, char **argv)
         switch (rc)
         {
             case 'N': // --name
-                m->m_Name = Val.psz;
+                m->m_ServiceName = Val.psz;
                 break;
 
             case 'n': // --network
-                m->m_Network = Val.psz;
+                m->m_NetworkName = Val.psz;
                 break;
 
             case 't': //--trunk-name
@@ -388,9 +388,9 @@ int VBoxNetBaseService::tryGoOnline(void)
     OpenReq.Hdr.u32Magic = SUPVMMR0REQHDR_MAGIC;
     OpenReq.Hdr.cbReq = sizeof(OpenReq);
     OpenReq.pSession = m->m_pSession;
-    strncpy(OpenReq.szNetwork, m->m_Network.c_str(), sizeof(OpenReq.szNetwork));
+    RTStrCopy(OpenReq.szNetwork, sizeof(OpenReq.szNetwork), m->m_NetworkName.c_str());
     OpenReq.szNetwork[sizeof(OpenReq.szNetwork) - 1] = '\0';
-    strncpy(OpenReq.szTrunk, m->m_TrunkName.c_str(), sizeof(OpenReq.szTrunk));
+    RTStrCopy(OpenReq.szTrunk, sizeof(OpenReq.szTrunk), m->m_TrunkName.c_str());
     OpenReq.szTrunk[sizeof(OpenReq.szTrunk) - 1] = '\0';
     OpenReq.enmTrunkType = m->m_enmTrunkType;
     OpenReq.fFlags = 0; /** @todo check this */
@@ -455,7 +455,29 @@ int VBoxNetBaseService::tryGoOnline(void)
 void VBoxNetBaseService::shutdown(void)
 {
     syncEnter();
-    m->fShutdown = true;
+    if (! m->fShutdown)
+    {
+        m->fShutdown = true;
+        if (m->m_hThrRecv != NIL_RTTHREAD)
+        {
+            int rc = abortWait();
+            Assert(rc == VINF_SUCCESS || rc == VERR_SEM_DESTROYED);
+            rc = m->m_EventQ->interruptEventQueueProcessing();
+#if 0 /* this will not work as long as we don't set RTTHREADFLAGS_WAITABLE */
+            if (RT_SUCCESS(rc))
+            {
+                rc = RTThreadWait(m->m_hThrRecv, 60000, NULL);
+                if (RT_FAILURE(rc))
+                    LogWarningFunc(("RTThreadWait(%RTthrd) -> %Rrc\n", m->m_hThrRecv, rc));
+            }
+            else
+            {
+                AssertMsgFailed(("interruptEventQueueProcessing() failed\n"));
+                RTThreadWait(m->m_hThrRecv , 0, NULL);
+            }
+#endif
+        }
+    }
     syncLeave();
 }
 
@@ -474,7 +496,6 @@ int VBoxNetBaseService::syncLeave()
 
 int VBoxNetBaseService::waitForIntNetEvent(int cMillis)
 {
-    int rc = VINF_SUCCESS;
     INTNETIFWAITREQ WaitReq;
     LogFlowFunc(("ENTER:cMillis: %d\n", cMillis));
     WaitReq.Hdr.u32Magic = SUPVMMR0REQHDR_MAGIC;
@@ -483,10 +504,27 @@ int VBoxNetBaseService::waitForIntNetEvent(int cMillis)
     WaitReq.hIf = m->m_hIf;
     WaitReq.cMillies = cMillis;
 
-    rc = SUPR3CallVMMR0Ex(NIL_RTR0PTR, NIL_VMCPUID, VMMR0_DO_INTNET_IF_WAIT, 0, &WaitReq.Hdr);
+    int rc = SUPR3CallVMMR0Ex(NIL_RTR0PTR, NIL_VMCPUID, VMMR0_DO_INTNET_IF_WAIT, 0, &WaitReq.Hdr);
     LogFlowFuncLeaveRC(rc);
     return rc;
 }
+
+
+int VBoxNetBaseService::abortWait()
+{
+    INTNETIFABORTWAITREQ AbortReq;
+    LogFlowFunc(("ENTER:\n"));
+    AbortReq.Hdr.u32Magic = SUPVMMR0REQHDR_MAGIC;
+    AbortReq.Hdr.cbReq = sizeof(AbortReq);
+    AbortReq.pSession = m->m_pSession;
+    AbortReq.hIf = m->m_hIf;
+    AbortReq.fNoMoreWaits = true;
+
+    int rc = SUPR3CallVMMR0Ex(NIL_RTR0PTR, NIL_VMCPUID, VMMR0_DO_INTNET_IF_ABORT_WAIT, 0, &AbortReq.Hdr);
+    LogFlowFuncLeaveRC(rc);
+    return rc;
+}
+
 
 /* S/G API */
 int VBoxNetBaseService::sendBufferOnWire(PCINTNETSEG pcSg, int cSg, size_t cbFrame)
@@ -518,13 +556,12 @@ int VBoxNetBaseService::sendBufferOnWire(PCINTNETSEG pcSg, int cSg, size_t cbFra
  */
 void VBoxNetBaseService::flushWire()
 {
-    int rc = VINF_SUCCESS;
     INTNETIFSENDREQ SendReq;
     SendReq.Hdr.u32Magic = SUPVMMR0REQHDR_MAGIC;
     SendReq.Hdr.cbReq    = sizeof(SendReq);
     SendReq.pSession     = m->m_pSession;
     SendReq.hIf          = m->m_hIf;
-    rc = SUPR3CallVMMR0Ex(NIL_RTR0PTR, NIL_VMCPUID, VMMR0_DO_INTNET_IF_SEND, 0, &SendReq.Hdr);
+    int rc = SUPR3CallVMMR0Ex(NIL_RTR0PTR, NIL_VMCPUID, VMMR0_DO_INTNET_IF_SEND, 0, &SendReq.Hdr);
     AssertRCReturnVoid(rc);
     LogFlowFuncLeave();
 
@@ -541,27 +578,27 @@ int VBoxNetBaseService::hlpUDPBroadcast(unsigned uSrcPort, unsigned uDstPort,
 }
 
 
-const std::string VBoxNetBaseService::getName() const
+const std::string VBoxNetBaseService::getServiceName() const
 {
-    return m->m_Name;
+    return m->m_ServiceName;
 }
 
 
-void VBoxNetBaseService::setName(const std::string& aName)
+void VBoxNetBaseService::setServiceName(const std::string& aName)
 {
-    m->m_Name = aName;
+    m->m_ServiceName = aName;
 }
 
 
-const std::string VBoxNetBaseService::getNetwork() const
+const std::string VBoxNetBaseService::getNetworkName() const
 {
-    return m->m_Network;
+    return m->m_NetworkName;
 }
 
 
-void VBoxNetBaseService::setNetwork(const std::string& aNetwork)
+void VBoxNetBaseService::setNetworkName(const std::string& aName)
 {
-    m->m_Network = aNetwork;
+    m->m_NetworkName = aName;
 }
 
 
@@ -656,6 +693,8 @@ void VBoxNetBaseService::doReceiveLoop()
          */
         /* 2. waiting for request for */
         rc = waitForIntNetEvent(2000);
+        if (rc == VERR_SEM_DESTROYED)
+            break;
         if (RT_FAILURE(rc))
         {
             if (rc == VERR_TIMEOUT || rc == VERR_INTERRUPTED)
@@ -717,7 +756,6 @@ void VBoxNetBaseService::doReceiveLoop()
 
         } /* loop */
     }
-
 }
 
 
@@ -733,19 +771,19 @@ int VBoxNetBaseService::startReceiveThreadAndEnterEventLoop()
                             RTTHREADTYPE_IO, /* type */
                             0, /* flags, @todo: waitable ?*/
                             "RECV");
-    AssertRCReturn(rc,rc);
+    AssertRCReturn(rc, rc);
 
     m->m_EventQ = com::NativeEventQueue::getMainEventQueue();
     AssertPtrReturn(m->m_EventQ, VERR_INTERNAL_ERROR);
 
-    while(true)
+    while (!m->fShutdown)
     {
-        m->m_EventQ->processEventQueue(0);
-
-        if (m->fShutdown)
+        rc = m->m_EventQ->processEventQueue(RT_INDEFINITE_WAIT);
+        if (rc == VERR_INTERRUPTED)
+        {
+            LogFlow(("Event queue processing ended with rc=%Rrc\n", rc));
             break;
-
-        m->m_EventQ->processEventQueue(500);
+        }
     }
 
     return VINF_SUCCESS;

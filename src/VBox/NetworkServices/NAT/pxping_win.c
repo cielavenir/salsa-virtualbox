@@ -1,4 +1,20 @@
-/* -*- indent-tabs-mode: nil; -*- */
+/* $Id: pxping_win.c $ */
+/** @file
+ * NAT Network - ping proxy, Windows ICMP API version.
+ */
+
+/*
+ * Copyright (C) 2013-2014 Oracle Corporation
+ *
+ * This file is part of VirtualBox Open Source Edition (OSE), as
+ * available from http://www.virtualbox.org. This file is free software;
+ * you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GPL) as published by the Free Software
+ * Foundation, in version 2 as it comes in the "COPYING" file of the
+ * VirtualBox OSE distribution. VirtualBox OSE is distributed in the
+ * hope that it will be useful, but WITHOUT ANY WARRANTY of any kind.
+ */
+
 #define LOG_GROUP LOG_GROUP_NAT_SERVICE
 
 #include "winutils.h"
@@ -191,8 +207,14 @@ pxping_recv4(void *arg, struct pbuf *p)
         goto out;
     }
 
-    bufsize = sizeof(ICMP_ECHO_REPLY) + p->tot_len;
-    pong = (struct pong4 *)malloc(sizeof(*pong) - sizeof(pong->buf) + bufsize);
+    bufsize = sizeof(ICMP_ECHO_REPLY);
+    if (p->tot_len < sizeof(IO_STATUS_BLOCK) + sizeof(struct icmp_echo_hdr))
+        bufsize += sizeof(IO_STATUS_BLOCK) + sizeof(struct icmp_echo_hdr);
+    else
+        bufsize += p->tot_len;
+    bufsize += 16; /* whatever that is; empirically at least XP needs it */
+
+    pong = (struct pong4 *)malloc(RT_OFFSETOF(struct pong4, buf) + bufsize);
     if (RT_UNLIKELY(pong == NULL)) {
         goto out;
     }
@@ -468,8 +490,15 @@ pxping_recv6(void *arg, struct pbuf *p)
         goto out;
     }
 
-    bufsize = sizeof(ICMPV6_ECHO_REPLY) + p->tot_len;
-    pong = (struct pong6 *)malloc(sizeof(*pong) - sizeof(pong->buf) + bufsize);
+    /* XXX: parrotted from IPv4 version, not tested all os version/bitness */
+    bufsize = sizeof(ICMPV6_ECHO_REPLY);
+    if (p->tot_len < sizeof(IO_STATUS_BLOCK) + sizeof(struct icmp6_echo_hdr))
+        bufsize += sizeof(IO_STATUS_BLOCK) + sizeof(struct icmp6_echo_hdr);
+    else
+        bufsize += p->tot_len;
+    bufsize += 16;
+
+    pong = (struct pong6 *)malloc(RT_OFFSETOF(struct pong6, buf) + bufsize);
     if (RT_UNLIKELY(pong == NULL)) {
         goto out;
     }
@@ -533,7 +562,7 @@ pxping_recv6(void *arg, struct pbuf *p)
         }
         goto out;
     }
-    
+
     pong = NULL;                /* callback owns it now */
   out:
     if (pong != NULL) {

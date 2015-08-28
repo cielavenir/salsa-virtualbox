@@ -1,7 +1,10 @@
-/* -*- indent-tabs-mode: nil; -*- */
+/* $Id: pxdns.c $ */
+/** @file
+ * NAT Network - DNS proxy.
+ */
 
 /*
- * Copyright (C) 2009-2013 Oracle Corporation
+ * Copyright (C) 2009-2014 Oracle Corporation
  *
  * This file is part of VirtualBox Open Source Edition (OSE), as
  * available from http://www.virtualbox.org. This file is free software;
@@ -693,7 +696,7 @@ pxdns_forward_outbound(struct pxdns *pxdns, struct request *req)
     if (resolver->sa.sa_family == AF_INET) {
         nsent = sendto(pxdns->sock4, req->data, req->size, 0,
                        &resolver->sa, sizeof(resolver->sin));
-        
+
     }
     else if (resolver->sa.sa_family == AF_INET6) {
         if (pxdns->sock6 != INVALID_SOCKET) {

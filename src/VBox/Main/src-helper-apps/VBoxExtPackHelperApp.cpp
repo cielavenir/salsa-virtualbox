@@ -1887,7 +1887,16 @@ int main(int argc, char **argv)
             case OPT_STDERR:
             case OPT_STDOUT:
             {
+# ifdef RT_OS_WINDOWS
+                PRTUTF16 pwszName = NULL;
+                rc = RTStrToUtf16(ValueUnion.psz, &pwszName);
+                if (RT_FAILURE(rc))
+                    return RTMsgErrorExit(RTEXITCODE_FAILURE, "Error converting '%s' to UTF-16: %Rrc\n", ValueUnion.psz, rc);
+                FILE *pFile = _wfreopen(pwszName, L"r+", ch == OPT_STDOUT ? stdout : stderr);
+                RTUtf16Free(pwszName);
+# else
                 FILE *pFile = freopen(ValueUnion.psz, "r+", ch == OPT_STDOUT ? stdout : stderr);
+# endif
                 if (!pFile)
                 {
                     rc = RTErrConvertFromErrno(errno);
@@ -1937,7 +1946,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPST
 
     int    cArgs;
     char **papszArgs;
-    rc = RTGetOptArgvFromString(&papszArgs, &cArgs, pszCmdLine, NULL);
+    rc = RTGetOptArgvFromString(&papszArgs, &cArgs, pszCmdLine, RTGETOPTARGV_CNV_QUOTE_MS_CRT, NULL);
     if (RT_SUCCESS(rc))
     {
 

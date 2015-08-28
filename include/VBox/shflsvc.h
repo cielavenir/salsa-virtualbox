@@ -152,9 +152,10 @@ typedef uint64_t SHFLHANDLE;
 /**
  * Shared folder string buffer structure.
  */
+#pragma pack(1)
 typedef struct _SHFLSTRING
 {
-    /** Size of the String member in bytes. */
+    /** Allocated size of the String member in bytes. */
     uint16_t u16Size;
 
     /** Length of string without trailing nul in bytes. */
@@ -167,6 +168,9 @@ typedef struct _SHFLSTRING
         uint16_t ucs2[1];
     } String;
 } SHFLSTRING;
+#pragma pack()
+
+#define SHFLSTRING_HEADER_SIZE RT_UOFFSETOF(SHFLSTRING, String)
 
 /** Pointer to a shared folder string buffer. */
 typedef SHFLSTRING *PSHFLSTRING;
@@ -176,21 +180,21 @@ typedef const SHFLSTRING *PCSHFLSTRING;
 /** Calculate size of the string. */
 DECLINLINE(uint32_t) ShflStringSizeOfBuffer(PCSHFLSTRING pString)
 {
-    return pString? sizeof (SHFLSTRING) - sizeof (pString->String) + pString->u16Size: 0;
+    return pString ? sizeof(SHFLSTRING) - sizeof(pString->String) + pString->u16Size : 0;
 }
 
 DECLINLINE(uint32_t) ShflStringLength(PCSHFLSTRING pString)
 {
-    return pString? pString->u16Length: 0;
+    return pString ? pString->u16Length : 0;
 }
 
 DECLINLINE(PSHFLSTRING) ShflStringInitBuffer(void *pvBuffer, uint32_t u32Size)
 {
     PSHFLSTRING pString = NULL;
+    const uint32_t u32HeaderSize = SHFLSTRING_HEADER_SIZE;
 
-    uint32_t u32HeaderSize = sizeof (SHFLSTRING) - sizeof (pString->String);
-
-    /* Check that the buffer size is big enough to hold a zero sized string
+    /* 
+     * Check that the buffer size is big enough to hold a zero sized string
      * and is not too big to fit into 16 bit variables.
      */
     if (u32Size >= u32HeaderSize && u32Size - u32HeaderSize <= 0xFFFF)
@@ -198,6 +202,10 @@ DECLINLINE(PSHFLSTRING) ShflStringInitBuffer(void *pvBuffer, uint32_t u32Size)
         pString = (PSHFLSTRING)pvBuffer;
         pString->u16Size = u32Size - u32HeaderSize;
         pString->u16Length = 0;
+        if (pString->u16Size >= sizeof(pString->String.ucs2[0]))
+            pString->String.ucs2[0] = 0;
+        else if (pString->u16Size >= sizeof(pString->String.utf8[0]))
+            pString->String.utf8[0] = 0;
     }
 
     return pString;

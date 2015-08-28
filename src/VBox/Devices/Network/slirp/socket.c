@@ -127,10 +127,9 @@ DECLINLINE(bool) slirpSend2Home(PNATState pData, struct socket *pSo, const void 
     return fSendDone;
 }
 #endif /* !VBOX_WITH_NAT_SEND2HOME */
+
+#if !defined(RT_OS_WINDOWS)
 static void send_icmp_to_guest(PNATState, char *, size_t, const struct sockaddr_in *);
-#ifdef RT_OS_WINDOWS
-static void sorecvfrom_icmp_win(PNATState, struct socket *);
-#else /* RT_OS_WINDOWS */
 static void sorecvfrom_icmp_unix(PNATState, struct socket *);
 #endif /* !RT_OS_WINDOWS */
 
@@ -208,17 +207,17 @@ sofree(PNATState pData, struct socket *so)
     else if (so == udp_last_so)
         udp_last_so = &udb;
 
-#if 0 /* XXX: !defined(NO_USE_SOCKETS) */
-    /* libalias notification */
-    if (so->so_pvLnk)
-        slirpDeleteLinkSocket(so->so_pvLnk);
-#endif
-
     /* check if mbuf haven't been already freed  */
     if (so->so_m != NULL)
     {
         m_freem(pData, so->so_m);
         so->so_m = NULL;
+    }
+
+    if (so->so_ohdr != NULL)
+    {
+        RTMemFree(so->so_ohdr);
+        so->so_ohdr = NULL;
     }
 
     if (so->so_next && so->so_prev)
@@ -236,7 +235,6 @@ sofree(PNATState pData, struct socket *so)
  * NOTE: This will only be called if it is select()ed for reading, so
  * a read() of 0 (or less) means it's disconnected
  */
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
 int
 soread(PNATState pData, struct socket *so)
 {
@@ -424,83 +422,6 @@ soread(PNATState pData, struct socket *so)
     SOCKET_UNLOCK(so);
     return nn;
 }
-#else /* VBOX_WITH_SLIRP_BSD_SBUF */
-int
-soread(PNATState pData, struct socket *so)
-{
-    int n;
-    char *buf;
-    struct sbuf *sb = &so->so_snd;
-    size_t len = sbspace(sb);
-    int mss = so->so_tcpcb->t_maxseg;
-
-    STAM_PROFILE_START(&pData->StatIOread, a);
-    STAM_COUNTER_RESET(&pData->StatIORead_in_1);
-    STAM_COUNTER_RESET(&pData->StatIORead_in_2);
-
-    QSOCKET_LOCK(tcb);
-    SOCKET_LOCK(so);
-    QSOCKET_UNLOCK(tcb);
-
-    LogFlowFunc(("soread: so = %lx\n", (long)so));
-
-    if (len > mss)
-        len -= len % mss;
-    buf = RTMemAlloc(len);
-    if (buf == NULL)
-    {
-        Log(("NAT: can't alloc enough memory\n"));
-        return -1;
-    }
-
-    n = recv(so->s, buf, len, (so->so_tcpcb->t_force? MSG_OOB:0));
-    if (n <= 0)
-    {
-        /*
-         * Special case for WSAEnumNetworkEvents: If we receive 0 bytes that
-         * _could_ mean that the connection is closed. But we will receive an
-         * FD_CLOSE event later if the connection was _really_ closed. With
-         * www.youtube.com I see this very often. Closing the socket too early
-         * would be dangerous.
-         */
-        int status;
-        unsigned long pending = 0;
-        status = ioctlsocket(so->s, FIONREAD, &pending);
-        if (status < 0)
-            Log(("NAT:error in WSAIoctl: %d\n", errno));
-        if (n == 0 && (pending != 0))
-        {
-            SOCKET_UNLOCK(so);
-            STAM_PROFILE_STOP(&pData->StatIOread, a);
-            RTMemFree(buf);
-            return 0;
-        }
-        if (   n < 0
-            && soIgnorableErrorCode(errno))
-        {
-            SOCKET_UNLOCK(so);
-            STAM_PROFILE_STOP(&pData->StatIOread, a);
-            RTMemFree(buf);
-            return 0;
-        }
-        else
-        {
-            Log2((" --- soread() disconnected, n = %d, errno = %d (%s)\n",
-                  n, errno, strerror(errno)));
-            sofcantrcvmore(so);
-            tcp_sockclosed(pData, sototcpcb(so));
-            SOCKET_UNLOCK(so);
-            STAM_PROFILE_STOP(&pData->StatIOread, a);
-            RTMemFree(buf);
-            return -1;
-        }
-    }
-
-    sbuf_bcat(sb, buf, n);
-    RTMemFree(buf);
-    return n;
-}
-#endif
 
 /*
  * Get urgent data
@@ -534,7 +455,7 @@ sorecvoob(PNATState pData, struct socket *so)
         tp->t_force = 0;
     }
 }
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
+
 /*
  * Send urgent data
  * There's a lot duplicated code here, but...
@@ -750,58 +671,6 @@ sowrite(PNATState pData, struct socket *so)
     STAM_PROFILE_STOP(&pData->StatIOwrite, a);
     return nn;
 }
-#else /* VBOX_WITH_SLIRP_BSD_SBUF */
-static int
-do_sosend(struct socket *so, int fUrg)
-{
-    struct sbuf *sb = &so->so_rcv;
-
-    int n, len;
-
-    LogFlowFunc(("sosendoob: so = %R[natsock]\n", so));
-
-    len = sbuf_len(sb);
-
-    n = send(so->s, sbuf_data(sb), len, (fUrg ? MSG_OOB : 0));
-    if (n < 0)
-        Log(("NAT: Can't sent sbuf via socket.\n"));
-    if (fUrg)
-        so->so_urgc -= n;
-    if (n > 0 && n < len)
-    {
-        char *ptr;
-        char *buff;
-        buff = RTMemAlloc(len);
-        if (buff == NULL)
-        {
-            Log(("NAT: No space to allocate temporal buffer\n"));
-            return -1;
-        }
-        ptr = sbuf_data(sb);
-        memcpy(buff, &ptr[n], len - n);
-        sbuf_bcpy(sb, buff, len - n);
-        RTMemFree(buff);
-        return n;
-    }
-    sbuf_clear(sb);
-    return n;
-}
-int
-sosendoob(struct socket *so)
-{
-    return do_sosend(so, 1);
-}
-
-/*
- * Write data from so_rcv to so's socket,
- * updating all sbuf field as necessary
- */
-int
-sowrite(PNATState pData, struct socket *so)
-{
-    return do_sosend(so, 0);
-}
-#endif
 
 /*
  * recvfrom() a UDP socket
@@ -811,17 +680,18 @@ sorecvfrom(PNATState pData, struct socket *so)
 {
     LogFlowFunc(("sorecvfrom: so = %lx\n", (long)so));
 
+#ifdef RT_OS_WINDOWS
+    /* ping is handled with ICMP API in ip_icmpwin.c */
+    Assert(so->so_type == IPPROTO_UDP);
+#else
     if (so->so_type == IPPROTO_ICMP)
     {
         /* This is a "ping" reply */
-#ifdef RT_OS_WINDOWS
-        sorecvfrom_icmp_win(pData, so);
-#else /* RT_OS_WINDOWS */
         sorecvfrom_icmp_unix(pData, so);
-#endif /* !RT_OS_WINDOWS */
         udp_detach(pData, so);
     }
     else
+#endif /* !RT_OS_WINDOWS */
     {
         static uint8_t au8Buf[64 * 1024];
 
@@ -878,7 +748,10 @@ sorecvfrom(PNATState pData, struct socket *so)
             status = WSARecvFrom(so->s, iov, 2, &nbytes, &flags,
                                  (struct sockaddr *)&addr, &addrlen,
                                  NULL, NULL);
-            nread = (status != SOCKET_ERROR) ? nbytes : -1;
+            if (status != SOCKET_ERROR)
+                nread = nbytes;
+            else
+                nread = -1;
         }
 #endif
         if (nread >= 0)
@@ -905,11 +778,15 @@ sorecvfrom(PNATState pData, struct socket *so)
             }
 
             /*
-             *  last argument should be changed if Slirp will inject IP attributes
-             *  Note: Here we can't check if dnsproxy's sent initial request
+             * DNS proxy requests are forwarded to the real resolver,
+             * but its socket's so_faddr is that of the DNS proxy
+             * itself.
+             *
+             * last argument should be changed if Slirp will inject IP attributes
              */
             if (   pData->fUseDnsProxy
-                && so->so_fport == RT_H2N_U16_C(53))
+                && so->so_fport == RT_H2N_U16_C(53)
+                && CTL_CHECK(so->so_faddr.s_addr, CTL_DNS))
                 dnsproxy_answer(pData, so, m);
 
             /* packets definetly will be fragmented, could confuse receiver peer. */
@@ -925,7 +802,6 @@ sorecvfrom(PNATState pData, struct socket *so)
         else
         {
             m_freem(pData, m);
-            so->so_m = NULL;
 
             if (!soIgnorableErrorCode(errno))
             {
@@ -939,6 +815,7 @@ sorecvfrom(PNATState pData, struct socket *so)
 
                 Log2((" rx error, tx icmp ICMP_UNREACH:%i\n", code));
                 icmp_error(pData, so->so_m, ICMP_UNREACH, code, 0, strerror(errno));
+                so->so_m = NULL;
             }
         }
 
@@ -1271,6 +1148,7 @@ sofwdrain(struct socket *so)
         sofcantsendmore(so);
 }
 
+#if !defined(RT_OS_WINDOWS)
 static void
 send_icmp_to_guest(PNATState pData, char *buff, size_t len, const struct sockaddr_in *addr)
 {
@@ -1349,9 +1227,7 @@ send_icmp_to_guest(PNATState pData, char *buff, size_t len, const struct sockadd
     if (!m)
     {
         LogFunc(("%R[natsock] hasn't stored it's mbuf on sent\n", icm->im_so));
-        LIST_REMOVE(icm, im_list);
-        RTMemFree(icm);
-        return;
+        goto done;
     }
 
     src = addr->sin_addr.s_addr;
@@ -1362,7 +1238,7 @@ send_icmp_to_guest(PNATState pData, char *buff, size_t len, const struct sockadd
         if (icp0->icmp_type != ICMP_ECHO)
         {
             Log(("NAT: we haven't found echo for this reply\n"));
-            return;
+            goto done;
         }
         /*
          * while combining buffer to send (see ip_icmp.c) we control ICMP header only,
@@ -1375,7 +1251,7 @@ send_icmp_to_guest(PNATState pData, char *buff, size_t len, const struct sockadd
         {
             Log(("NAT: ECHO(%d) lenght doesn't match ECHOREPLY(%d)\n",
                 (ip->ip_len - hlen), (ip0->ip_len - (ip0->ip_hl << 2))));
-            return;
+            goto done;
         }
     }
 
@@ -1416,180 +1292,13 @@ send_icmp_to_guest(PNATState pData, char *buff, size_t len, const struct sockadd
     ip->ip_src.s_addr = src;
     ip->ip_dst.s_addr = dst;
     icmp_reflect(pData, m);
-    LIST_REMOVE(icm, im_list);
-    pData->cIcmpCacheSize--;
-    /* Don't call m_free here*/
+    /* m was freed */
+    icm->im_m = NULL;
 
-    if (   type == ICMP_TIMXCEED
-        || type == ICMP_UNREACH)
-    {
-        icm->im_so->so_m = NULL;
-        switch (proto)
-        {
-            case  IPPROTO_UDP:
-                /*XXX: so->so_m already freed so we shouldn't call sofree */
-                udp_detach(pData, icm->im_so);
-            break;
-            case  IPPROTO_TCP:
-                /*close tcp should be here */
-            break;
-            default:
-            /* do nothing */
-            break;
-        }
-    }
-    RTMemFree(icm);
+  done:
+    icmp_msg_delete(pData, icm);
 }
 
-#ifdef RT_OS_WINDOWS
-static void
-sorecvfrom_icmp_win(PNATState pData, struct socket *so)
-{
-    int len;
-    int i;
-    struct ip *ip;
-    struct mbuf *m;
-    struct icmp *icp;
-    struct icmp_msg *icm;
-    struct ip *ip_broken; /* ICMP returns header + 64 bit of packet */
-    uint32_t src;
-    ICMP_ECHO_REPLY *icr;
-    int hlen = 0;
-    int nbytes = 0;
-    u_char code = ~0;
-    int out_len;
-    int size;
-
-    len = pData->pfIcmpParseReplies(pData->pvIcmpBuffer, pData->cbIcmpBuffer);
-    if (len < 0)
-    {
-        LogRel(("NAT: Error (%d) occurred on ICMP receiving\n", GetLastError()));
-        return;
-    }
-    if (len == 0)
-        return; /* no error */
-
-    icr = (ICMP_ECHO_REPLY *)pData->pvIcmpBuffer;
-    for (i = 0; i < len; ++i)
-    {
-        LogFunc(("icr[%d] Data:%p, DataSize:%d\n",
-                 i, icr[i].Data, icr[i].DataSize));
-        switch(icr[i].Status)
-        {
-            case IP_DEST_HOST_UNREACHABLE:
-                code = (code != ~0 ? code : ICMP_UNREACH_HOST);
-            case IP_DEST_NET_UNREACHABLE:
-                code = (code != ~0 ? code : ICMP_UNREACH_NET);
-            case IP_DEST_PROT_UNREACHABLE:
-                code = (code != ~0 ? code : ICMP_UNREACH_PROTOCOL);
-                /* UNREACH error inject here */
-            case IP_DEST_PORT_UNREACHABLE:
-                code = (code != ~0 ? code : ICMP_UNREACH_PORT);
-                icmp_error(pData, so->so_m, ICMP_UNREACH, code, 0, "Error occurred!!!");
-                so->so_m = NULL;
-                break;
-            case IP_SUCCESS: /* echo replied */
-                out_len = ETH_HLEN + sizeof(struct ip) +  8;
-                size;
-                size = MCLBYTES;
-                if (out_len < MSIZE)
-                    size = MCLBYTES;
-                else if (out_len < MCLBYTES)
-                    size = MCLBYTES;
-                else if (out_len < MJUM9BYTES)
-                    size = MJUM9BYTES;
-                else if (out_len < MJUM16BYTES)
-                    size = MJUM16BYTES;
-                else
-                    AssertMsgFailed(("Unsupported size"));
-
-                m = m_getjcl(pData, M_NOWAIT, MT_HEADER, M_PKTHDR, size);
-                LogFunc(("m_getjcl returns m: %p\n", m));
-                if (m == NULL)
-                    return;
-                m->m_len = 0;
-                m->m_data += if_maxlinkhdr;
-                m->m_pkthdr.header = mtod(m, void *);
-
-                ip = mtod(m, struct ip *);
-                ip->ip_src.s_addr = icr[i].Address;
-                ip->ip_p = IPPROTO_ICMP;
-                ip->ip_dst.s_addr = so->so_laddr.s_addr; /*XXX: still the hack*/
-                ip->ip_hl =  sizeof(struct ip) >> 2; /* requiered for icmp_reflect, no IP options */
-                ip->ip_ttl = icr[i].Options.Ttl;
-
-                icp = (struct icmp *)&ip[1]; /* no options */
-                icp->icmp_type = ICMP_ECHOREPLY;
-                icp->icmp_code = 0;
-                icp->icmp_id = so->so_icmp_id;
-                icp->icmp_seq = so->so_icmp_seq;
-
-                icm = icmp_find_original_mbuf(pData, ip);
-                if (icm)
-                {
-                    /* on this branch we don't need stored variant */
-                    m_freem(pData, icm->im_m);
-                    LIST_REMOVE(icm, im_list);
-                    pData->cIcmpCacheSize--;
-                    RTMemFree(icm);
-                }
-
-
-                hlen = (ip->ip_hl << 2);
-                Assert((hlen >= sizeof(struct ip)));
-
-                m->m_data += hlen + ICMP_MINLEN;
-                if (!RT_VALID_PTR(icr[i].Data))
-                {
-                    m_freem(pData, m);
-                    break;
-                }
-                m_copyback(pData, m, 0, icr[i].DataSize, icr[i].Data);
-                m->m_data -= hlen + ICMP_MINLEN;
-                m->m_len += hlen + ICMP_MINLEN;
-
-
-                ip->ip_len = m_length(m, NULL);
-                Assert((ip->ip_len == hlen + ICMP_MINLEN + icr[i].DataSize));
-
-                icmp_reflect(pData, m);
-                break;
-            case IP_TTL_EXPIRED_TRANSIT: /* TTL expired */
-
-                ip_broken = icr[i].Data;
-                icm = icmp_find_original_mbuf(pData, ip_broken);
-                if (icm == NULL) {
-                    Log(("ICMP: can't find original package (first double word %x)\n", *(uint32_t *)ip_broken));
-                    return;
-                }
-                m = icm->im_m;
-                ip = mtod(m, struct ip *);
-                Assert(((ip_broken->ip_hl >> 2) >= sizeof(struct ip)));
-                ip->ip_ttl = icr[i].Options.Ttl;
-                src = ip->ip_src.s_addr;
-                ip->ip_dst.s_addr = src;
-                ip->ip_dst.s_addr = icr[i].Address;
-
-                hlen = (ip->ip_hl << 2);
-                icp = (struct icmp *)((char *)ip + hlen);
-                ip_broken->ip_src.s_addr = src; /*it packet sent from host not from guest*/
-
-                m->m_len = (ip_broken->ip_hl << 2) + 64;
-                m->m_pkthdr.header = mtod(m, void *);
-                m_copyback(pData, m, ip->ip_hl >> 2, icr[i].DataSize, icr[i].Data);
-                icmp_reflect(pData, m);
-                /* Here is different situation from Unix world, where we can receive icmp in response on TCP/UDP */
-                LIST_REMOVE(icm, im_list);
-                pData->cIcmpCacheSize--;
-                RTMemFree(icm);
-                break;
-            default:
-                Log(("ICMP(default): message with Status: %x was received from %x\n", icr[i].Status, icr[i].Address));
-                break;
-        }
-    }
-}
-#else /* !RT_OS_WINDOWS */
 static void sorecvfrom_icmp_unix(PNATState pData, struct socket *so)
 {
     struct sockaddr_in addr;

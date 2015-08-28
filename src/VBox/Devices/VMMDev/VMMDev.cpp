@@ -335,8 +335,9 @@ static int vmmdevReqHandler_ReportGuestInfo(PVMMDEV pThis, VMMDevRequestHeader *
         /* Check additions interface version. */
         pThis->fu32AdditionsOk = VBOX_GUEST_INTERFACE_VERSION_OK(pThis->guestInfo.interfaceVersion);
 
-        LogRel(("Guest Additions information report: Interface = 0x%08X osType = 0x%08X\n",
-                pThis->guestInfo.interfaceVersion, pThis->guestInfo.osType));
+        LogRel(("Guest Additions information report: Interface = 0x%08X osType = 0x%08X (%u-bit)\n",
+                pThis->guestInfo.interfaceVersion, pThis->guestInfo.osType,
+                (pThis->guestInfo.osType & VBOXOSTYPE_x64) ? 64 : 32));
 
         if (pThis->pDrv && pThis->pDrv->pfnUpdateGuestInfo)
             pThis->pDrv->pfnUpdateGuestInfo(pThis->pDrv, &pThis->guestInfo);
@@ -725,23 +726,23 @@ static int vmmdevReqHandler_ReportGuestCapabilities(PVMMDEV pThis, VMMDevRequest
     VMMDevReqGuestCapabilities *pReq = (VMMDevReqGuestCapabilities *)pReqHdr;
     AssertMsgReturn(pReq->header.size == sizeof(*pReq), ("%u\n", pReq->header.size), VERR_INVALID_PARAMETER);
 
-    /* Enable this automatically for guests using the old
-       request to report their capabilities. */
-    /** @todo change this when we next bump the interface version */
-    pReq->caps |= VMMDEV_GUEST_SUPPORTS_GRAPHICS;
-    if (pThis->guestCaps != pReq->caps)
+    /* Enable VMMDEV_GUEST_SUPPORTS_GRAPHICS automatically for guests using the old
+     * request to report their capabilities.
+     */
+    const uint32_t fu32Caps = pReq->caps | VMMDEV_GUEST_SUPPORTS_GRAPHICS;
+
+    if (pThis->guestCaps != fu32Caps)
     {
         /* make a copy of supplied information */
-        pThis->guestCaps = pReq->caps;
+        pThis->guestCaps = fu32Caps;
 
-        LogRel(("Guest Additions capability report: (0x%x) seamless: %s, hostWindowMapping: %s, graphics: %s\n",
-                pReq->caps,
-                pReq->caps & VMMDEV_GUEST_SUPPORTS_SEAMLESS ? "yes" : "no",
-                pReq->caps & VMMDEV_GUEST_SUPPORTS_GUEST_HOST_WINDOW_MAPPING ? "yes" : "no",
-                pReq->caps & VMMDEV_GUEST_SUPPORTS_GRAPHICS ? "yes" : "no"));
+        LogRel(("Guest Additions capability report (legacy): (0x%x) seamless: %s, hostWindowMapping: %s, graphics: yes\n",
+                fu32Caps,
+                fu32Caps & VMMDEV_GUEST_SUPPORTS_SEAMLESS ? "yes" : "no",
+                fu32Caps & VMMDEV_GUEST_SUPPORTS_GUEST_HOST_WINDOW_MAPPING ? "yes" : "no"));
 
         if (pThis->pDrv && pThis->pDrv->pfnUpdateGuestCapabilities)
-            pThis->pDrv->pfnUpdateGuestCapabilities(pThis->pDrv, pReq->caps);
+            pThis->pDrv->pfnUpdateGuestCapabilities(pThis->pDrv, fu32Caps);
     }
     return VINF_SUCCESS;
 }
@@ -759,18 +760,20 @@ static int vmmdevReqHandler_SetGuestCapabilities(PVMMDEV pThis, VMMDevRequestHea
     VMMDevReqGuestCapabilities2 *pReq = (VMMDevReqGuestCapabilities2 *)pReqHdr;
     AssertMsgReturn(pReq->header.size == sizeof(*pReq), ("%u\n", pReq->header.size), VERR_INVALID_PARAMETER);
 
-    uint32_t const fOldCaps = pThis->guestCaps; NOREF(fOldCaps);
-    pThis->guestCaps |= pReq->u32OrMask;
-    pThis->guestCaps &= ~pReq->u32NotMask;
+    uint32_t fu32Caps = pThis->guestCaps;
+    fu32Caps |= pReq->u32OrMask;
+    fu32Caps &= ~pReq->u32NotMask;
 
     LogRel(("Guest Additions capability report: (%#x -> %#x) seamless: %s, hostWindowMapping: %s, graphics: %s\n",
-            fOldCaps, pThis->guestCaps,
-            pThis->guestCaps & VMMDEV_GUEST_SUPPORTS_SEAMLESS ? "yes" : "no",
-            pThis->guestCaps & VMMDEV_GUEST_SUPPORTS_GUEST_HOST_WINDOW_MAPPING ? "yes" : "no",
-            pThis->guestCaps & VMMDEV_GUEST_SUPPORTS_GRAPHICS ? "yes" : "no"));
+            pThis->guestCaps, fu32Caps,
+            fu32Caps & VMMDEV_GUEST_SUPPORTS_SEAMLESS ? "yes" : "no",
+            fu32Caps & VMMDEV_GUEST_SUPPORTS_GUEST_HOST_WINDOW_MAPPING ? "yes" : "no",
+            fu32Caps & VMMDEV_GUEST_SUPPORTS_GRAPHICS ? "yes" : "no"));
+
+    pThis->guestCaps = fu32Caps;
 
     if (pThis->pDrv && pThis->pDrv->pfnUpdateGuestCapabilities)
-        pThis->pDrv->pfnUpdateGuestCapabilities(pThis->pDrv, pThis->guestCaps);
+        pThis->pDrv->pfnUpdateGuestCapabilities(pThis->pDrv, fu32Caps);
 
     return VINF_SUCCESS;
 }
@@ -3007,22 +3010,22 @@ vmmdevIPort_RequestDisplayChange(PPDMIVMMDEVPORT pInterface, uint32_t cx, uint32
           pRequest->lastReadDisplayChangeRequest.display,
           xOrigin, yOrigin, fEnabled, fChangeOrigin));
 
+    /* we could validate the information here but hey, the guest can do that as well! */
+    pRequest->displayChangeRequest.xres          = cx;
+    pRequest->displayChangeRequest.yres          = cy;
+    pRequest->displayChangeRequest.bpp           = cBits;
+    pRequest->displayChangeRequest.display       = idxDisplay;
+    pRequest->displayChangeRequest.xOrigin       = xOrigin;
+    pRequest->displayChangeRequest.yOrigin       = yOrigin;
+    pRequest->displayChangeRequest.fEnabled      = fEnabled;
+    pRequest->displayChangeRequest.fChangeOrigin = fChangeOrigin;
+
+    pRequest->fPending = !fSameResolution;
+
     if (!fSameResolution)
     {
         LogRel(("VMMDev::SetVideoModeHint: got a video mode hint (%dx%dx%d)@(%dx%d),(%d;%d) at %d\n",
                 cx, cy, cBits, xOrigin, yOrigin, fEnabled, fChangeOrigin, idxDisplay));
-
-        /* we could validate the information here but hey, the guest can do that as well! */
-        pRequest->displayChangeRequest.xres          = cx;
-        pRequest->displayChangeRequest.yres          = cy;
-        pRequest->displayChangeRequest.bpp           = cBits;
-        pRequest->displayChangeRequest.display       = idxDisplay;
-        pRequest->displayChangeRequest.xOrigin       = xOrigin;
-        pRequest->displayChangeRequest.yOrigin       = yOrigin;
-        pRequest->displayChangeRequest.fEnabled      = fEnabled;
-        pRequest->displayChangeRequest.fChangeOrigin = fChangeOrigin;
-
-        pRequest->fPending = true;
 
         /* IRQ so the guest knows what's going on */
         VMMDevNotifyGuest(pThis, VMMDEV_EVENT_DISPLAY_CHANGE_REQUEST);
@@ -3452,8 +3455,9 @@ static DECLCALLBACK(int) vmmdevLoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uin
 
     if (pThis->fu32AdditionsOk)
     {
-        LogRel(("Guest Additions information report: additionsVersion = 0x%08X, osType = 0x%08X\n",
-                pThis->guestInfo.interfaceVersion, pThis->guestInfo.osType));
+        LogRel(("Guest Additions information report: additionsVersion = 0x%08X, osType = 0x%08X (%u-bit)\n",
+                pThis->guestInfo.interfaceVersion, pThis->guestInfo.osType,
+                (pThis->guestInfo.osType & VBOXOSTYPE_x64) ? 64 : 32));
         if (pThis->pDrv)
         {
             if (pThis->guestInfo2.uFullVersion && pThis->pDrv->pfnUpdateGuestInfo2)
@@ -3565,6 +3569,8 @@ static DECLCALLBACK(void) vmmdevReset(PPDMDEVINS pDevIns)
     pThis->fu32AdditionsOk = false;
     memset (&pThis->guestInfo, 0, sizeof (pThis->guestInfo));
     RT_ZERO(pThis->guestInfo2);
+    const bool fCapsChanged = pThis->guestCaps != 0; /* Report transition to 0. */
+    pThis->guestCaps = 0;
 
     /* Clear facilities. No need to tell Main as it will get a
        pfnUpdateGuestInfo callback. */
@@ -3611,19 +3617,12 @@ static DECLCALLBACK(void) vmmdevReset(PPDMDEVINS pDevIns)
     pThis->u32NewGuestFilterMask = 0;
     pThis->fNewGuestFilterMask   = 0;
 
-    /* This is the default, as Windows and OS/2 guests take this for granted. (Actually, neither does...) */
-    /** @todo change this when we next bump the interface version */
-    const bool fCapsChanged = pThis->guestCaps != VMMDEV_GUEST_SUPPORTS_GRAPHICS;
-    if (fCapsChanged)
-        Log(("vmmdevReset: fCapsChanged=%#x -> %#x\n", pThis->guestCaps, VMMDEV_GUEST_SUPPORTS_GRAPHICS));
-    pThis->guestCaps = VMMDEV_GUEST_SUPPORTS_GRAPHICS; /** @todo r=bird: why? I cannot see this being done at construction?*/
-
     /*
      * Call the update functions as required.
      */
     if (fVersionChanged && pThis->pDrv && pThis->pDrv->pfnUpdateGuestInfo)
         pThis->pDrv->pfnUpdateGuestInfo(pThis->pDrv, &pThis->guestInfo);
-    if (fCapsChanged    && pThis->pDrv && pThis->pDrv->pfnUpdateGuestCapabilities)
+    if (fCapsChanged && pThis->pDrv && pThis->pDrv->pfnUpdateGuestCapabilities)
         pThis->pDrv->pfnUpdateGuestCapabilities(pThis->pDrv, pThis->guestCaps);
 
     /* Generate a unique session id for this VM; it will be changed for each start, reset or restore.

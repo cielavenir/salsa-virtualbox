@@ -1,3 +1,109 @@
+virtualbox (4.3.30-dfsg-1+deb8u1) jessie-security; urgency=medium
+
+  [ Ritesh Raj Sarraf ]
+  * Imported upstream release.
+
+  [ Gianfranco Costamagna ]
+  * Readd again some removed lintian overrides.
+  * virtualbox 4.3.30 builds fine with gcc 5.1, removing the
+    gcc-4.9 workaround (d/{rules,control})
+  * Update copyright file.
+  * Patch refresh.
+  * Remove some more windows prebuilt files.
+  * Add libnotify-bin as runtime-dependency for the x11 package
+    (used for notify-send command) (Closes: #792292)
+    - Thanks Torquil Macdonald Sørensen for the useful and complete
+      bug report.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Tue, 14 Jul 2015 15:29:23 +0200
+
+virtualbox (4.3.28-dfsg-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #785655).
+    - fix for CVE-2015-3456 a.k.a. VENOM (Closes: #785424)
+    - patch refresh.
+    - remove d/p/37-diff_smap_4.patch.
+  * Remove MAKE=kmk on virtualbox{,-guest}-source.files/rules
+    (Closes: #785161).
+    Upstream doesn't recommend using kmk to build kernel modules.
+    this reverts 63fa6b7b86035b53e8d053b894814eccac9ce595
+  * Add gbp.conf file.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Thu, 14 May 2015 09:36:52 +0200
+
+virtualbox (4.3.26-dfsg-3) unstable; urgency=medium
+
+  [ Adam Conrad ]
+  * Re-work the packaging to account for the kernel modules being shipped in
+    the master kernel packages, removing the need for dkms (LP: #1434579):
+    - Make the dkms package provide a virtual package matching what the
+      kernel packages provide to indicate that they ship the dkms modules.
+    - Add an alternate dep from the utils package to the virtual driver.
+    - Make the x11 driver package associate with the VGA controller PCI ID.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Wed, 22 Apr 2015 16:16:23 +0200
+
+virtualbox (4.3.26-dfsg-2) experimental; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * remove obsolete lintian overrides.
+  * d/p/37-diff_smap_4.patch, cherry-pick upstream patch to fix a kernel
+    paging issue (LP: #1437845).
+
+  [ Ritesh Raj Sarraf ]
+  * Remove Michael Meskes from uploaders.
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Fri, 20 Mar 2015 12:02:04 +0100
+
+virtualbox (4.3.26-dfsg-1) experimental; urgency=medium
+
+  * Imported upstream release.
+   * Conflict with upstream proprietary packages 4.3 series.
+     (LP: #1371287, LP: #1375018, LP: #1385931, LP: #1386328, LP: #1421926)
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Tue, 17 Mar 2015 08:36:06 +0100
+
+virtualbox (4.3.24-dfsg-1) experimental; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * Imported upstream release (Closes: #779025).
+  * Remove d/p/38-remove-hardcoded-gcc.patch, use --with-gcc and
+    --with-g++ configure flags.
+  * Remove d/p/37-fix-build.patch, merged upstream.
+
+  [ Ritesh Raj Sarraf ]
+  * [3bf4cdd] Add back versioned dependency on gcc multilib
+
+ -- Ritesh Raj Sarraf <rrs@debian.org>  Wed, 04 Mar 2015 17:35:40 +0530
+
+virtualbox (4.3.22-dfsg-1) experimental; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * Imported Upstream release.
+  * Update copyright year.
+  * d/p/37-fix-build.patch fix build, following upstream change in
+    xorg driver build (thanks to Michael Thayer for the hint and
+    the help).
+  * Remove old patches.
+  * d/p/38-remove-hardcoded-gcc.patch use CC and CXX from d/rules
+    until virtualbox is gcc-5 ready.
+
+  [ Ritesh Raj Sarraf ]
+  * [1413631] Build with gcc 4 only
+  * [f34c886] Add versioned dependency on g++-multilib
+
+ -- Ritesh Raj Sarraf <rrs@debian.org>  Sun, 15 Feb 2015 16:56:09 +0530
+
+virtualbox (4.3.20-dfsg-1) experimental; urgency=medium
+
+  [ Gianfranco Costamagna ]
+  * Imported Upstream release.
+
+  [ Ritesh Raj Sarraf ]
+  * Flip build dependency to libcurl4-gnutls-dev
+
+ -- Gianfranco Costamagna <costamagnagianfranco@yahoo.it>  Wed, 03 Dec 2014 09:37:08 +0100
+
 virtualbox (4.3.18-dfsg-3+deb8u3) jessie; urgency=medium
 
   * d/p/39-crash-raw-mode.patch fix crash in raw mode.
@@ -20,6 +126,7 @@ virtualbox (4.3.18-dfsg-3+deb8u1) jessie; urgency=medium
     paging issue (LP: #1437845, Closes: #783142).
 
  -- Ritesh Raj Sarraf <rrs@debian.org>  Wed, 13 May 2015 13:53:36 +0530
+
 
 virtualbox (4.3.18-dfsg-3) unstable; urgency=medium
 

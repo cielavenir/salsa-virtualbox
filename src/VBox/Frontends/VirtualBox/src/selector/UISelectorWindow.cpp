@@ -615,8 +615,9 @@ void UISelectorWindow::sltPerformSaveAction()
 
         /* Get session console: */
         CConsole console = session.GetConsole();
-        /* Pause VM first: */
-        console.Pause();
+        /* Pause VM first if necessary: */
+        if (pItem->machineState() != KMachineState_Paused)
+            console.Pause();
         if (console.isOk())
         {
             /* Prepare machine state saving: */
@@ -878,7 +879,7 @@ void UISelectorWindow::sltCurrentVMItemChanged(bool fRefreshDetails, bool fRefre
                    "at the top of the window.</p>"
                    "<p>You can press the <b>%1</b> key to get instant help, "
                    "or visit "
-                   "<a href=http://www.virtualbox.org>www.virtualbox.org</a> "
+                   "<a href=https://www.virtualbox.org>www.virtualbox.org</a> "
                    "for the latest information and news.</p>")
                    .arg(QKeySequence(QKeySequence::HelpContents).toString(QKeySequence::NativeText)));
         }

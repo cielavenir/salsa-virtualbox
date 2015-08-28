@@ -140,6 +140,18 @@
 # include <linux/kthread.h>
 #endif
 
+/* for cr4_init_shadow() / cpu_tlbstate. */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 20, 0)
+# include <asm/tlbflush.h>
+#endif
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0)
+# include <asm/smap.h>
+#else
+static inline void clac(void) { }
+static inline void stac(void) { }
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 0)
 # ifndef page_to_pfn
 #  define page_to_pfn(page) ((page) - mem_map)
@@ -365,6 +377,23 @@ DECLINLINE(unsigned long) msecs_to_jiffies(unsigned int cMillies)
 #else
 # define IPRT_DEBUG_SEMS_STATE_RC(pThis, chState, rc)  do {  } while (0)
 #endif
+
+/** @name Macros for preserving EFLAGS.AC on 3.19+/amd64  paranoid.
+ * The AMD 64 switch_to in macro in arch/x86/include/asm/switch_to.h stopped
+ * restoring flags.
+ * @{ */
+#ifdef CONFIG_X86_SMAP
+# include <iprt/asm-amd64-x86.h>
+# define IPRT_X86_EFL_AC                    RT_BIT(18)
+# define IPRT_LINUX_SAVE_EFL_AC()           RTCCUINTREG fSavedEfl = ASMGetFlags();
+# define IPRT_LINUX_RESTORE_EFL_AC()        ASMSetFlags(fSavedEfl)
+# define IPRT_LINUX_RESTORE_EFL_ONLY_AC()   ASMSetFlags((ASMGetFlags() & ~IPRT_X86_EFL_AC) | (fSavedEfl & IPRT_X86_EFL_AC))
+#else
+# define IPRT_LINUX_SAVE_EFL_AC()           do { } while (0)
+# define IPRT_LINUX_RESTORE_EFL_AC()        do { } while (0)
+# define IPRT_LINUX_RESTORE_EFL_ONLY_AC()   do { } while (0)
+#endif
+/** @} */
 
 /*
  * There are some conflicting defines in iprt/param.h, sort them out here.

@@ -25,7 +25,6 @@
  */
 
 #include <slirp.h>
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
 
 /* Done as a macro in socket.h */
 /* int
@@ -111,7 +110,6 @@ sbappend(PNATState pData, struct socket *so, struct mbuf *m)
 {
     int ret = 0;
     int mlen = 0;
-    caddr_t buf = NULL;
 
     STAM_PROFILE_START(&pData->StatIOSBAppend_pf, a);
     LogFlow(("sbappend: so = %lx, m = %lx, m->m_len = %d\n", (long)so, (long)m, m ? m->m_len : 0));
@@ -140,26 +138,30 @@ sbappend(PNATState pData, struct socket *so, struct mbuf *m)
 
     /*
      * We only write if there's nothing in the buffer,
-     * ottherwise it'll arrive out of order, and hence corrupt
+     * otherwise it'll arrive out of order, and hence corrupt
      */
-    if (m->m_next)
+    if (so->so_rcv.sb_cc == 0)
     {
-        buf = RTMemAlloc(mlen);
-        if (buf == NULL)
-        {
-            ret = 0;
-            goto no_sent;
-        }
-        m_copydata(m, 0, mlen, buf);
-    }
-    else
-        buf = mtod(m, char *);
+        caddr_t buf = NULL;
 
-    if(!so->so_rcv.sb_cc)
+        if (m->m_next)
+        {
+            buf = RTMemAlloc(mlen);
+            if (buf == NULL)
+            {
+                ret = 0;
+                goto no_sent;
+            }
+            m_copydata(m, 0, mlen, buf);
+        }
+        else
+            buf = mtod(m, char *);
+
         ret = send(so->s, buf, mlen, 0);
 
-    if (m->m_next)
-        RTMemFree(buf);
+        if (m->m_next)
+            RTMemFree(buf);
+    }
 no_sent:
 
     if (ret <= 0)
@@ -278,84 +280,3 @@ sbcopy(struct sbuf *sb, int off, int len, char *to)
             memcpy(to+off, sb->sb_data, len);
     }
 }
-#else /* VBOX_WITH_SLIRP_BSD_SBUF */
-void
-sbappend (PNATState pData, struct socket *so, struct mbuf *m)
-{
-    int ret = 0;
-    int mlen = 0;
-    caddr_t buf = NULL;
-
-    STAM_PROFILE_START(&pData->StatIOSBAppend_pf, a);
-    LogFlow(("sbappend: so = %R[natsock], m = %lx, m->m_len = %d\n", so, (long)m, m ? m->m_len : 0));
-
-    STAM_COUNTER_INC(&pData->StatIOSBAppend);
-    mlen = m_length(m, NULL);
-    if (mlen <= 0)
-    {
-        STAM_COUNTER_INC(&pData->StatIOSBAppend_zm);
-        goto done;
-    }
-
-    /*
-     * We only write if there's nothing in the buffer,
-     * ottherwise it'll arrive out of order, and hence corrupt
-     */
-    buf = RTMemAlloc(mlen);
-    if (buf == NULL)
-    {
-        ret = 0;
-        goto no_sent;
-    }
-    m_copydata(m, 0, mlen, buf);
-
-    /*
-     * If there is urgent data, call sosendoob
-     * if not all was sent, sowrite will take care of the rest
-     * (The rest of this function is just an optimisation)
-     */
-    if (so->so_urgc)
-    {
-        sbuf_bcpy(&so->so_rcv, buf, mlen);
-        RTMemFree(buf);
-        m_free(pData, m);
-        sosendoob(so);
-        return;
-    }
-
-    if(!sbuf_len(&so->so_rcv))
-        ret = send(so->s, buf, mlen, 0);
-no_sent:
-
-    if (ret <= 0)
-    {
-        STAM_COUNTER_INC(&pData->StatIOSBAppend_wf);
-        /*
-         * Nothing was written
-         * It's possible that the socket has closed, but
-         * we don't need to check because if it has closed,
-         * it will be detected in the normal way by soread()
-         */
-        sbuf_bcpy(&so->so_rcv, buf, mlen);
-        STAM_PROFILE_STOP(&pData->StatIOSBAppend_pf_wf, a);
-        goto done;
-    }
-    else if (ret != mlen)
-    {
-        STAM_COUNTER_INC(&pData->StatIOSBAppend_wp);
-        /*
-         * Something was written, but not everything..
-         * sbappendsb the rest
-         */
-        sbuf_bcpy(&so->so_rcv, &buf[ret + 1], mlen - ret);
-        STAM_PROFILE_STOP(&pData->StatIOSBAppend_pf_wp, a);
-        goto done;
-    } /* else */
-    /* Whatever happened, we free the mbuf */
-    STAM_COUNTER_INC(&pData->StatIOSBAppend_wa);
-    STAM_PROFILE_STOP(&pData->StatIOSBAppend_pf_wa, a);
-done:
-    RTMemFree(buf);
-    m_freem(pData, m);
-}
-#endif

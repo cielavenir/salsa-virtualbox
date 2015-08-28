@@ -208,7 +208,7 @@ VBOX_VERSION_MINOR = 3
 # This is the current build number. It should be increased every time we publish a
 # new build. The define is available in every source file. Only even build numbers
 # will be published, odd numbers are set during development.
-VBOX_VERSION_BUILD = 18
+VBOX_VERSION_BUILD = 30
 # The raw version string. This *must not* contain any other information/fields than
 # major, minor and build revision (as it is now) -- also will be used for host/guest version
 # comparison.
@@ -437,6 +437,10 @@ VBOX_WITH_WINMM =
 VBOX_WITH_INTERNAL_NETWORKING = 1
 # Enable vmsvga (svga2) graphics device variant, 2D part
 VBOX_WITH_VMSVGA = 1
+# Enable vmsvga (svga2) graphics device variant, 3D part
+if1of ($(KBUILD_TARGET), darwin win)
+ VBOX_WITH_VMSVGA3D = 1
+endif
 # Enable Host Guest Shared Memory Interface.
 VBOX_WITH_HGSMI = 1
 # Enable Video 2D Acceleration.
@@ -627,8 +631,6 @@ VBOX_WITH_MEMBALLOON = 1
 if1of ($(KBUILD_TARGET), darwin freebsd linux solaris win)
  VBOX_WITH_CROGL = 1
 endif
-# enable new wined3d code
-VBOX_WITH_NEW_WINE = 1
 # Enable S3 support (requires libcurl)
 VBOX_WITH_S3 = 1
 # Enable Host=>Guest Drag'n'Drop
@@ -1948,6 +1950,10 @@ endif
 # 32bit X11 LIBPATH for building 32bit guest additions
 VBOX_LIBPATH32_X11 ?= /usr/X11R6/lib32 /usr/X11R6/lib
 
+# Good windows shell.
+VBOX_GOOD_COMSPEC = $(subst \,/,$(SystemRoot))/System32/cmd.exe
+VBOX_GOOD_COMSPEC_BS ?= $(subst /,\,$(VBOX_GOOD_COMSPEC))
+
 #
 # Macros dealing with the darwin version we're targeting.
 # The DEF in VBOX_DEF_MACOSX_VERSION_MIN mean default.  The default min
@@ -2601,11 +2607,7 @@ ifdef VBOX_SIGNING_MODE
   else if1of ($(VBOX_SIGNING_MODE), release development)
    VBOX_CERTIFICATE_SUBJECT_NAME ?= Oracle Corporation
    VBOX_CERTIFICATE_SUBJECT_NAME_ARGS ?= /n "$(VBOX_CERTIFICATE_SUBJECT_NAME)" /a
-   if defined(VBOX_ONLY_ADDITIONS) || defined(VBOX_ONLY_EXTPACKS)
-    VBOX_CROSS_CERTIFICATE_FILE ?= $(VBOX_PATH_SELFSIGN)/VeriSign Class 3 Public Primary Certification Authority - G5.cer
-   else
-    VBOX_CROSS_CERTIFICATE_FILE ?= $(VBOX_PATH_SELFSIGN)/MSCV-VSClass3.cer
-   endif
+   VBOX_CROSS_CERTIFICATE_FILE ?= $(VBOX_PATH_SELFSIGN)/VeriSign Class 3 Public Primary Certification Authority - G5.cer
    VBOX_CROSS_CERTIFICATE_FILE_ARGS ?= /ac "$(VBOX_CROSS_CERTIFICATE_FILE)"
    VBOX_TSA_URL ?= http://timestamp.verisign.com/scripts/timestamp.dll
    VBOX_TSA_URL_ARGS ?= /t "$(VBOX_TSA_URL)"
@@ -2614,6 +2616,8 @@ ifdef VBOX_SIGNING_MODE
   endif
   VBOX_CERTIFICATE_STORE ?= my
   VBOX_CERTIFICATE_STORE_ARGS ?= /s "$(VBOX_CERTIFICATE_STORE)"
+  VBOX_CERTIFICATE_FINGERPRINT_ARGS := $(if-expr "$(VBOX_CERTIFICATE_FINGERPRINT)" != "" \
+  	,/sha1 "$(subst $(SP),,$(VBOX_CERTIFICATE_FINGERPRINT))",)
 
   ## Commands for signing a driver image after link.
   VBOX_SIGN_DRIVER_CMDS ?= $(if $(eq $(tool_do),LINK_LIBRARY),,$(call VBOX_SIGN_IMAGE_FN,$(out)))
@@ -2625,6 +2629,7 @@ ifdef VBOX_SIGNING_MODE
 	$(VBOX_CROSS_CERTIFICATE_FILE_ARGS) \
 	$(VBOX_CERTIFICATE_STORE_ARGS) \
 	$(VBOX_CERTIFICATE_SUBJECT_NAME_ARGS) \
+       $(VBOX_CERTIFICATE_FINGERPRINT_ARGS) \
 	$(VBOX_TSA_URL_ARGS) \
 	$(if $(strip $(2)),/d "$(strip $(2))",) \
        $(3) \
@@ -2666,6 +2671,9 @@ ifdef VBOX_SIGNING_MODE
   # Currently release signing is done when packing.  This may change later.
   # (Installer package signing is done elsewhere (VBOX_MACOSX_INSTALLER_SIGN).)
   #
+  if defined(VBOX_CERTIFICATE_FINGERPRINT) && !defined(VBOX_CERTIFICATE_SUBJECT_NAME)
+   VBOX_CERTIFICATE_SUBJECT_NAME = $(subst $(SP),,$(VBOX_CERTIFICATE_FINGERPRINT))
+  endif
   ifeq ($(strip $(VBOX_SIGNING_MODE)),test)
    VBOX_CERTIFICATE_SUBJECT_NAME ?= $(error You, need to set VBOX_CERTIFICATE_SUBJECT_NAME in LocalConfig.kmk.)
    VBOX_CERTIFICATE_SUBJECT_NAME_ARGS ?= --sign "$(VBOX_CERTIFICATE_SUBJECT_NAME)"
@@ -2712,6 +2720,12 @@ ifdef VBOX_SIGNING_MODE
   # Not Windows or mac os x build host, ignore.
   VBOX_SIGNING_MODE :=
  endif
+
+#
+# Complain if windows hardening is enabled but not code signing.
+#
+else if "$(KBUILD_TARGET)" == "win" && defined(VBOX_WITH_HARDENING) && !defined(VBOX_ONLY_BUILD)
+ $(error You need to enable code signing for a hardened windows build to work.)
 endif
 
 #
@@ -2909,12 +2923,12 @@ SDK_VBoxOpenSslExtPack_LIBS    = \
 ifdef VBOX_WITH_S3
 VBOX_WITH_LIBCURL = 1
 SDK_VBOX_LIBCURL       = .
-SDK_VBOX_LIBCURL_INCS ?= $(PATH_ROOT)/src/libs/curl-7.27.0/include
+SDK_VBOX_LIBCURL_INCS ?= $(PATH_ROOT)/src/libs/curl-7.42.1/include
 SDK_VBOX_LIBCURL_LIBS ?= $(PATH_STAGE_LIB)/VBox-libcurl$(VBOX_SUFF_LIB)
 SDK_VBOX_LIBCURL_DEFS ?= BUILDING_LIBCURL
 
 SDK_VBOX_LIBCURL-x86           = .
-SDK_VBOX_LIBCURL-x86_INCS     ?= $(PATH_ROOT)/src/libs/curl-7.27.0/include
+SDK_VBOX_LIBCURL-x86_INCS     ?= $(PATH_ROOT)/src/libs/curl-7.42.1/include
 SDK_VBOX_LIBCURL-x86_LIBS.x86 ?= $(PATH_STAGE_LIB)/VBox-libcurl-x86$(VBOX_SUFF_LIB)
 SDK_VBOX_LIBCURL-x86_DEFS     ?= BUILDING_LIBCURL
 endif
@@ -3136,6 +3150,9 @@ ifdef VBOX_WITH_RAW_MODE
    TEMPLATE_VBoxRc_LIBS               = \
 	$(VBOX_GCC32_LIBGCC) # instricts
   endif
+  if1of ($(KBUILD_TARGET),linux)
+   TEMPLATE_VBoxRc_POST_CMDS         = $(if $(eq $(tool_do),LINK_SYSMOD),if readelf -S $(out)|grep -q "[cd]tors"; then echo "Found ctors/dtors in $(out)!"; exit 1; fi)
+  endif
  endif
 
  ifeq ($(VBOX_LDR_FMT32),macho)
@@ -3280,6 +3297,9 @@ endif
 ifn1of ($(KBUILD_TARGET),solaris freebsd)
  TEMPLATE_VBoxR0_LIBS               = \
 	$(VBOX_GCC_LIBGCC) # instricts
+endif
+if1of ($(KBUILD_TARGET),linux)
+ TEMPLATE_VBoxR0_POST_CMDS          =  $(if $(eq $(tool_do),LINK_SYSMOD),if readelf -S $(out)|grep -q "[cd]tors"; then echo "Found ctors/dtors in $(out)!"; exit 1; fi)
 endif
 endif
 
@@ -4081,6 +4101,22 @@ TEMPLATE_VBOXR3OSX105_OBJCFLAGS.darwin   = $(VBOX_DARWIN_DEF_SDK_10_5_OBJCFLAGS)
 TEMPLATE_VBOXR3OSX105_OBJCXXFLAGS.darwin = $(VBOX_DARWIN_DEF_SDK_10_5_OBJCFLAGS)
 TEMPLATE_VBOXR3OSX105_LDFLAGS.darwin     = $(VBOX_DARWIN_DEF_SDK_10_5_LDFLAGS) \
 	-read_only_relocs suppress \
+	-current_version $(VBOX_VERSION_MAJOR).$(VBOX_VERSION_MINOR).$(VBOX_VERSION_BUILD) \
+	-compatibility_version $(VBOX_VERSION_MAJOR).$(VBOX_VERSION_MINOR).$(VBOX_VERSION_BUILD)
+
+#
+# Template for building R3 shared objects / DLLs with the 10.7 Mac OS X SDK.
+# Identical to VBoxR3Dll, except for the DYLIB, the classic_linker and SDK bits.
+#
+TEMPLATE_VBoxR3DllOsX107  = VBox Ring 3 SO/DLLs for OS X 10.7
+TEMPLATE_VBoxR3DllOsX107_EXTENDS = VBoxR3Dll
+TEMPLATE_VBoxR3DllOsX107_TOOL               = LLVMGXX42MACHO
+TEMPLATE_VBoxR3DllOsX107_DEFS.darwin        = $(VBOX_DARWIN_DEF_SDK_10_7_DEFS) PIC
+TEMPLATE_VBoxR3DllOsX107_CFLAGS.darwin      = $(VBOX_DARWIN_DEF_SDK_10_7_CFLAGS) -fno-common
+TEMPLATE_VBoxR3DllOsX107_CXXFLAGS.darwin    = $(VBOX_DARWIN_DEF_SDK_10_7_CXXFLAGS)
+TEMPLATE_VBoxR3DllOsX107_OBJCFLAGS.darwin   = $(VBOX_DARWIN_DEF_SDK_10_7_OBJCFLAGS)
+TEMPLATE_VBoxR3DllOsX107_OBJCXXFLAGS.darwin = $(VBOX_DARWIN_DEF_SDK_10_7_OBJCFLAGS)
+TEMPLATE_VBoxR3DllOsX107_LDFLAGS.darwin     = $(VBOX_DARWIN_DEF_SDK_10_7_LDFLAGS) \
 	-current_version $(VBOX_VERSION_MAJOR).$(VBOX_VERSION_MINOR).$(VBOX_VERSION_BUILD) \
 	-compatibility_version $(VBOX_VERSION_MAJOR).$(VBOX_VERSION_MINOR).$(VBOX_VERSION_BUILD)
 
@@ -5698,7 +5734,7 @@ endif
 SVN                    ?= svn$(HOSTSUFF_EXE)
 VBOX_SVN_REV_KMK        = $(PATH_OUT)/revision.kmk
 ifndef VBOX_SVN_REV
- VBOX_SVN_REV_FALLBACK := $(patsubst %:,,  $Rev: 96516 $  )
+ VBOX_SVN_REV_FALLBACK := $(patsubst %:,,  $Rev: 101610 $  )
  VBOX_SVN_DEP          := $(firstword $(wildcard $(PATH_ROOT)/.svn/wc.db $(abspath $(PATH_ROOT)/../.svn/wc.db) $(abspath $(PATH_ROOT)/../../.svn/wc.db) $(PATH_ROOT)/.svn/entries))
  ifeq ($(which $(SVN)),)
   VBOX_SVN_DEP         :=

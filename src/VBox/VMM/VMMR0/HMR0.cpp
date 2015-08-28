@@ -122,8 +122,12 @@ static struct
         /** VMX MSR values */
         VMXMSRS                     Msrs;
 
-        /* Last instruction error */
+        /** Last instruction error. */
         uint32_t                    ulLastInstrError;
+
+        /** Set if we've called SUPR0EnableVTx(true) and should disable it during
+         * module termination. */
+        bool                        fCalledSUPR0EnableVTx;
     } vmx;
 
     /** AMD-V information. */
@@ -730,7 +734,14 @@ VMMR0_INT_DECL(int) HMR0Term(void)
          * Simple if the host OS manages VT-x.
          */
         Assert(g_HvmR0.fGlobalInit);
-        rc = SUPR0EnableVTx(false /* fEnable */);
+
+        if (g_HvmR0.vmx.fCalledSUPR0EnableVTx)
+        {
+            rc = SUPR0EnableVTx(false /* fEnable */);
+            g_HvmR0.vmx.fCalledSUPR0EnableVTx = false;
+        }
+        else
+            rc = VINF_SUCCESS;
 
         for (unsigned iCpu = 0; iCpu < RT_ELEMENTS(g_HvmR0.aCpuInfo); iCpu++)
         {
@@ -760,10 +771,7 @@ VMMR0_INT_DECL(int) HMR0Term(void)
             rc = RTMpOnAll(hmR0DisableCpuCallback, NULL /* pvUser 1 */, &FirstRc);
             Assert(RT_SUCCESS(rc) || rc == VERR_NOT_SUPPORTED);
             if (RT_SUCCESS(rc))
-            {
                 rc = hmR0FirstRcGetStatus(&FirstRc);
-                AssertMsgRC(rc, ("%u: %Rrc\n", hmR0FirstRcGetCpuId(&FirstRc), rc));
-            }
         }
 
         /*
@@ -936,7 +944,6 @@ static int hmR0EnableCpu(PVM pVM, RTCPUID idCpu)
         else
             rc = g_HvmR0.pfnEnableCpu(pCpu, pVM, pvCpuPage, HCPhysCpuPage, false, NULL /* pvArg */);
     }
-    AssertRC(rc);
     if (RT_SUCCESS(rc))
         pCpu->fConfigured = true;
 
@@ -1005,8 +1012,11 @@ static DECLCALLBACK(int32_t) hmR0EnableAllCpuOnce(void *pvUser)
          */
         rc = SUPR0EnableVTx(true /* fEnable */);
         if (RT_SUCCESS(rc))
+        {
+            g_HvmR0.vmx.fCalledSUPR0EnableVTx = true;
             /* If the host provides a VT-x init API, then we'll rely on that for global init. */
             g_HvmR0.fGlobalInit = pVM->hm.s.fGlobalInit = true;
+        }
         else
             AssertMsgFailed(("hmR0EnableAllCpuOnce/SUPR0EnableVTx: rc=%Rrc\n", rc));
     }
@@ -1042,7 +1052,6 @@ static DECLCALLBACK(int32_t) hmR0EnableAllCpuOnce(void *pvUser)
         rc = RTMpOnAll(hmR0EnableCpuCallback, (void *)pVM, &FirstRc);
         if (RT_SUCCESS(rc))
             rc = hmR0FirstRcGetStatus(&FirstRc);
-        AssertMsgRC(rc, ("hmR0EnableAllCpuOnce failed for cpu %d with rc=%d\n", hmR0FirstRcGetCpuId(&FirstRc), rc));
     }
 
     return rc;
@@ -1088,7 +1097,8 @@ static int hmR0DisableCpu(RTCPUID idCpu)
         return pCpu->fConfigured ? VERR_NO_MEMORY : VINF_SUCCESS /* not initialized. */;
 
     int rc;
-    if (pCpu->fConfigured)
+    if (   pCpu->fConfigured
+        && idCpu == RTMpCpuId())    /* We may not be firing on the CPU being disabled/going offline. */
     {
         void    *pvCpuPage     = RTR0MemObjAddress(pCpu->hMemObj);
         RTHCPHYS HCPhysCpuPage = RTR0MemObjGetPagePhysAddr(pCpu->hMemObj, 0);
@@ -1100,7 +1110,6 @@ static int hmR0DisableCpu(RTCPUID idCpu)
     }
     else
         rc = VINF_SUCCESS; /* nothing to do */
-
     return rc;
 }
 
@@ -1271,7 +1280,7 @@ VMMR0_INT_DECL(int) HMR0InitVM(PVM pVM)
     }
 
     /*
-     * Initialize some per CPU fields.
+     * Initialize some per-VCPU fields.
      */
     for (VMCPUID i = 0; i < pVM->cCpus; i++)
     {
@@ -1351,7 +1360,11 @@ VMMR0_INT_DECL(int) HMR0SetupVM(PVM pVM)
     if (!g_HvmR0.fGlobalInit)
     {
         rc = hmR0EnableCpu(pVM, idCpu);
-        AssertRCReturnStmt(rc, RTThreadPreemptRestore(&PreemptState), rc);
+        if (RT_FAILURE(rc))
+        {
+            RTThreadPreemptRestore(&PreemptState);
+            return rc;
+        }
     }
 
     /* Setup VT-x or AMD-V. */

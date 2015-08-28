@@ -606,15 +606,14 @@ int handleStartVM(HandlerArg *a)
                         CHECK_ERROR(progress, COMGETTER(ResultCode)(&iRc));
                         if (SUCCEEDED(rc))
                         {
-                            if (FAILED(iRc))
+                            if (SUCCEEDED(rc))
+                                RTPrintf("VM \"%s\" has been successfully started.\n", pszVM);
+                            else
                             {
                                 ProgressErrorInfo info(progress);
                                 com::GluePrintErrorInfo(info);
                             }
-                            else
-                            {
-                                RTPrintf("VM \"%s\" has been successfully started.\n", pszVM);
-                            }
+                            rc = iRc;
                         }
                     }
                 }
@@ -900,6 +899,13 @@ int handleSetProperty(HandlerArg *a)
         if (!strcmp(a->argv[1], "default"))
             bstrDefaultFrontend.setNull();
         CHECK_ERROR(systemProperties, COMSETTER(DefaultFrontend)(bstrDefaultFrontend.raw()));
+    }
+    else if (!strcmp(a->argv[0], "logginglevel"))
+    {
+        Bstr bstrLoggingLevel(a->argv[1]);
+        if (!strcmp(a->argv[1], "default"))
+            bstrLoggingLevel.setNull();
+        CHECK_ERROR(systemProperties, COMSETTER(LoggingLevel)(bstrLoggingLevel.raw()));
     }
     else
         return errorSyntax(USAGE_SETPROPERTY, "Invalid parameter '%s'", a->argv[0]);

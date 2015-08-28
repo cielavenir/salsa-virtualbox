@@ -1,4 +1,20 @@
-/* -*- indent-tabs-mode: nil; -*- */
+/* $Id: portfwd.c $ */
+/** @file
+ * NAT Network - port-forwarding rules.
+ */
+
+/*
+ * Copyright (C) 2013-2014 Oracle Corporation
+ *
+ * This file is part of VirtualBox Open Source Edition (OSE), as
+ * available from http://www.virtualbox.org. This file is free software;
+ * you can redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GPL) as published by the Free Software
+ * Foundation, in version 2 as it comes in the "COPYING" file of the
+ * VirtualBox OSE distribution. VirtualBox OSE is distributed in the
+ * hope that it will be useful, but WITHOUT ANY WARRANTY of any kind.
+ */
+
 #define LOG_GROUP LOG_GROUP_NAT_SERVICE
 
 #include "winutils.h"
@@ -172,11 +188,11 @@ fwspec_set(struct fwspec *fwspec, int sdom, int stype,
 
     if (sdom == PF_INET) {
         fwspec->src.sin.sin_port = htons(src_port);
-        fwspec->dst.sin.sin_port = htons(dst_port); 
+        fwspec->dst.sin.sin_port = htons(dst_port);
     }
     else { /* PF_INET6 */
         fwspec->src.sin6.sin6_port = htons(src_port);
-        fwspec->dst.sin6.sin6_port = htons(dst_port); 
+        fwspec->dst.sin6.sin6_port = htons(dst_port);
     }
 
     return 0;

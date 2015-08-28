@@ -100,6 +100,7 @@ struct Medium::Data
           autoReset(false),
           hostDrive(false),
           implicit(false),
+          fClosing(false),
           uOpenFlagsDef(VD_OPEN_FLAGS_IGNORE_FLUSH),
           numCreateDiffTasks(0),
           vdDiskIfaces(NULL),
@@ -157,6 +158,8 @@ struct Medium::Data
     settings::StringsMap mapProperties;
 
     bool implicit : 1;
+    /** Flag whether the medium is in the process of being closed. */
+    bool fClosing: 1;
 
     /** Default flags passed to VDOpen(). */
     unsigned uOpenFlagsDef;
@@ -679,15 +682,21 @@ DECLCALLBACK(int) Medium::Task::fntMediumTask(RTTHREAD aThread, void *pvUser)
 
     HRESULT rc = pTask->handler();
 
-    /* complete the progress if run asynchronously */
+    /*
+     * save the progress reference if run asynchronously, since we want to
+     * destroy the task before we send out the completion notification.
+     * see @bugref{7763}
+     */
+    ComObjPtr<Progress> pProgress;
     if (pTask->isAsync())
-    {
-        if (!pTask->mProgress.isNull())
-            pTask->mProgress->notifyComplete(rc);
-    }
+        pProgress = pTask->mProgress;
 
     /* pTask is no longer needed, delete it. */
     delete pTask;
+
+    /* complete the progress if run asynchronously */
+    if (!pProgress.isNull())
+        pProgress->notifyComplete(rc);
 
     LogFlowFunc(("rc=%Rhrc\n", rc));
     LogFlowFuncLeave();
@@ -4282,6 +4291,8 @@ HRESULT Medium::close(AutoCaller &autoCaller)
     HRESULT rc = canClose();
     if (FAILED(rc)) return rc;
 
+    m->fClosing = true;
+
     if (wasCreated)
     {
         // remove from the list of known media before performing actual
@@ -5648,9 +5659,10 @@ HRESULT Medium::queryInfo(bool fSetImageId, bool fSetParentId, AutoCaller &autoC
     Assert(!isWriteLockOnCurrentThread());
     AutoWriteLock alock(this COMMA_LOCKVAL_SRC_POS);
 
-    if (   m->state != MediumState_Created
-        && m->state != MediumState_Inaccessible
-        && m->state != MediumState_LockedRead)
+    if (   (   m->state != MediumState_Created
+            && m->state != MediumState_Inaccessible
+            && m->state != MediumState_LockedRead)
+        || m->fClosing)
         return E_FAIL;
 
     HRESULT rc = S_OK;
@@ -6765,11 +6777,12 @@ DECLCALLBACK(int) Medium::vdTcpSocketDestroy(VDSOCKET Sock)
     return VINF_SUCCESS;
 }
 
-DECLCALLBACK(int) Medium::vdTcpClientConnect(VDSOCKET Sock, const char *pszAddress, uint32_t uPort)
+DECLCALLBACK(int) Medium::vdTcpClientConnect(VDSOCKET Sock, const char *pszAddress, uint32_t uPort,
+                                             RTMSINTERVAL cMillies)
 {
     PVDSOCKETINT pSocketInt = (PVDSOCKETINT)Sock;
 
-    return RTTcpClientConnect(pszAddress, uPort, &pSocketInt->hSocket);
+    return RTTcpClientConnectEx(pszAddress, uPort, &pSocketInt->hSocket, cMillies, NULL);
 }
 
 DECLCALLBACK(int) Medium::vdTcpClientClose(VDSOCKET Sock)

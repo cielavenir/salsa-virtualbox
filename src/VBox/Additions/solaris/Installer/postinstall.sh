@@ -241,8 +241,27 @@ if test ! -z "$xorgbin"; then
                 rm -f $vboxadditions_path/$xorgconf_unfit
             fi
 
-            # Adjust xorg.conf with video driver sections
-            $vboxadditions_path/x11config15sol.pl
+            # Check for VirtualBox graphics card
+            # S10u10's prtconf doesn't support the '-d' option, so let's use -v even though it's slower.
+            is_vboxgraphics=`prtconf -v | grep -i pci80ee,beef`
+            if test "$?" -eq 0; then
+                drivername="vboxvideo"
+            else
+                # Check for VMware graphics card
+                is_vmwaregraphics=`prtconf -v | grep -i pci15ad,405`
+                if test "$?" -eq 0; then
+                    echo "Configuring X.Org to use VMware SVGA graphics driver..."
+                    drivername="vmware"
+                fi
+            fi
+
+            # Adjust xorg.conf with video driver sections if a supported graphics card is found
+            if test ! -z "$drivername"; then
+                $vboxadditions_path/x11config15sol.pl "$drivername"
+            else
+                # No supported graphics card found, do nothing.
+                echo "## No supported graphics card found. Skipped configuring of X.org drivers."
+            fi
         fi
     fi
 

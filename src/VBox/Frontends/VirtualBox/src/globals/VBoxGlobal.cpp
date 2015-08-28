@@ -1668,7 +1668,7 @@ QString VBoxGlobal::openMediumWithFileOpenDialog(UIMediumType mediumType, QWidge
             break;
     }
     QString strHomeFolder = fUseLastFolder && !strLastFolder.isEmpty() ? strLastFolder :
-                            strDefaultFolder.isEmpty() ? vboxGlobal().virtualBox().GetHomeFolder() : strDefaultFolder;
+                            strDefaultFolder.isEmpty() ? vboxGlobal().homeFolder() : strDefaultFolder;
 
     /* Prepare filters and backends: */
     for (int i = 0; i < filters.count(); ++i)
@@ -3309,6 +3309,7 @@ bool VBoxGlobal::isWddmCompatibleOsType(const QString &strGuestOSTypeId)
            || strGuestOSTypeId.startsWith("Windows7")
            || strGuestOSTypeId.startsWith("Windows8")
            || strGuestOSTypeId.startsWith("Windows81")
+           || strGuestOSTypeId.startsWith("Windows10")
            || strGuestOSTypeId.startsWith("Windows2008")
            || strGuestOSTypeId.startsWith("Windows2012");
 }
@@ -3333,14 +3334,14 @@ QString VBoxGlobal::fullMediumFormatName(const QString &strBaseMediumFormatName)
 }
 
 /* static */
-bool VBoxGlobal::isApprovedByExtraData(CVirtualBox &vbox, const QString &strExtraDataKey)
+bool VBoxGlobal::isApprovedByExtraData(CVirtualBox &vbox, const QString &strExtraDataKey, bool fApprovedByDefault /* = false */)
 {
     /* Load corresponding extra-data value: */
     QString strExtraDataValue(vbox.GetExtraData(strExtraDataKey));
 
     /* 'false' if value was not set: */
     if (strExtraDataValue.isEmpty())
-        return false;
+        return fApprovedByDefault;
 
     /* Handle particular values: */
     return    strExtraDataValue.compare("true", Qt::CaseInsensitive) == 0
@@ -3350,14 +3351,14 @@ bool VBoxGlobal::isApprovedByExtraData(CVirtualBox &vbox, const QString &strExtr
 }
 
 /* static */
-bool VBoxGlobal::isApprovedByExtraData(CMachine &machine, const QString &strExtraDataKey)
+bool VBoxGlobal::isApprovedByExtraData(CMachine &machine, const QString &strExtraDataKey, bool fApprovedByDefault /* = false */)
 {
     /* Load corresponding extra-data value: */
     QString strExtraDataValue(machine.GetExtraData(strExtraDataKey));
 
     /* 'false' if value was not set: */
     if (strExtraDataValue.isEmpty())
-        return false;
+        return fApprovedByDefault;
 
     /* Handle particular values: */
     return    strExtraDataValue.compare("true", Qt::CaseInsensitive) == 0
@@ -3731,6 +3732,20 @@ QList<MachineSettingsPageType> VBoxGlobal::restrictedMachineSettingsPages(CMachi
     return result;
 }
 
+/* static */
+bool VBoxGlobal::activateHoveredMachineWindow(CVirtualBox &vbox)
+{
+    /* 'true' if activating is approved by the extra-data: */
+    return isApprovedByExtraData(vbox, GUI_ActivateHoveredMachineWindow, true);
+}
+
+/* static */
+void VBoxGlobal::setActivateHoveredMachineWindow(CVirtualBox &vbox, bool fActivate)
+{
+    /* "false" if activating is restricted, null-string otherwise: */
+    vbox.SetExtraData(GUI_ActivateHoveredMachineWindow, fActivate ? QString() : QString("false"));
+}
+
 #ifndef Q_WS_MAC
 /* static */
 QStringList VBoxGlobal::machineWindowIconNames(CMachine &machine)
@@ -4061,6 +4076,7 @@ void VBoxGlobal::prepare()
         return;
     }
     mHost = virtualBox().GetHost();
+    mHomeFolder = virtualBox().GetHomeFolder();
 
     /* create default non-null global settings */
     gset = VBoxGlobalSettings (false);
@@ -4136,9 +4152,11 @@ void VBoxGlobal::prepare()
         {"Windows7_64",     ":/os_win7_64.png"},
         {"Windows8",        ":/os_win8.png"},
         {"Windows8_64",     ":/os_win8_64.png"},
-        {"Windows81",       ":/os_win8.png"},
-        {"Windows81_64",    ":/os_win8_64.png"},
+        {"Windows81",       ":/os_win81.png"},
+        {"Windows81_64",    ":/os_win81_64.png"},
         {"Windows2012_64",  ":/os_win2k12_64.png"},
+        {"Windows10",       ":/os_win10.png"},
+        {"Windows10_64",    ":/os_win10_64.png"},
         {"WindowsNT",       ":/os_win_other.png"},
         {"WindowsNT_64",    ":/os_win_other.png"}, /// @todo os_win_other_64.png
         {"OS2Warp3",        ":/os_os2warp3.png"},
@@ -4826,7 +4844,8 @@ bool VBoxGlobal::switchToMachine(CMachine &machine)
 bool VBoxGlobal::launchMachine(CMachine &machine, bool fHeadless /* = false */)
 {
     /* Switch to machine window(s) if possible: */
-    if (machine.CanShowConsoleWindow())
+    if (   machine.GetSessionState() == KSessionState_Locked /* precondition for CanShowConsoleWindow() */
+        && machine.CanShowConsoleWindow())
         return VBoxGlobal::switchToMachine(machine);
 
     /* Make sure machine-state is one of required: */

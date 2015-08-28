@@ -1415,7 +1415,7 @@ static int crVBoxHGCMDoConnect( CRConnection *conn )
 # endif
     if (ioctl(g_crvboxhgcm.iGuestDrv, VBOXGUEST_IOCTL_HGCM_CONNECT, &Hdr) >= 0)
 #else
-    if (ioctl(g_crvboxhgcm.iGuestDrv, VBOXGUEST_IOCTL_HGCM_CONNECT, &info, sizeof (info)) >= 0)
+    if (ioctl(g_crvboxhgcm.iGuestDrv, VBOXGUEST_IOCTL_HGCM_CONNECT, &info, sizeof (info)) == 0)
 #endif
     {
         if (info.result == VINF_SUCCESS)
@@ -2414,9 +2414,11 @@ void crVBoxHGCMBufferFree(void *data)
     switch (hgcm_buffer->kind)
     {
         case CR_VBOXHGCM_MEMORY:
+            crDebug("crVBoxHGCMBufferFree: CR_VBOXHGCM_MEMORY: %p", hgcm_buffer);
             crFree( hgcm_buffer );
             break;
         case CR_VBOXHGCM_MEMORY_BIG:
+            crDebug("crVBoxHGCMBufferFree: CR_VBOXHGCM_MEMORY_BIG: %p", hgcm_buffer);
             crFree( hgcm_buffer );
             break;
 
@@ -2449,15 +2451,15 @@ void crVBoxHGCMTearDown(void)
 
     g_crvboxhgcm.initialized = 0;
 
+    if (g_crvboxhgcm.bufpool)
+        crBufferPoolCallbackFree(g_crvboxhgcm.bufpool, crVBoxHGCMBufferFree);
+    g_crvboxhgcm.bufpool = NULL;
+
 #ifdef CHROMIUM_THREADSAFE
     crUnlockMutex(&g_crvboxhgcm.mutex);
     crFreeMutex(&g_crvboxhgcm.mutex);
     crFreeMutex(&g_crvboxhgcm.recvmutex);
 #endif
-
-    if (g_crvboxhgcm.bufpool)
-        crBufferPoolCallbackFree(g_crvboxhgcm.bufpool, crVBoxHGCMBufferFree);
-    g_crvboxhgcm.bufpool = NULL;
 
     crFree(g_crvboxhgcm.conns);
     g_crvboxhgcm.conns = NULL;

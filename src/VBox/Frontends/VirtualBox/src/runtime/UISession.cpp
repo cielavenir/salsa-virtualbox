@@ -135,6 +135,7 @@ UISession::UISession(UIMachine *pMachine, CSession &sessionReference)
     , m_mouseCapturePolicy(MouseCapturePolicy_Default)
     , m_guruMeditationHandlerType(GuruMeditationHandlerType_Default)
     , m_hiDPIOptimizationType(HiDPIOptimizationType_None)
+    , m_fActivateHoveredMachineWindow(false)
     , m_fIsExtensionPackUsable(false)
     , m_requestedVisualStateType(UIVisualStateType_Invalid)
 #ifdef Q_WS_WIN
@@ -233,6 +234,12 @@ void UISession::powerUp()
     if (!fPrepared)
         return;
 
+    /* Enable 'manual-override',
+     * preventing automatic Runtime UI closing
+     * and visual representation mode changes: */
+    if (machineLogic())
+        machineLogic()->setManualOverrideMode(true);
+
     /* Get current machine/console: */
     CMachine machine = session().GetMachine();
     CConsole console = session().GetConsole();
@@ -268,10 +275,6 @@ void UISession::powerUp()
         return;
     }
 
-    /* Guard progressbar warnings from auto-closing: */
-    if (uimachine()->machineLogic())
-        uimachine()->machineLogic()->setPreventAutoClose(true);
-
     /* Show "Starting/Restoring" progress dialog: */
     if (isSaved())
     {
@@ -290,10 +293,6 @@ void UISession::powerUp()
         closeRuntimeUI();
         return;
     }
-
-    /* Allow further auto-closing: */
-    if (uimachine()->machineLogic())
-        uimachine()->machineLogic()->setPreventAutoClose(false);
 
     /* Check if we missed a really quick termination after successful startup, and process it if we did: */
     if (isTurnedOff())
@@ -329,16 +328,10 @@ void UISession::powerUp()
             CProgress progress = console.PowerDown();
             if (console.isOk())
             {
-                /* Guard progressbar warnings from auto-closing: */
-                if (uimachine()->machineLogic())
-                    uimachine()->machineLogic()->setPreventAutoClose(true);
                 /* Show the power down progress dialog */
                 msgCenter().showModalProgressDialog(progress, machine.GetName(), ":/progress_poweroff_90px.png");
                 if (!progress.isOk() || progress.GetResultCode() != 0)
                     msgCenter().cannotPowerDownMachine(progress, machine.GetName());
-                /* Allow further auto-closing: */
-                if (uimachine()->machineLogic())
-                    uimachine()->machineLogic()->setPreventAutoClose(false);
             }
             else
                 msgCenter().cannotPowerDownMachine(console);
@@ -369,6 +362,10 @@ void UISession::powerUp()
 #ifdef VBOX_GUI_WITH_PIDFILE
     vboxGlobal().createPidfile();
 #endif
+
+    /* Disable 'manual-override' finally: */
+    if (machineLogic())
+        machineLogic()->setManualOverrideMode(false);
 
     /* Warn listeners about machine was started: */
     emit sigStarted();
@@ -962,9 +959,12 @@ void UISession::sltAdditionsChange()
         m_fIsGuestSupportsGraphics = fIsGuestSupportsGraphics;
         m_fIsGuestSupportsSeamless = fIsGuestSupportsSeamless;
 
-        /* Notify listeners about guest additions state changed: */
-        emit sigAdditionsStateChange();
+        /* Notify listeners about guest additions state really changed: */
+        emit sigAdditionsStateActualChange();
     }
+
+    /* Notify listeners about guest additions state event came: */
+    emit sigAdditionsStateChange();
 }
 
 void UISession::prepareConsoleEventHandlers()
@@ -1096,7 +1096,9 @@ void UISession::prepareMenuPool()
 
 void UISession::loadSessionSettings()
 {
-   /* Get uisession machine: */
+    /* Get vbox instance: */
+    CVirtualBox vbox = vboxGlobal().virtualBox();
+    /* Get uisession machine: */
     CMachine machine = session().GetConsole().GetMachine();
 
     /* Load extra-data settings: */
@@ -1153,6 +1155,9 @@ void UISession::loadSessionSettings()
 
         /* Determine HiDPI optimization type: */
         m_hiDPIOptimizationType = VBoxGlobal::hiDPIOptimizationType(machine);
+
+        /* Determine whether hovered machine-window should be activated: */
+        m_fActivateHoveredMachineWindow = VBoxGlobal::activateHoveredMachineWindow(vbox);
 
         /* Is there should be First RUN Wizard? */
         strSettings = machine.GetExtraData(GUI_FirstRun);

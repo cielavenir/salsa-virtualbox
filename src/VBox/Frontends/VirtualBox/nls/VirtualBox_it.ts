@@ -1128,7 +1128,7 @@
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished">Rete</translation>
+        <translation>Rete</translation>
     </message>
 </context>
 <context>
@@ -2992,9 +2992,9 @@ p, li { white-space: pre-wrap; }
         <translation>Driver generico, &apos;%1&apos;</translation>
     </message>
     <message>
-        <source>Generic Driver, &apos;%1&apos; {&amp;nbsp;%2&amp;nbsp;}</source>
+        <source>Generic Driver, &apos;%1&apos; { %2 }</source>
         <comment>details (network)</comment>
-        <translation>Driver generico, &apos;%1&apos; {&amp;nbsp;%2&amp;nbsp;}</translation>
+        <translation>Driver generico, &apos;%1&apos; { %2 }</translation>
     </message>
     <message>
         <source>Device Filters</source>
@@ -3435,6 +3435,18 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Suggest a maximum screen size to the guest. The guest will only see this suggestion when guest additions are installed.</source>
         <translation>Suggerisci una dimensione dello schermo al guest. Il guest vedrà questo suggerimento solo dopo l&apos;installazione delle guest additions.</translation>
+    </message>
+    <message>
+        <source>Machine Windows:</source>
+        <translation>Finestre della macchina:</translation>
+    </message>
+    <message>
+        <source>If checked, machine windows will be raised when the mouse pointer moves over them.</source>
+        <translation>Se marcata, le finestre della macchina saranno alzate qunado il puntatore del mouse passa su di esse.</translation>
+    </message>
+    <message>
+        <source>&amp;Raise Window Under Mouse</source>
+        <translation>Alza finest&amp;ra sotto il mouse</translation>
     </message>
 </context>
 <context>
@@ -4952,11 +4964,11 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Connect Network Adapter</source>
-        <translation type="unfinished"></translation>
+        <translation>Connetti scheda di rete</translation>
     </message>
     <message>
         <source>Connect Network Adapter %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Connetti scheda di rete %1</translation>
     </message>
 </context>
 <context>
@@ -5241,7 +5253,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>Remote Display is currently enabled for this virtual machine. However, this requires the &lt;b&gt;%1&lt;/b&gt; to be installed. Please install the Extension Pack from the VirtualBox download site as otherwise your VM will be started with Remote Display disabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Lo schermo remoto è attualmente abilitato per questa macchina virtuale. Tuttavia, ciò richiede che &lt;b&gt;%1&lt;/b&gt; sia installato. Installa l&apos;Extension Pack dal sito di VirtualBox, altrimenti la tua MV sarà avviata senza il supporto per lo schermo remoto.</translation>
     </message>
 </context>
 <context>
@@ -7673,7 +7685,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>&lt;p&gt;A new version of VirtualBox has been released! Version &lt;b&gt;%1&lt;/b&gt; is available at &lt;a href=&quot;http://www.virtualbox.org/&quot;&gt;virtualbox.org&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;You can download this version using the link:&lt;/p&gt;&lt;p&gt;&lt;a href=%2&gt;%3&lt;/a&gt;&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Una nuova versione di VirtualBox è stata rilasciata! La versione &lt;b&gt;%1&lt;/b&gt; è disponibile presso &lt;a href=&quot;http://www.virtualbox.org/&quot;&gt;virtualbox.org&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Puoi scaricare questa versione da questo collegamento diretto:&lt;/p&gt;&lt;p&gt;&lt;a href=%2&gt;%3&lt;/a&gt;&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;p&gt;Una nuova versione di VirtualBox è stata rilasciata! La versione &lt;b&gt;%1&lt;/b&gt; è disponibile presso &lt;a href=&quot;http://www.virtualbox.org/&quot;&gt;virtualbox.org&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Puoi scaricare questa versione da questo collegamento diretto:&lt;/p&gt;&lt;p&gt;&lt;a href=%2&gt;%3&lt;/a&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Are you sure you want to release the %1 &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/nobr&gt;?&lt;/p&gt;&lt;p&gt;This will detach it from the following virtual machine(s): &lt;b&gt;%3&lt;/b&gt;.&lt;/p&gt;</source>
@@ -7753,7 +7765,7 @@ p, li { white-space: pre-wrap; }
     </message>
     <message>
         <source>&lt;p&gt;A critical error has occurred while running the virtual machine and the machine execution has been stopped.&lt;/p&gt;&lt;p&gt;For help, please see the Community section on &lt;a href=http://www.virtualbox.org&gt;http://www.virtualbox.org&lt;/a&gt; or your support contract. Please provide the contents of the log file &lt;tt&gt;VBox.log&lt;/tt&gt; and the image file &lt;tt&gt;VBox.png&lt;/tt&gt;, which you can find in the &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt; directory, as well as a description of what you were doing when this error happened. Note that you can also access the above files by selecting &lt;b&gt;Show Log&lt;/b&gt; from the &lt;b&gt;Machine&lt;/b&gt; menu of the main VirtualBox window.&lt;/p&gt;&lt;p&gt;Press &lt;b&gt;OK&lt;/b&gt; if you want to power off the machine or press &lt;b&gt;Ignore&lt;/b&gt; if you want to leave it as is for debugging. Please note that debugging requires special knowledge and tools, so it is recommended to press &lt;b&gt;OK&lt;/b&gt; now.&lt;/p&gt;</source>
-        <translation>&lt;p&gt;Si è verificato un errore critico durante il funzionamento della macchina virtuale e l&apos;esecuzione della macchina è stata fermata.&lt;/p&gt;&lt;p&gt;Per ottenere aiuto, vedi la sezione Community su &lt;a href=http://www.virtualbox.org&gt;http://www.virtualbox.org&lt;/a&gt; o il contratto di supporto. Fornisci il contenuto del file di log &lt;tt&gt;VBox.log&lt;/tt&gt; e il file immagine &lt;tt&gt;VBox.png&lt;/tt&gt;, che puoi trovare nella cartella &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;, così come una descrizione di cosa stavi facendo quando si è verificato l&apos;errore. Nota che puoi anche accedere ai suddetti file selezionando &lt;b&gt;Mostra log&lt;/b&gt; dal menu &lt;b&gt;Macchina&lt;/b&gt; della finestra principale di VirtualBox. &lt;/p&gt;&lt;p&gt;Premi &lt;b&gt;OK&lt;/b&gt; se vuoi spegnere la macchina o &lt;b&gt;Ignora&lt;/b&gt; se desideri lasciarla così com&apos;è per debug. Nota che il debug richiede conoscenza particolare e strumenti, perciò è consigliato premere &lt;b&gt;OK&lt;/b&gt; subito.&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;p&gt;Si è verificato un errore critico durante il funzionamento della macchina virtuale e l&apos;esecuzione della macchina è stata fermata.&lt;/p&gt;&lt;p&gt;Per ottenere aiuto, vedi la sezione Community su &lt;a href=http://www.virtualbox.org&gt;http://www.virtualbox.org&lt;/a&gt; o il contratto di supporto. Fornisci il contenuto del file di log &lt;tt&gt;VBox.log&lt;/tt&gt; e il file immagine &lt;tt&gt;VBox.png&lt;/tt&gt;, che puoi trovare nella cartella &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;, così come una descrizione di cosa stavi facendo quando si è verificato l&apos;errore. Nota che puoi anche accedere ai suddetti file selezionando &lt;b&gt;Mostra log&lt;/b&gt; dal menu &lt;b&gt;Macchina&lt;/b&gt; della finestra principale di VirtualBox. &lt;/p&gt;&lt;p&gt;Premi &lt;b&gt;OK&lt;/b&gt; se vuoi spegnere la macchina o &lt;b&gt;Ignora&lt;/b&gt; se desideri lasciarla così com&apos;è per debug. Nota che il debug richiede conoscenza particolare e strumenti, perciò è consigliato premere &lt;b&gt;OK&lt;/b&gt; subito.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>The following files already exist:&lt;br /&gt;&lt;br /&gt;%1&lt;br /&gt;&lt;br /&gt;Are you sure you want to replace them? Replacing them will overwrite their contents.</source>
@@ -9093,6 +9105,14 @@ p, li { white-space: pre-wrap; }
         <source>&lt;p&gt;The virtual screen is currently set to a &lt;b&gt;%1&amp;nbsp;bit&lt;/b&gt; color mode. For better performance please change this to &lt;b&gt;%2&amp;nbsp;bit&lt;/b&gt;. This can usually be done from the &lt;b&gt;Display&lt;/b&gt; section of the guest operating system&apos;s Control Panel or System Settings.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Lo schermo virtuale è attualmente impostato a una modalità di colore di &lt;b&gt;%1&amp;nbsp;bit&lt;/b&gt;. Per ottenere prestazioni migliori, modifica questa impostazione a &lt;b&gt;%2&amp;nbsp;bit&lt;/b&gt;. Ciò normalmente può essere fatto dalla sezione &lt;b&gt;Schermo&lt;/b&gt; del panello di controllo del sistema operativo del guest o da Impostazioni di sistema.&lt;/p&gt;</translation>
     </message>
+    <message>
+        <source>&lt;p&gt;A critical error has occurred while running the virtual machine and the machine execution has been stopped.&lt;/p&gt;&lt;p&gt;For help, please see the Community section on &lt;a href=https://www.virtualbox.org&gt;https://www.virtualbox.org&lt;/a&gt; or your support contract. Please provide the contents of the log file &lt;tt&gt;VBox.log&lt;/tt&gt; and the image file &lt;tt&gt;VBox.png&lt;/tt&gt;, which you can find in the &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt; directory, as well as a description of what you were doing when this error happened. Note that you can also access the above files by selecting &lt;b&gt;Show Log&lt;/b&gt; from the &lt;b&gt;Machine&lt;/b&gt; menu of the main VirtualBox window.&lt;/p&gt;&lt;p&gt;Press &lt;b&gt;OK&lt;/b&gt; if you want to power off the machine or press &lt;b&gt;Ignore&lt;/b&gt; if you want to leave it as is for debugging. Please note that debugging requires special knowledge and tools, so it is recommended to press &lt;b&gt;OK&lt;/b&gt; now.&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Si è verificato un errore critico durante il funzionamento della macchina virtuale e l&apos;esecuzione della macchina è stata fermata.&lt;/p&gt;&lt;p&gt;Per ottenere aiuto, vedi la sezione Community su &lt;a href=https://www.virtualbox.org&gt;http://www.virtualbox.org&lt;/a&gt; o il tuo contratto di supporto. Fornisci il contenuto del file di log &lt;tt&gt;VBox.log&lt;/tt&gt; e il file dell&apos;immagine &lt;tt&gt;VBox.png&lt;/tt&gt;, che puoi trovare nella cartella &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;, così come una descrizione di cosa stavi facendo quando si è verificato l&apos;errore. Nota che puoi accedere ai suddetti file anche selezionando &lt;b&gt;Mostra log&lt;/b&gt; dal menu &lt;b&gt;Macchina&lt;/b&gt; della finestra principale di VirtualBox. &lt;/p&gt;&lt;p&gt;Premi &lt;b&gt;OK&lt;/b&gt; se vuoi spegnere la macchina o &lt;b&gt;Ignora&lt;/b&gt; se desideri lasciarla così com&apos;è per debug. Nota che il debug richiede conoscenza particolare e strumenti, perciò è consigliato premere &lt;b&gt;OK&lt;/b&gt; subito.&lt;/p&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;A new version of VirtualBox has been released! Version &lt;b&gt;%1&lt;/b&gt; is available at &lt;a href=&quot;https://www.virtualbox.org/&quot;&gt;virtualbox.org&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;You can download this version using the link:&lt;/p&gt;&lt;p&gt;&lt;a href=%2&gt;%3&lt;/a&gt;&lt;/p&gt;</source>
+        <translation>&lt;p&gt;Una nuova versione di VirtualBox è stata rilasciata! La versione &lt;b&gt;%1&lt;/b&gt; è disponibile presso &lt;a href=&quot;https://www.virtualbox.org/&quot;&gt;virtualbox.org&lt;/a&gt;.&lt;/p&gt;&lt;p&gt;Puoi scaricare questa versione utilizzando questo collegamento:&lt;/p&gt;&lt;p&gt;&lt;a href=%2&gt;%3&lt;/a&gt;&lt;/p&gt;</translation>
+    </message>
 </context>
 <context>
     <name>UIMiniProcessWidgetAdditions</name>
@@ -10342,12 +10362,16 @@ questo passo e collegare hard disk più tardi tramite Impostazioni della MV.&lt;
     </message>
     <message>
         <source>&lt;h3&gt;Welcome to VirtualBox!&lt;/h3&gt;&lt;p&gt;The left part of this window is  a list of all virtual machines on your computer. The list is empty now because you haven&apos;t created any virtual machines yet.&lt;img src=:/welcome.png align=right/&gt;&lt;/p&gt;&lt;p&gt;In order to create a new virtual machine, press the &lt;b&gt;New&lt;/b&gt; button in the main tool bar located at the top of the window.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;%1&lt;/b&gt; key to get instant help, or visit &lt;a href=http://www.virtualbox.org&gt;www.virtualbox.org&lt;/a&gt; for the latest information and news.&lt;/p&gt;</source>
-        <translation>&lt;h3&gt;Benvenuti in VirtualBox!&lt;/h3&gt;&lt;p&gt;La parte sinistra di questa finestra visualizza un elenco delle macchine virtuali sul tuo computer. L&apos;elenco al momento è vuoto perché non hai ancora creato macchine virtuali.&lt;img src=:/welcome.png align=right/&gt;&lt;/p&gt;&lt;p&gt;Per creare una nuova macchina virtuale, premi il pulsante &lt;b&gt;Nuova&lt;/b&gt; nella barra degli strumenti principale posizionata nella parte alta della finestra.&lt;/p&gt;&lt;p&gt;Premi il tasto &lt;b&gt;%1&lt;/b&gt; per ottenere aiuto immediatamente, o visita &lt;a href=http://www.virtualbox.org&gt;www.virtualbox.org&lt;/a&gt; per le ultime notizie e informazioni.&lt;/p&gt;</translation>
+        <translation type="obsolete">&lt;h3&gt;Benvenuti in VirtualBox!&lt;/h3&gt;&lt;p&gt;La parte sinistra di questa finestra visualizza un elenco delle macchine virtuali sul tuo computer. L&apos;elenco al momento è vuoto perché non hai ancora creato macchine virtuali.&lt;img src=:/welcome.png align=right/&gt;&lt;/p&gt;&lt;p&gt;Per creare una nuova macchina virtuale, premi il pulsante &lt;b&gt;Nuova&lt;/b&gt; nella barra degli strumenti principale posizionata nella parte alta della finestra.&lt;/p&gt;&lt;p&gt;Premi il tasto &lt;b&gt;%1&lt;/b&gt; per ottenere aiuto immediatamente, o visita &lt;a href=http://www.virtualbox.org&gt;www.virtualbox.org&lt;/a&gt; per le ultime notizie e informazioni.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Manager</source>
         <comment>Note: main window title which is pretended by the product name.</comment>
         <translation>Gestore</translation>
+    </message>
+    <message>
+        <source>&lt;h3&gt;Welcome to VirtualBox!&lt;/h3&gt;&lt;p&gt;The left part of this window is  a list of all virtual machines on your computer. The list is empty now because you haven&apos;t created any virtual machines yet.&lt;img src=:/welcome.png align=right/&gt;&lt;/p&gt;&lt;p&gt;In order to create a new virtual machine, press the &lt;b&gt;New&lt;/b&gt; button in the main tool bar located at the top of the window.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;%1&lt;/b&gt; key to get instant help, or visit &lt;a href=https://www.virtualbox.org&gt;www.virtualbox.org&lt;/a&gt; for the latest information and news.&lt;/p&gt;</source>
+        <translation>&lt;h3&gt;Benvenuti in VirtualBox!&lt;/h3&gt;&lt;p&gt;La parte sinistra di questa finestra visualizza un elenco delle macchine virtuali sul tuo computer. L&apos;elenco al momento è vuoto perché non hai ancora creato macchine virtuali.&lt;img src=:/welcome.png align=right/&gt;&lt;/p&gt;&lt;p&gt;Per creare una nuova macchina virtuale, premi il pulsante &lt;b&gt;Nuova&lt;/b&gt; nella barra degli strumenti principale posizionata nella parte alta della finestra.&lt;/p&gt;&lt;p&gt;Premi il tasto &lt;b&gt;%1&lt;/b&gt; per ottenere aiuto immediatamente, o visita &lt;a href=https://www.virtualbox.org&gt;www.virtualbox.org&lt;/a&gt; per le ultime notizie e informazioni.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>

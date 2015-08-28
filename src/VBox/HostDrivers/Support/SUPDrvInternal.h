@@ -548,6 +548,8 @@ typedef struct SUPDRVDEVEXT
 
     /** Linked list of loaded code. */
     PSUPDRVLDRIMAGE volatile        pLdrImages;
+    /** Set if the image loading interface got disabled after loading all needed images */
+    bool                            fLdrLockedDown;
 
     /** @name These members for detecting whether an API caller is in ModuleInit.
      * Certain APIs are only permitted from ModuleInit, like for instance tracepoint
@@ -685,6 +687,7 @@ void VBOXCALL   supdrvOSObjInitCreator(PSUPDRVOBJ pObj, PSUPDRVSESSION pSession)
 bool VBOXCALL   supdrvOSObjCanAccess(PSUPDRVOBJ pObj, PSUPDRVSESSION pSession, const char *pszObjName, int *prc);
 bool VBOXCALL   supdrvOSGetForcedAsyncTscMode(PSUPDRVDEVEXT pDevExt);
 int  VBOXCALL   supdrvOSEnableVTx(bool fEnabled);
+RTCCUINTREG VBOXCALL supdrvOSChangeCR4(RTCCUINTREG fOrMask, RTCCUINTREG fAndMask);
 bool VBOXCALL   supdrvOSSuspendVTxOnCpu(void);
 void VBOXCALL   supdrvOSResumeVTxOnCpu(bool fSuspended);
 
@@ -771,6 +774,7 @@ PSUPDRVSESSION VBOXCALL supdrvSessionHashTabLookup(PSUPDRVDEVEXT pDevExt, RTPROC
                                                    PSUPDRVSESSION *ppOsSessionPtr);
 uint32_t VBOXCALL supdrvSessionRetain(PSUPDRVSESSION pSession);
 uint32_t VBOXCALL supdrvSessionRelease(PSUPDRVSESSION pSession);
+int VBOXCALL    supdrvQueryVTCapsInternal(uint32_t *pfCaps);
 
 int  VBOXCALL   supdrvTracerInit(PSUPDRVDEVEXT pDevExt);
 void VBOXCALL   supdrvTracerTerm(PSUPDRVDEVEXT pDevExt);

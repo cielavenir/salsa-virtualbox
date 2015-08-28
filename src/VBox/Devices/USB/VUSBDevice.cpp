@@ -1051,13 +1051,15 @@ static DECLCALLBACK(int) vusbDevCancelAllUrbsWorker(PVUSBDEV pDev, bool fDetachi
         Assert(pUrb->VUsb.pDev == pDev);
 
         LogFlow(("%s: vusbDevCancelAllUrbs: CANCELING URB\n", pUrb->pszDesc));
-        vusbUrbCancelWorker(pUrb, CANCELMODE_FAIL);
+        int rc = vusbUrbCancelWorker(pUrb, CANCELMODE_FAIL);
+        AssertRC(rc);
         pUrb = pNext;
     }
 
     /*
      * Reap any URBs which became ripe during cancel now.
      */
+    RTCritSectEnter(&pDev->CritSectAsyncUrbs);
     unsigned cReaped;
     do
     {
@@ -1114,7 +1116,7 @@ static DECLCALLBACK(int) vusbDevCancelAllUrbsWorker(PVUSBDEV pDev, bool fDetachi
             pUrb = pNext;
         }
     }
-
+    RTCritSectLeave(&pDev->CritSectAsyncUrbs);
     return VINF_SUCCESS;
 }
 

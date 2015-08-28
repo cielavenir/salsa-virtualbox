@@ -976,7 +976,10 @@ static void vusbMsgCompletion(PVUSBURB pUrb)
     Assert(   pUrb->enmState == VUSBURBSTATE_REAPED
            || pUrb->enmState == VUSBURBSTATE_CANCELLED);
     if (pUrb->enmState != VUSBURBSTATE_CANCELLED)
+    {
         pUrb->enmState = VUSBURBSTATE_ALLOCATED;
+        pUrb->fCompleting = false;
+    }
     RTCritSectLeave(&pPipe->CritSectCtrl);
 
     /* Complete the original control URB on the root hub now. */
@@ -1011,13 +1014,24 @@ void vusbUrbCompletionRh(PVUSBURB pUrb)
     AssertMsg(   pUrb->enmState == VUSBURBSTATE_REAPED
               || pUrb->enmState == VUSBURBSTATE_CANCELLED, ("%d\n", pUrb->enmState));
 
+    PVUSBROOTHUB pRh = vusbDevGetRh(pUrb->VUsb.pDev);
+    AssertPtrReturnVoid(pRh);
+
+    /* If there is a sniffer on the roothub record the completed URB there too. */
+    if (pRh->hSniffer != VUSBSNIFFER_NIL)
+    {
+        int rc = VUSBSnifferRecordEvent(pRh->hSniffer, pUrb,
+                                          pUrb->enmStatus == VUSBSTATUS_OK
+                                        ? VUSBSNIFFEREVENT_COMPLETE
+                                        : VUSBSNIFFEREVENT_ERROR_COMPLETE);
+        if (RT_FAILURE(rc))
+            LogRel(("VUSB: Capturing URB completion event on the root hub failed with %Rrc\n", rc));
+    }
 
 #ifdef VBOX_WITH_STATISTICS
     /*
      * Total and per-type submit statistics.
      */
-    PVUSBROOTHUB pRh = vusbDevGetRh(pUrb->VUsb.pDev);
-    AssertPtrReturnVoid(pRh);
     if (pUrb->enmType != VUSBXFERTYPE_MSG)
     {
         Assert(pUrb->enmType >= 0 && pUrb->enmType < (int)RT_ELEMENTS(pRh->aTypes));
@@ -1118,10 +1132,6 @@ void vusbUrbCompletionRh(PVUSBURB pUrb)
     }
 #ifdef LOG_ENABLED
     vusbUrbTrace(pUrb, "vusbUrbCompletionRh", true);
-#endif
-#ifndef VBOX_WITH_STATISTICS
-    PVUSBROOTHUB pRh = vusbDevGetRh(pUrb->VUsb.pDev);
-    AssertPtrReturnVoid(pRh);
 #endif
 
     pRh->pIRhPort->pfnXferCompletion(pRh->pIRhPort, pUrb);
@@ -1270,6 +1280,7 @@ static void vusbMsgSubmitSynchronously(PVUSBURB pUrb, bool fSafeRequest)
      * 'Free' the message URB, i.e. put it back to the allocated state.
      */
     pExtra->Urb.enmState = VUSBURBSTATE_ALLOCATED;
+    pExtra->Urb.fCompleting = false;
 }
 
 /**
@@ -1281,7 +1292,10 @@ void vusbMsgResetExtraData(PVUSBCTRLEXTRA pExtra)
         return;
     pExtra->enmStage = CTLSTAGE_SETUP;
     if (pExtra->Urb.enmState != VUSBURBSTATE_CANCELLED)
+    {
         pExtra->Urb.enmState = VUSBURBSTATE_ALLOCATED;
+        pExtra->Urb.fCompleting = false;
+    }
 }
 
 
@@ -1327,6 +1341,7 @@ static DECLCALLBACK(void) vusbMsgFreeUrb(PVUSBURB pUrb)
     {
         Assert(pUrb->VUsb.pvFreeCtx == &pExtra->Urb);
         pUrb->enmState = VUSBURBSTATE_ALLOCATED;
+        pUrb->fCompleting = false;
     }
 }
 
@@ -1376,6 +1391,7 @@ static PVUSBCTRLEXTRA vusbMsgAllocExtraData(PVUSBURB pUrb)
         //pExtra->Urb.Dev.pvProxyUrb = NULL;
         pExtra->Urb.u32Magic = VUSBURB_MAGIC;
         pExtra->Urb.enmState = VUSBURBSTATE_ALLOCATED;
+        pExtra->Urb.fCompleting = false;
 #ifdef LOG_ENABLED
         RTStrAPrintf(&pExtra->Urb.pszDesc, "URB %p msg->%p", &pExtra->Urb, pUrb);
 #endif
@@ -1442,6 +1458,7 @@ static bool vusbMsgSetup(PVUSBPIPE pPipe, const void *pvBuf, uint32_t cbBuf)
         pPipe->pCtrl = pExtra = (PVUSBCTRLEXTRA)pvNew;
         pExtra->pMsg = (PVUSBSETUP)pExtra->Urb.abData;
         pExtra->Urb.enmState = VUSBURBSTATE_ALLOCATED;
+        pExtra->Urb.fCompleting = false;
     }
 
     /*
@@ -1588,8 +1605,12 @@ static int vusbUrbSubmitCtrl(PVUSBURB pUrb)
     }
     PVUSBSETUP      pSetup = pExtra->pMsg;
 
-    AssertMsgReturn(!pPipe->async, ("%u\n", pPipe->async), VERR_GENERAL_FAILURE);
-
+    if (pPipe->async)
+    {
+        AssertMsgFailed(("%u\n", pPipe->async));
+        RTCritSectLeave(&pPipe->CritSectCtrl);
+        return VERR_GENERAL_FAILURE;
+    }
 
     /*
      * A setup packet always resets the transaction and the
@@ -2055,11 +2076,11 @@ static void vusbUrbCompletion(PVUSBURB pUrb)
 /**
  * The worker for vusbUrbCancel() which is executed on the I/O thread.
  *
- * @returns nothing.
+ * @returns IPRT status code.
  * @param   pUrb        The URB to cancel.
  * @param   enmMode     The way the URB should be canceled.
  */
-DECLHIDDEN(void) vusbUrbCancelWorker(PVUSBURB pUrb, CANCELMODE enmMode)
+DECLHIDDEN(int) vusbUrbCancelWorker(PVUSBURB pUrb, CANCELMODE enmMode)
 {
     vusbUrbAssert(pUrb);
 #ifdef VBOX_WITH_STATISTICS
@@ -2112,6 +2133,7 @@ DECLHIDDEN(void) vusbUrbCancelWorker(PVUSBURB pUrb, CANCELMODE enmMode)
 
         }
     }
+    return VINF_SUCCESS;
 }
 
 /**
@@ -2150,8 +2172,12 @@ void vusbUrbCancel(PVUSBURB pUrb, CANCELMODE mode)
  */
 void vusbUrbCancelAsync(PVUSBURB pUrb, CANCELMODE mode)
 {
-    int rc = vusbDevIoThreadExec(pUrb->VUsb.pDev, 0 /* fFlags */, (PFNRT)vusbUrbCancelWorker, 2, pUrb, mode);
-    AssertRC(rc);
+    /* Don't try to cancel the URB when completion is in progress at the moment. */
+    if (!ASMAtomicXchgBool(&pUrb->fCompleting, true))
+    {
+        int rc = vusbDevIoThreadExec(pUrb->VUsb.pDev, 0 /* fFlags */, (PFNRT)vusbUrbCancelWorker, 2, pUrb, mode);
+        AssertRC(rc);
+    }
 }
 
 
@@ -2170,7 +2196,8 @@ void vusbUrbRipe(PVUSBURB pUrb)
         ||  pUrb->enmState == VUSBURBSTATE_REAPED)
     {
         pUrb->enmState = VUSBURBSTATE_REAPED;
-        vusbUrbCompletion(pUrb);
+        if (!ASMAtomicXchgBool(&pUrb->fCompleting, true))
+            vusbUrbCompletion(pUrb);
     }
     else if (pUrb->enmState == VUSBURBSTATE_CANCELLED)
     {

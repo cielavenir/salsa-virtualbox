@@ -119,9 +119,6 @@
 #ifdef VBOX_WITH_EXTPACK
 # include "ExtPackManagerImpl.h"
 #endif
-#if defined(RT_OS_DARWIN)
-# include "IOKit/IOKitLib.h"
-#endif
 
 
 /*******************************************************************************
@@ -129,72 +126,6 @@
 *******************************************************************************/
 static Utf8Str *GetExtraDataBoth(IVirtualBox *pVirtualBox, IMachine *pMachine, const char *pszName, Utf8Str *pStrValue);
 
-
-
-#if defined(RT_OS_DARWIN)
-
-static int DarwinSmcKey(char *pabKey, uint32_t cbKey)
-{
-    /*
-     * Method as described in Amit Singh's article:
-     *   http://osxbook.com/book/bonus/chapter7/tpmdrmmyth/
-     */
-    typedef struct
-    {
-        uint32_t   key;
-        uint8_t    pad0[22];
-        uint32_t   datasize;
-        uint8_t    pad1[10];
-        uint8_t    cmd;
-        uint32_t   pad2;
-        uint8_t    data[32];
-    } AppleSMCBuffer;
-
-    AssertReturn(cbKey >= 65, VERR_INTERNAL_ERROR);
-
-    io_service_t service = IOServiceGetMatchingService(kIOMasterPortDefault,
-                                                       IOServiceMatching("AppleSMC"));
-    if (!service)
-        return VERR_NOT_FOUND;
-
-    io_connect_t    port = (io_connect_t)0;
-    kern_return_t   kr   = IOServiceOpen(service, mach_task_self(), 0, &port);
-    IOObjectRelease(service);
-
-    if (kr != kIOReturnSuccess)
-        return RTErrConvertFromDarwin(kr);
-
-    AppleSMCBuffer  inputStruct    = { 0, {0}, 32, {0}, 5, };
-    AppleSMCBuffer  outputStruct;
-    size_t          cbOutputStruct = sizeof(outputStruct);
-
-    for (int i = 0; i < 2; i++)
-    {
-        inputStruct.key = (uint32_t)(i == 0 ? 'OSK0' : 'OSK1');
-        kr = IOConnectCallStructMethod((mach_port_t)port,
-                                       (uint32_t)2,
-                                       (const void *)&inputStruct,
-                                       sizeof(inputStruct),
-                                       (void *)&outputStruct,
-                                       &cbOutputStruct);
-        if (kr != kIOReturnSuccess)
-        {
-            IOServiceClose(port);
-            return RTErrConvertFromDarwin(kr);
-        }
-
-        for (int j = 0; j < 32; j++)
-            pabKey[j + i*32] = outputStruct.data[j];
-    }
-
-    IOServiceClose(port);
-
-    pabKey[64] = 0;
-
-    return VINF_SUCCESS;
-}
-
-#endif /* RT_OS_DARWIN */
 
 /* Darwin compile kludge */
 #undef PVM
@@ -271,18 +202,12 @@ static int getSmcDeviceKey(IVirtualBox *pVirtualBox, IMachine *pMachine, Utf8Str
         return VINF_SUCCESS;
 
 #ifdef RT_OS_DARWIN
+
     /*
-     * Query it here and now.
+     * Work done in EFI/DevSmc
      */
-    char abKeyBuf[65];
-    int rc = DarwinSmcKey(abKeyBuf, sizeof(abKeyBuf));
-    if (SUCCEEDED(rc))
-    {
-        *pStrKey = abKeyBuf;
-        *pfGetKeyFromRealSMC = true;
-        return rc;
-    }
-    LogRel(("Warning: DarwinSmcKey failed with rc=%Rrc!\n", rc));
+    *pfGetKeyFromRealSMC = true;
+    int rc = VINF_SUCCESS;
 
 #else
     /*
@@ -527,7 +452,7 @@ static int SetBiosDiskInfo(ComPtr<IMachine> pMachine, PCFGMNODE pCfg, PCFGMNODE 
 {
     HRESULT             hrc;
 #define MAX_DEVICES     30
-#define H()     AssertMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_GENERAL_FAILURE)
+#define H()     AssertLogRelMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_MAIN_CONFIG_CONSTRUCTOR_COM_ERROR)
 
     LONG lPortLUN[MAX_BIOS_LUN_COUNT];
     LONG lPortUsed[MAX_DEVICES];
@@ -783,7 +708,7 @@ DECLCALLBACK(int) Console::configConstructor(PUVM pUVM, PVM pVM, void *pvConsole
 {
     LogFlowFuncEnter();
 
-    AssertReturn(pvConsole, VERR_GENERAL_FAILURE);
+    AssertReturn(pvConsole, VERR_INVALID_POINTER);
     ComObjPtr<Console> pConsole = static_cast<Console *>(pvConsole);
 
     AutoCaller autoCaller(pConsole);
@@ -837,7 +762,7 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
     Utf8Str         strTmp;
     Bstr            bstr;
 
-#define H()         AssertMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_GENERAL_FAILURE)
+#define H()         AssertLogRelMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_MAIN_CONFIG_CONSTRUCTOR_COM_ERROR)
 
     /*
      * Get necessary objects and frequently used parameters.
@@ -943,10 +868,11 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
         }
 #endif
 
-        /* Not necessary, but to make sure these two settings end up in the release log. */
         BOOL fPageFusion = FALSE;
         hrc = pMachine->COMGETTER(PageFusionEnabled)(&fPageFusion);                         H();
-        InsertConfigInteger(pRoot, "PageFusion",           fPageFusion); /* boolean */
+        InsertConfigInteger(pRoot, "PageFusionAllowed",    fPageFusion); /* boolean */
+
+        /* Not necessary, but makes sure this setting ends up in the release log. */
         ULONG ulBalloonSize = 0;
         hrc = pMachine->COMGETTER(MemoryBalloonSize)(&ulBalloonSize);                       H();
         InsertConfigInteger(pRoot, "MemBalloonSize",       ulBalloonSize);
@@ -991,9 +917,10 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
 
         /* Expose CMPXCHG16B. Currently a hack. */
         if (   osTypeId == "Windows81_64"
-            || osTypeId == "Windows2012_64")
+            || osTypeId == "Windows2012_64"
+            || osTypeId == "Windows10_64")
         {
-            LogRel(("Enabling CMPXCHG16B for Windows 8.1 / 2k12 guests\n"));
+            LogRel(("Enabling CMPXCHG16B for Windows 8.1 / 2k12 or newer guests\n"));
             InsertConfigInteger(pCPUM, "CMPXCHG16B", true);
         }
 
@@ -1015,19 +942,22 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
             uint32_t uMaxIntelFamilyModelStep = UINT32_MAX;
             if (   osTypeId == "MacOS"
                 || osTypeId == "MacOS_64")
-                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 7); /* Penryn / X5482. */
+                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 0); /* Penryn / X5482. */
             else if (   osTypeId == "MacOS106"
                      || osTypeId == "MacOS106_64")
-                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 7); /* Penryn / X5482 */
+                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 0); /* Penryn / X5482 */
             else if (   osTypeId == "MacOS107"
                      || osTypeId == "MacOS107_64")
-                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 7); /* Penryn / X5482 */ /** @todo figure out what is required here. */
+                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 0); /* Penryn / X5482 */ /** @todo figure out
+                                                                                what is required here. */
             else if (   osTypeId == "MacOS108"
                      || osTypeId == "MacOS108_64")
-                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 7); /* Penryn / X5482 */ /** @todo figure out what is required here. */
+                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 0); /* Penryn / X5482 */ /** @todo figure out
+                                                                                what is required here. */
             else if (   osTypeId == "MacOS109"
                      || osTypeId == "MacOS109_64")
-                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 7); /* Penryn / X5482 */ /** @todo figure out what is required here. */
+                uMaxIntelFamilyModelStep = RT_MAKE_U32_FROM_U8(1, 23, 6, 0); /* Penryn / X5482 */ /** @todo figure
+                                                                                out what is required here. */
             if (uMaxIntelFamilyModelStep != UINT32_MAX)
                 InsertConfigInteger(pCPUM, "MaxIntelFamilyModelStep", uMaxIntelFamilyModelStep);
         }
@@ -1403,7 +1333,8 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
             rc = getSmcDeviceKey(virtualBox, pMachine, &strKey, &fGetKeyFromRealSMC);
             AssertRCReturn(rc, rc);
 
-            InsertConfigString(pCfg,   "DeviceKey", strKey);
+            if (!fGetKeyFromRealSMC)
+                InsertConfigString(pCfg,   "DeviceKey", strKey);
             InsertConfigInteger(pCfg,  "GetKeyFromRealSMC", fGetKeyFromRealSMC);
         }
 
@@ -1511,9 +1442,9 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
         /*
          * VGA.
          */
-        GraphicsControllerType_T graphicsController;
-        hrc = pMachine->COMGETTER(GraphicsControllerType)(&graphicsController);             H();
-        switch (graphicsController)
+        GraphicsControllerType_T enmGraphicsController;
+        hrc = pMachine->COMGETTER(GraphicsControllerType)(&enmGraphicsController);          H();
+        switch (enmGraphicsController)
         {
             case GraphicsControllerType_Null:
                 break;
@@ -1521,15 +1452,15 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
 #ifdef VBOX_WITH_VMSVGA
             case GraphicsControllerType_VMSVGA:
 #endif
-                rc = configGraphicsController(pDevices, graphicsController, pBusMgr, pMachine, biosSettings,
+                rc = configGraphicsController(pDevices, enmGraphicsController, pBusMgr, pMachine, biosSettings,
                                               RT_BOOL(fHMEnabled));
                 if (FAILED(rc))
                     return rc;
                 break;
             default:
-                AssertMsgFailed(("Invalid graphicsController=%d\n", graphicsController));
+                AssertMsgFailed(("Invalid enmGraphicsController=%d\n", enmGraphicsController));
                 return VMR3SetError(pUVM, VERR_INVALID_PARAMETER, RT_SRC_POS,
-                                    N_("Invalid graphics controller type '%d'"), graphicsController);
+                                    N_("Invalid graphics controller type '%d'"), enmGraphicsController);
         }
 
         /*
@@ -1811,6 +1742,10 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
                         hrc = SetBiosDiskInfo(pMachine, pCfg, pBiosCfg, controllerName, apszBiosConfigSata);    H();
                     }
 
+                    GetExtraDataBoth(virtualBox, pMachine, "VBoxInternal2/AhciPortsHotpluggable", &strTmp);
+                    if (!strTmp.isEmpty())
+                        InsertConfigInteger(pCfg, "PortsHotpluggable", strTmp == "1" ? true : false);
+
                     /* Attach the status driver */
                     AssertRelease(cPorts <= cLedSata);
                     attachStatusDriver(pCtlInst, &mapStorageLeds[iLedSata], 0, cPorts - 1,
@@ -1892,7 +1827,7 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
                 }
 
                 default:
-                    AssertMsgFailedReturn(("invalid storage controller type: %d\n", enmCtrlType), VERR_GENERAL_FAILURE);
+                    AssertLogRelMsgFailedReturn(("invalid storage controller type: %d\n", enmCtrlType), VERR_MAIN_CONFIG_CONSTRUCTOR_IPE);
             }
 
             /* Attach the media to the storage controllers. */
@@ -2749,7 +2684,11 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
             BOOL fEnabled3D = false;
             hrc = pMachine->COMGETTER(Accelerate3DEnabled)(&fEnabled3D); H();
 
-            if (fEnabled3D)
+            if (   fEnabled3D
+# ifdef VBOX_WITH_VMSVGA3D
+                && enmGraphicsController == GraphicsControllerType_VBoxVGA
+# endif
+                )
             {
                 BOOL fSupports3D = VBoxOglIs3DAccelerationSupported();
                 if (!fSupports3D)
@@ -2945,7 +2884,7 @@ int Console::configConstructorInner(PUVM pUVM, PVM pVM, AutoWriteLock *pAlock)
     }
     catch (HRESULT hrcXcpt)
     {
-        AssertMsgFailedReturn(("hrc=%Rhrc\n", hrcXcpt), VERR_GENERAL_FAILURE);
+        AssertLogRelMsgFailedReturn(("hrc=%Rhrc\n", hrcXcpt), VERR_MAIN_CONFIG_CONSTRUCTOR_COM_ERROR);
     }
 
 #ifdef VBOX_WITH_EXTPACK
@@ -3237,7 +3176,7 @@ int Console::configDumpAPISettingsTweaks(IVirtualBox *pVirtualBox, IMachine *pMa
 }
 
 int Console::configGraphicsController(PCFGMNODE pDevices,
-                                      const GraphicsControllerType_T graphicsController,
+                                      const GraphicsControllerType_T enmGraphicsController,
                                       BusAssignmentManager *pBusMgr,
                                       const ComPtr<IMachine> &pMachine,
                                       const ComPtr<IBIOSSettings> &biosSettings,
@@ -3251,7 +3190,7 @@ int Console::configGraphicsController(PCFGMNODE pDevices,
         Bstr    bstr;
         const char *pcszDevice = "vga";
 
-#define H()         AssertMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_GENERAL_FAILURE)
+#define H()         AssertLogRelMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_MAIN_CONFIG_CONSTRUCTOR_COM_ERROR)
         InsertConfigNode(pDevices, pcszDevice, &pDev);
         InsertConfigNode(pDev,     "0", &pInst);
         InsertConfigInteger(pInst, "Trusted",              1); /* boolean */
@@ -3271,7 +3210,7 @@ int Console::configGraphicsController(PCFGMNODE pDevices,
 #endif
 
 #ifdef VBOX_WITH_VMSVGA
-        if (graphicsController == GraphicsControllerType_VMSVGA)
+        if (enmGraphicsController == GraphicsControllerType_VMSVGA)
         {
             InsertConfigInteger(pCfg, "VMSVGAEnabled", true);
 #ifdef VBOX_WITH_VMSVGA3D
@@ -3426,7 +3365,7 @@ int Console::configMediumAttachment(PCFGMNODE pCtlInst,
         Bstr    bstr;
 
 // #define RC_CHECK()  AssertMsgReturn(RT_SUCCESS(rc), ("rc=%Rrc\n", rc), rc)
-#define H()         AssertMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_GENERAL_FAILURE)
+#define H()         AssertLogRelMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_MAIN_CONFIG_CONSTRUCTOR_COM_ERROR)
 
         LONG lDev;
         hrc = pMediumAtt->COMGETTER(Device)(&lDev);                                         H();
@@ -3774,6 +3713,22 @@ int Console::configMediumAttachment(PCFGMNODE pCtlInst,
                                    fHotplug ? 0 : PDM_TACH_FLAGS_NOT_HOT_PLUG, NULL /*ppBase*/);
             AssertRCReturn(rc, rc);
 
+            /*
+             * Make the secret key helper interface known to the VD driver if it is attached,
+             * so we can get notified about missing keys.
+             */
+            PPDMIBASE pIBase = NULL;
+            rc = PDMR3QueryDriverOnLun(pUVM, pcszDevice, uInstance, uLUN, "VD", &pIBase);
+            if (RT_SUCCESS(rc) && pIBase)
+            {
+                PPDMIMEDIA pIMedium = (PPDMIMEDIA)pIBase->pfnQueryInterface(pIBase, PDMIMEDIA_IID);
+                if (pIMedium)
+                {
+                    rc = pIMedium->pfnSetSecKeyIf(pIMedium, NULL, mpIfSecKeyHlp);
+                    Assert(RT_SUCCESS(rc) || rc == VERR_NOT_SUPPORTED);
+                }
+            }
+
             /* There is no need to handle removable medium mounting, as we
              * unconditionally replace everthing including the block driver level.
              * This means the new medium will be picked up automatically. */
@@ -4014,49 +3969,7 @@ int Console::configMedium(PCFGMNODE pLunL0,
 
                 /* Pass all custom parameters. */
                 bool fHostIP = true;
-                SafeArray<BSTR> names;
-                SafeArray<BSTR> values;
-                hrc = pMedium->GetProperties(Bstr().raw(),
-                                             ComSafeArrayAsOutParam(names),
-                                             ComSafeArrayAsOutParam(values));               H();
-
-                if (names.size() != 0)
-                {
-                    PCFGMNODE pVDC;
-                    InsertConfigNode(pCfg, "VDConfig", &pVDC);
-                    for (size_t ii = 0; ii < names.size(); ++ii)
-                    {
-                        if (values[ii] && *values[ii])
-                        {
-                            /* Put properties of filters in a separate config node. */
-                            Utf8Str name = names[ii];
-                            Utf8Str value = values[ii];
-                            size_t offSlash = name.find("/", 0);
-                            if (   offSlash != name.npos
-                                && !name.startsWith("Special/"))
-                            {
-                                com::Utf8Str strFilter;
-                                com::Utf8Str strKey;
-
-                                hrc = strFilter.assignEx(name, 0, offSlash); H();
-                                hrc = strKey.assignEx(name, offSlash + 1, name.length() - offSlash - 1); /* Skip slash */ H();
-
-                                PCFGMNODE pCfgFilterConfig = CFGMR3GetChild(pVDC, strFilter.c_str());
-                                if (!pCfgFilterConfig)
-                                    InsertConfigNode(pVDC, strFilter.c_str(), &pCfgFilterConfig);
-
-                                InsertConfigString(pCfgFilterConfig, strKey.c_str(), value);
-                            }
-                            else
-                            {
-                                InsertConfigString(pVDC, name.c_str(), value);
-                                if (    name.compare("HostIPStack") == 0
-                                    &&  value.compare("0") == 0)
-                                    fHostIP = false;
-                            }
-                        }
-                    }
-                }
+                hrc = configMediumProperties(pCfg, pMedium, &fHostIP); H();
 
                 /* Create an inverted list of parents. */
                 uImage--;
@@ -4083,30 +3996,8 @@ int Console::configMedium(PCFGMNODE pLunL0,
                             InsertConfigInteger(pCur, "MergeTarget", 1);
                     }
 
-                    /* Pass all custom parameters. */
-                    SafeArray<BSTR> aNames;
-                    SafeArray<BSTR> aValues;
-                    hrc = pMedium->GetProperties(NULL,
-                                                ComSafeArrayAsOutParam(aNames),
-                                                ComSafeArrayAsOutParam(aValues));           H();
-
-                    if (aNames.size() != 0)
-                    {
-                        PCFGMNODE pVDC;
-                        InsertConfigNode(pCur, "VDConfig", &pVDC);
-                        for (size_t ii = 0; ii < aNames.size(); ++ii)
-                        {
-                            if (aValues[ii] && *aValues[ii])
-                            {
-                                Utf8Str name = aNames[ii];
-                                Utf8Str value = aValues[ii];
-                                InsertConfigString(pVDC, name.c_str(), value);
-                                if (    name.compare("HostIPStack") == 0
-                                    &&  value.compare("0") == 0)
-                                    fHostIP = false;
-                            }
-                        }
-                    }
+                    /* Configure medium properties. */
+                    hrc = configMediumProperties(pCur, pMedium, &fHostIP); H();
 
                     /* next */
                     pParent = pCur;
@@ -4128,6 +4019,68 @@ int Console::configMedium(PCFGMNODE pLunL0,
     }
 
     return VINF_SUCCESS;
+}
+
+/**
+ * Adds the medium properties to the CFGM tree.
+ *
+ * @returns VBox status code.
+ * @param   pCur       The current CFGM node.
+ * @param   pMedium    The medium object to configure.
+ * @param   pfHostIP   Where to return the value of the \"HostIPStack\" property if found.
+ */
+int Console::configMediumProperties(PCFGMNODE pCur, IMedium *pMedium, bool *pfHostIP)
+{
+    /* Pass all custom parameters. */
+    SafeArray<BSTR> aNames;
+    SafeArray<BSTR> aValues;
+    HRESULT hrc = pMedium->GetProperties(NULL, ComSafeArrayAsOutParam(aNames),
+                                         ComSafeArrayAsOutParam(aValues));
+
+    if (   SUCCEEDED(hrc)
+        && aNames.size() != 0)
+    {
+        PCFGMNODE pVDC;
+        InsertConfigNode(pCur, "VDConfig", &pVDC);
+        for (size_t ii = 0; ii < aNames.size(); ++ii)
+        {
+            if (aValues[ii] && *aValues[ii])
+            {
+                Utf8Str name = aNames[ii];
+                Utf8Str value = aValues[ii];
+                size_t offSlash = name.find("/", 0);
+                if (   offSlash != name.npos
+                    && !name.startsWith("Special/"))
+                {
+                    com::Utf8Str strFilter;
+                    com::Utf8Str strKey;
+
+                    hrc = strFilter.assignEx(name, 0, offSlash);
+                    if (FAILED(hrc))
+                        break;
+
+                    hrc = strKey.assignEx(name, offSlash + 1, name.length() - offSlash - 1); /* Skip slash */
+                    if (FAILED(hrc))
+                        break;
+
+                    PCFGMNODE pCfgFilterConfig = CFGMR3GetChild(pVDC, strFilter.c_str());
+                    if (!pCfgFilterConfig)
+                        InsertConfigNode(pVDC, strFilter.c_str(), &pCfgFilterConfig);
+
+                    InsertConfigString(pCfgFilterConfig, strKey.c_str(), value);
+                }
+                else
+                {
+                    InsertConfigString(pVDC, name.c_str(), value);
+                    if (    name.compare("HostIPStack") == 0
+                        &&  value.compare("0") == 0)
+                        *pfHostIP = false;
+                }
+            }
+        }
+    }
+
+    return hrc;
 }
 
 /**
@@ -4172,7 +4125,7 @@ int Console::configNetwork(const char *pszDevice,
         HRESULT hrc;
         Bstr bstr;
 
-#define H()         AssertMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_GENERAL_FAILURE)
+#define H()         AssertLogRelMsgReturn(!FAILED(hrc), ("hrc=%Rhrc\n", hrc), VERR_MAIN_CONFIG_CONSTRUCTOR_COM_ERROR)
 
         /*
          * Locking the object before doing VMR3* calls is quite safe here, since
@@ -5274,9 +5227,9 @@ int configSetGlobalPropertyFlags(VMMDev * const pVMMDev,
 /* static */ int Console::configGuestProperties(void *pvConsole, PUVM pUVM)
 {
 #ifdef VBOX_WITH_GUEST_PROPS
-    AssertReturn(pvConsole, VERR_GENERAL_FAILURE);
+    AssertReturn(pvConsole, VERR_INVALID_POINTER);
     ComObjPtr<Console> pConsole = static_cast<Console *>(pvConsole);
-    AssertReturn(pConsole->m_pVMMDev, VERR_GENERAL_FAILURE);
+    AssertReturn(pConsole->m_pVMMDev, VERR_INVALID_POINTER);
 
     /* Load the service */
     int rc = pConsole->m_pVMMDev->hgcmLoadService("VBoxGuestPropSvc", "VBoxGuestPropSvc");
@@ -5327,7 +5280,7 @@ int configSetGlobalPropertyFlags(VMMDev * const pVMMDev,
                                                       ComSafeArrayAsOutParam(valuesOut),
                                                       ComSafeArrayAsOutParam(timestampsOut),
                                                       ComSafeArrayAsOutParam(flagsOut));
-        AssertMsgReturn(SUCCEEDED(hrc), ("hrc=%Rhrc\n", hrc), VERR_GENERAL_FAILURE);
+        AssertLogRelMsgReturn(SUCCEEDED(hrc), ("hrc=%Rhrc\n", hrc), VERR_MAIN_CONFIG_CONSTRUCTOR_COM_ERROR);
         size_t cProps = namesOut.size();
         size_t cAlloc = cProps + 1;
         if (   valuesOut.size() != cProps
@@ -5431,7 +5384,7 @@ int configSetGlobalPropertyFlags(VMMDev * const pVMMDev,
 /* static */ int Console::configGuestControl(void *pvConsole)
 {
 #ifdef VBOX_WITH_GUEST_CONTROL
-    AssertReturn(pvConsole, VERR_GENERAL_FAILURE);
+    AssertReturn(pvConsole, VERR_INVALID_POINTER);
     ComObjPtr<Console> pConsole = static_cast<Console *>(pvConsole);
 
     /* Load the service */

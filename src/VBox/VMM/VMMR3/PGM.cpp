@@ -1335,11 +1335,14 @@ VMMR3DECL(int) PGMR3Init(PVM pVM)
     }
 
     /*
-     * Check for PCI pass-through.
+     * Check for PCI pass-through and other configurables.
      */
     rc = CFGMR3QueryBoolDef(pCfgPGM, "PciPassThrough", &pVM->pgm.s.fPciPassthrough, false);
     AssertMsgRCReturn(rc, ("Configuration error: Failed to query integer \"PciPassThrough\", rc=%Rrc.\n", rc), rc);
     AssertLogRelReturn(!pVM->pgm.s.fPciPassthrough || pVM->pgm.s.fRamPreAlloc, VERR_INVALID_PARAMETER);
+
+    rc = CFGMR3QueryBoolDef(CFGMR3GetRoot(pVM), "PageFusionAllowed", &pVM->pgm.s.fPageFusionAllowed, false);
+    AssertLogRelRCReturn(rc, rc);
 
 #ifdef VBOX_WITH_STATISTICS
     /*
@@ -3868,10 +3871,10 @@ static DECLCALLBACK(int) pgmR3CmdPhysToFile(PCDBGCCMD pCmd, PDBGCCMDHLP pCmdHlp,
     DBGC_CMDHLP_REQ_UVM_RET(pCmdHlp, pCmd, pUVM);
     PVM pVM = pUVM->pVM;
     DBGC_CMDHLP_ASSERT_PARSER_RET(pCmdHlp, pCmd, 0, cArgs == 1 || cArgs == 2);
-    DBGC_CMDHLP_ASSERT_PARSER_RET(pCmdHlp, pCmd, 0, paArgs[0].enmType != DBGCVAR_TYPE_STRING);
+    DBGC_CMDHLP_ASSERT_PARSER_RET(pCmdHlp, pCmd, 0, paArgs[0].enmType == DBGCVAR_TYPE_STRING);
     if (cArgs == 2)
     {
-        DBGC_CMDHLP_ASSERT_PARSER_RET(pCmdHlp, pCmd, 1, paArgs[2].enmType != DBGCVAR_TYPE_STRING);
+        DBGC_CMDHLP_ASSERT_PARSER_RET(pCmdHlp, pCmd, 1, paArgs[1].enmType == DBGCVAR_TYPE_STRING);
         if (strcmp(paArgs[1].u.pszString, "nozero"))
             return DBGCCmdHlpFail(pCmdHlp, pCmd, "Invalid 2nd argument '%s', must be 'nozero'.\n", paArgs[1].u.pszString);
     }

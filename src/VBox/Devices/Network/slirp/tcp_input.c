@@ -289,7 +289,7 @@ present:
 void
 tcp_input(PNATState pData, register struct mbuf *m, int iphlen, struct socket *inso)
 {
-    struct ip save_ip, *ip;
+    struct ip *ip, *save_ip;
     register struct tcpiphdr *ti;
     caddr_t optp = NULL;
     int optlen = 0;
@@ -302,6 +302,9 @@ tcp_input(PNATState pData, register struct mbuf *m, int iphlen, struct socket *i
     int iss = 0;
     u_long tiwin;
 /*  int ts_present = 0; */
+    size_t ohdrlen;
+    uint8_t ohdr[60 + 8]; /* max IP header plus 8 bytes of payload for icmp */
+
     STAM_PROFILE_START(&pData->StatTCP_input, counter_input);
 
     LogFlow(("tcp_input: m = %8lx, iphlen = %2d, inso = %R[natsock]\n",
@@ -323,8 +326,14 @@ tcp_input(PNATState pData, register struct mbuf *m, int iphlen, struct socket *i
         /* Re-set a few variables */
         tp = sototcpcb(so);
         m = so->so_m;
-
         so->so_m = 0;
+
+        if (RT_LIKELY(so->so_ohdr != NULL))
+        {
+            RTMemFree(so->so_ohdr);
+            so->so_ohdr = NULL;
+        }
+
         ti = so->so_ti;
 
         /** @todo (vvl) clarify why it might happens */
@@ -346,6 +355,32 @@ tcp_input(PNATState pData, register struct mbuf *m, int iphlen, struct socket *i
     }
 
     tcpstat.tcps_rcvtotal++;
+
+    ip = mtod(m, struct ip *);
+
+    /* ip_input() subtracts iphlen from ip::ip_len */
+    AssertStmt((ip->ip_len + iphlen == m_length(m, NULL)), goto drop);
+    if (RT_UNLIKELY(ip->ip_len < sizeof(struct tcphdr)))
+    {
+        /* tcps_rcvshort++; */
+        goto drop;
+    }
+
+    /*
+     * Save a copy of the IP header in case we want to restore it for
+     * sending an ICMP error message in response.
+     *
+     * XXX: This function should really be fixed to not strip IP
+     * options, to not overwrite IP header and to use "tlen" local
+     * variable (instead of ti->ti_len), then "m" could be passed to
+     * icmp_error() directly.
+     */
+    ohdrlen = iphlen + 8;
+    m_copydata(m, 0, ohdrlen, (caddr_t)ohdr);
+    save_ip = (struct ip *)ohdr;
+    save_ip->ip_len += iphlen;  /* undo change by ip_input() */
+
+
     /*
      * Get IP and TCP header together in first mbuf.
      * Note: IP leaves IP header in first mbuf.
@@ -356,21 +391,6 @@ tcp_input(PNATState pData, register struct mbuf *m, int iphlen, struct socket *i
         ip_stripoptions(m, (struct mbuf *)0);
         iphlen = sizeof(struct ip);
     }
-    /* XXX Check if too short */
-
-
-    /*
-     * Save a copy of the IP header in case we want restore it
-     * for sending an ICMP error message in response.
-     */
-    ip = mtod(m, struct ip *);
-    /*
-     * (vvl) ip_input substracts IP header length from ip->ip_len value.
-     * here we do the test the same as input method of UDP protocol.
-     */
-    Assert((ip->ip_len + iphlen == m_length(m, NULL)));
-    save_ip = *ip;
-    save_ip.ip_len+= iphlen;
 
     /*
      * Checksum extended TCP header and data.
@@ -509,13 +529,8 @@ findso:
             goto dropwithreset;
         }
         SOCKET_LOCK(so);
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
         sbreserve(pData, &so->so_snd, tcp_sndspace);
         sbreserve(pData, &so->so_rcv, tcp_rcvspace);
-#else
-        sbuf_new(&so->so_snd, NULL, tcp_sndspace, SBUF_AUTOEXTEND);
-        sbuf_new(&so->so_rcv, NULL, tcp_rcvspace, SBUF_AUTOEXTEND);
-#endif
 
 /*      tcp_last_so = so; */  /* XXX ? */
 /*      tp = sototcpcb(so);    */
@@ -641,15 +656,7 @@ findso:
               acked = ti->ti_ack - tp->snd_una;
               tcpstat.tcps_rcvackpack++;
               tcpstat.tcps_rcvackbyte += acked;
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
               sbdrop(&so->so_snd, acked);
-#else
-              if (sbuf_len(&so->so_snd) < acked)
-                /* drop all what sbuf have */
-                sbuf_setpos(&so->so_snd, 0);
-              else
-                sbuf_setpos(&so->so_snd, sbuf_len(&so->so_snd) - acked);
-#endif
               tp->snd_una = ti->ti_ack;
               m_freem(pData, m);
 
@@ -801,7 +808,7 @@ findso:
                     HTONS(ti->ti_urp);
                     m->m_data -= sizeof(struct tcpiphdr)+off-sizeof(struct tcphdr);
                     m->m_len  += sizeof(struct tcpiphdr)+off-sizeof(struct tcphdr);
-                    *ip = save_ip;
+                    *ip = *save_ip;
                     icmp_error(pData, m, ICMP_UNREACH, code, 0, strerror(errno));
                     tp->t_socket->so_m = NULL;
                 }
@@ -817,6 +824,7 @@ findso:
                  */
                 so->so_m = m;
                 so->so_ti = ti;
+                so->so_ohdr = RTMemDup(ohdr, ohdrlen);
                 tp->t_timer[TCPT_KEEP] = TCPTV_KEEP_INIT;
                 TCP_STATE_SWITCH_TO(tp, TCPS_SYN_RECEIVED);
             }
@@ -1375,20 +1383,12 @@ synrx_to_est:
             if (acked > SBUF_LEN(&so->so_snd))
             {
                 tp->snd_wnd -= SBUF_LEN(&so->so_snd);
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
                 sbdrop(&so->so_snd, (int)so->so_snd.sb_cc);
-#else
-                sbuf_clear(&so->so_snd);
-#endif
                 ourfinisacked = 1;
             }
             else
             {
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
                 sbdrop(&so->so_snd, acked);
-#else
-                sbuf_setpos(&so->so_snd, sbuf_len(&so->so_snd) - acked);
-#endif
                 tp->snd_wnd -= acked;
                 ourfinisacked = 0;
             }
@@ -1505,8 +1505,6 @@ step6:
     if ((tiflags & TH_URG) && ti->ti_urp &&
             TCPS_HAVERCVDFIN(tp->t_state) == 0)
     {
-    /* BSD's sbufs are auto extent so we shouldn't worry here */
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
         /*
          * This is a kludge, but if we receive and accept
          * random urgent pointers, we'll crash in
@@ -1520,7 +1518,7 @@ step6:
             LogFlowFunc(("%d -> dodata\n", __LINE__));
             goto dodata;
         }
-#endif
+
         /*
          * If this segment advances the known urgent pointer,
          * then mark the data stream.  This should not happen
@@ -1742,6 +1740,67 @@ drop:
     return;
 }
 
+
+void
+tcp_fconnect_failed(PNATState pData, struct socket *so, int sockerr)
+{
+    struct tcpcb *tp;
+    int code;
+
+    Log2(("NAT: connect error %d %R[natsock]\n", sockerr, so));
+
+    Assert(so->so_state & SS_ISFCONNECTING);
+    so->so_state = SS_NOFDREF;
+
+    if (sockerr == ECONNREFUSED || sockerr == ECONNRESET)
+    {
+        /* hand off to tcp_input():cont_conn to send RST */
+        TCP_INPUT(pData, NULL, 0, so);
+        return;
+    }
+
+    tp = sototcpcb(so);
+    if (RT_UNLIKELY(tp == NULL)) /* should never happen */
+    {
+        LogRel(("NAT: tp == NULL %R[natsock]\n", so));
+        sofree(pData, so);
+        return;
+    }
+
+    if (sockerr == ENETUNREACH || sockerr == ENETDOWN)
+        code = ICMP_UNREACH_NET;
+    else if (sockerr == EHOSTUNREACH || sockerr == EHOSTDOWN)
+        code = ICMP_UNREACH_HOST;
+    else
+        code = -1;
+
+    if (code >= 0)
+    {
+        struct ip *oip;
+        size_t ohdrlen;
+        struct mbuf *m;
+
+        if (RT_UNLIKELY(so->so_ohdr == NULL))
+            goto out;
+
+        oip = (struct ip *)so->so_ohdr;
+        ohdrlen = oip->ip_hl * 4 + 8;
+
+        m = m_gethdr(pData, M_NOWAIT, MT_HEADER);
+        if (RT_UNLIKELY(m == NULL))
+            goto out;
+
+        m_copyback(pData, m, 0, ohdrlen, (caddr_t)so->so_ohdr);
+        m->m_pkthdr.header = mtod(m, void *);
+
+        icmp_error(pData, m, ICMP_UNREACH, code, 0, NULL);
+    }
+
+  out:
+    tcp_close(pData, tp);
+}
+
+
 void
 tcp_dooptions(PNATState pData, struct tcpcb *tp, u_char *cp, int cnt, struct tcpiphdr *ti)
 {
@@ -1960,13 +2019,8 @@ tcp_mss(PNATState pData, register struct tcpcb *tp, u_int offer)
 
     tp->snd_cwnd = mss;
 
-#ifndef VBOX_WITH_SLIRP_BSD_SBUF
     sbreserve(pData, &so->so_snd, tcp_sndspace+((tcp_sndspace%mss)?(mss-(tcp_sndspace%mss)):0));
     sbreserve(pData, &so->so_rcv, tcp_rcvspace+((tcp_rcvspace%mss)?(mss-(tcp_rcvspace%mss)):0));
-#else
-    sbuf_new(&so->so_snd, NULL, tcp_sndspace+((tcp_sndspace%mss)?(mss-(tcp_sndspace%mss)):0), SBUF_AUTOEXTEND);
-    sbuf_new(&so->so_rcv, NULL, tcp_rcvspace+((tcp_rcvspace%mss)?(mss-(tcp_rcvspace%mss)):0), SBUF_AUTOEXTEND);
-#endif
 
     Log2((" returning mss = %d\n", mss));
 

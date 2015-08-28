@@ -705,6 +705,8 @@ typedef struct AHCI
 
     /** Flag whether we have written the first 4bytes in an 8byte MMIO write successfully. */
     volatile bool                   f8ByteMMIO4BytesWrittenSuccessfully;
+    /** Flag whether whether hotplugging is enabled for the controller. */
+    bool                            fPortsHotpluggable;
 
 #if HC_ARCH_BITS == 64
     uint32_t                        Alignment7;
@@ -943,6 +945,7 @@ static size_t ahciCopyToPrdtl(PPDMDEVINS pDevIns, PAHCIREQ pAhciReq,
 static size_t ahciCopyFromPrdtl(PPDMDEVINS pDevIns, PAHCIREQ pAhciReq,
                                 void *pvBuf, size_t cbBuf);
 static bool ahciCancelActiveTasks(PAHCIPort pAhciPort, PAHCIREQ pAhciReqExcept);
+static void ahciReqMemFree(PAHCIPort pAhciPort, PAHCIREQ pAhciReq, bool fForceFree);
 #endif
 RT_C_DECLS_END
 
@@ -1704,58 +1707,52 @@ static int HbaInterruptStatus_w(PAHCI ahci, uint32_t iReg, uint32_t u32Value)
     if (rc != VINF_SUCCESS)
         return rc;
 
-    /* Update interrupt status register first. */
+    ahci->regHbaIs &= ~(u32Value);
+
+    /*
+     * Update interrupt status register and check for ports who
+     * set the interrupt inbetween.
+     */
+    bool fClear = true;
     ahci->regHbaIs |= ASMAtomicXchgU32(&ahci->u32PortsInterrupted, 0);
-
-    if (u32Value > 0)
+    if (!ahci->regHbaIs)
     {
-        /*
-         * Clear the interrupt only if no port has signalled
-         * an interrupt and the guest has cleared all set interrupt
-         * notification bits.
-         */
-        bool fClear = true;
+        unsigned i = 0;
 
-        ahci->regHbaIs &= ~(u32Value);
-
-        fClear = !ahci->u32PortsInterrupted && !ahci->regHbaIs;
-        if (fClear)
+        /* Check if the cleared ports have a interrupt status bit set. */
+        while ((u32Value > 0) && (i < AHCI_MAX_NR_PORTS_IMPL))
         {
-            unsigned i = 0;
-
-            /* Check if the cleared ports have a interrupt status bit set. */
-            while ((u32Value > 0) && (i < AHCI_MAX_NR_PORTS_IMPL))
+            if (u32Value & 0x01)
             {
-                if (u32Value & 0x01)
+                PAHCIPort pAhciPort = &ahci->ahciPort[i];
+
+                if (pAhciPort->regIE & pAhciPort->regIS)
                 {
-                    PAHCIPort pAhciPort = &ahci->ahciPort[i];
-
-                    if (pAhciPort->regIE & pAhciPort->regIS)
-                    {
-                        Log(("%s: Interrupt status of port %u set -> Set interrupt again\n", __FUNCTION__, i));
-                        ASMAtomicOrU32(&ahci->u32PortsInterrupted, 1 << i);
-                        fClear = false;
-                        break;
-                    }
+                    Log(("%s: Interrupt status of port %u set -> Set interrupt again\n", __FUNCTION__, i));
+                    ASMAtomicOrU32(&ahci->u32PortsInterrupted, 1 << i);
+                    fClear = false;
+                    break;
                 }
-                u32Value = u32Value >> 1;
-                i++;
             }
+            u32Value >>= 1;
+            i++;
         }
+    }
+    else
+        fClear = false;
 
-        if (fClear)
-            ahciHbaClearInterrupt(ahci);
-        else
-        {
-            Log(("%s: Not clearing interrupt: u32PortsInterrupted=%#010x\n", __FUNCTION__, ahci->u32PortsInterrupted));
-            /*
-             * We need to set the interrupt again because the I/O APIC does not set it again even if the
-             * line is still high.
-             * We need to clear it first because the PCI bus only calls the interrupt controller if the state changes.
-             */
-            PDMDevHlpPCISetIrq(ahci->CTX_SUFF(pDevIns), 0, 0);
-            PDMDevHlpPCISetIrq(ahci->CTX_SUFF(pDevIns), 0, 1);
-        }
+    if (fClear)
+        ahciHbaClearInterrupt(ahci);
+    else
+    {
+        Log(("%s: Not clearing interrupt: u32PortsInterrupted=%#010x\n", __FUNCTION__, ahci->u32PortsInterrupted));
+        /*
+         * We need to set the interrupt again because the I/O APIC does not set it again even if the
+         * line is still high.
+         * We need to clear it first because the PCI bus only calls the interrupt controller if the state changes.
+         */
+        PDMDevHlpPCISetIrq(ahci->CTX_SUFF(pDevIns), 0, 0);
+        PDMDevHlpPCISetIrq(ahci->CTX_SUFF(pDevIns), 0, 1);
     }
 
     PDMCritSectLeave(&ahci->lock);
@@ -2023,9 +2020,12 @@ static void ahciPortSwReset(PAHCIPort pAhciPort)
     pAhciPort->regIS   = 0;
     pAhciPort->regIE   = 0;
     pAhciPort->regCMD  = AHCI_PORT_CMD_CPD  | /* Cold presence detection */
-                         AHCI_PORT_CMD_HPCP | /* Hotplugging supported. */
                          AHCI_PORT_CMD_SUD  | /* Device has spun up. */
                          AHCI_PORT_CMD_POD;   /* Port is powered on. */
+
+    if (pAhciPort->CTX_SUFF(pAhci)->fPortsHotpluggable)
+        pAhciPort->regCMD |= AHCI_PORT_CMD_HPCP;
+
     pAhciPort->regTFD  = (1 << 8) | ATA_STAT_SEEK | ATA_STAT_WRERR;
     pAhciPort->regSIG  = ~0;
     pAhciPort->regSSTS = 0;
@@ -3335,7 +3335,7 @@ static size_t atapiGetConfigurationFillFeatureListProfiles(PAHCIPort pAhciPort, 
         return 0;
 
     ataH2BE_U16(pbBuf, 0x0); /* feature 0: list of profiles supported */
-    pbBuf[2] = (0 << 2) | (1 << 1) | (1 || 0); /* version 0, persistent, current */
+    pbBuf[2] = (0 << 2) | (1 << 1) | (1 << 0); /* version 0, persistent, current */
     pbBuf[3] = 8; /* additional bytes for profiles */
     /* The MMC-3 spec says that DVD-ROM read capability should be reported
      * before CD-ROM read capability. */
@@ -4173,7 +4173,7 @@ static int atapiReadDVDStructureSS(PAHCIREQ pAhciReq, PAHCIPort pAhciPort, size_
     int media = pAhciReq->aATAPICmd[1];
     int format = pAhciReq->aATAPICmd[7];
 
-    uint16_t max_len = ataBE2H_U16(&pAhciReq->aATAPICmd[8]);
+    uint16_t max_len = RT_MIN(ataBE2H_U16(&pAhciReq->aATAPICmd[8]), sizeof(aBuf));
 
     memset(buf, 0, max_len);
 
@@ -4637,6 +4637,17 @@ static AHCITXDIR atapiParseCmdVirtualATAPI(PAHCIPort pAhciPort, PAHCIREQ pAhciRe
                     /* This must be done from EMT. */
                     PAHCI pAhci = pAhciPort->CTX_SUFF(pAhci);
                     PPDMDEVINS pDevIns = pAhci->CTX_SUFF(pDevIns);
+
+                    /*
+                     * Free the I/O memory of all cached tasks of this port
+                     * because the driver providing I/O memory allocation interface
+                     * is about to be destroyed.
+                     */
+                    for (uint32_t i = 0; i < AHCI_NR_COMMAND_SLOTS; i++)
+                    {
+                        if (pAhciPort->aCachedTasks[i])
+                            ahciReqMemFree(pAhciPort, pAhciPort->aCachedTasks[i], true /* fForceFree */);
+                    }
 
                     rc = VMR3ReqPriorityCallWait(PDMDevHlpGetVM(pDevIns), VMCPUID_ANY,
                                                  (PFNRT)pAhciPort->pDrvMount->pfnUnmount, 3,
@@ -6629,6 +6640,14 @@ static DECLCALLBACK(int) ahciAsyncIOLoop(PPDMDEVINS pDevIns, PPDMTHREAD pThread)
         ASMAtomicWriteBool(&pAhciPort->fWrkThreadSleeping, false);
         ASMAtomicIncU32(&pAhci->cThreadsActive);
 
+        /* Check whether the thread should be suspended. */
+        if (pAhci->fSignalIdle)
+        {
+            if (!ASMAtomicDecU32(&pAhci->cThreadsActive))
+                PDMDevHlpAsyncNotificationCompleted(pAhciPort->pDevInsR3);
+            continue;
+        }
+
         /*
          * Check whether the global host controller bit is set and go to sleep immediately again
          * if it is set.
@@ -6638,6 +6657,8 @@ static DECLCALLBACK(int) ahciAsyncIOLoop(PPDMDEVINS pDevIns, PPDMTHREAD pThread)
             && !ASMAtomicDecU32(&pAhci->cThreadsActive))
         {
             ahciHBAReset(pAhci);
+            if (pAhci->fSignalIdle)
+                PDMDevHlpAsyncNotificationCompleted(pAhciPort->pDevInsR3);
             continue;
         }
 
@@ -6854,6 +6875,9 @@ static DECLCALLBACK(int) ahciAsyncIOLoop(PPDMDEVINS pDevIns, PPDMTHREAD pThread)
         if (   (u32RegHbaCtrl & AHCI_HBA_CTRL_HR)
             && !cThreadsActive)
             ahciHBAReset(pAhci);
+
+        if (!cThreadsActive && pAhci->fSignalIdle)
+            PDMDevHlpAsyncNotificationCompleted(pAhciPort->pDevInsR3);
     } /* While running */
 
     ahciLog(("%s: Port %d async IO thread exiting\n", __FUNCTION__, pAhciPort->iLUN));
@@ -8094,14 +8118,8 @@ static DECLCALLBACK(int) ahciR3Destruct(PPDMDEVINS pDevIns)
             }
 
 #ifdef VBOX_STRICT
-            /* Check that all cached tasks were freed at this point. */
-            for (unsigned iPort = 0; iPort < pThis->cPortsImpl; iPort++)
-            {
-                PAHCIPort pAhciPort = &pThis->ahciPort[iPort];
-
-                for (uint32_t i = 0; i < AHCI_NR_COMMAND_SLOTS; i++)
-                    Assert(!pAhciPort->aCachedTasks[i]);
-            }
+            for (uint32_t i = 0; i < AHCI_NR_COMMAND_SLOTS; i++)
+                Assert(!pAhciPort->aCachedTasks[i]);
 #endif
         }
 
@@ -8139,7 +8157,8 @@ static DECLCALLBACK(int) ahciR3Construct(PPDMDEVINS pDevIns, int iInstance, PCFG
                                     "PortCount\0"
                                     "UseAsyncInterfaceIfAvailable\0"
                                     "Bootable\0"
-                                    "CmdSlotsAvail\0"))
+                                    "CmdSlotsAvail\0"
+                                    "PortsHotpluggable\0"))
         return PDMDEV_SET_ERROR(pDevIns, VERR_PDM_DEVINS_UNKNOWN_CFG_VALUES,
                                 N_("AHCI configuration error: unknown option specified"));
 
@@ -8192,6 +8211,11 @@ static DECLCALLBACK(int) ahciR3Construct(PPDMDEVINS pDevIns, int iInstance, PCFG
         return PDMDevHlpVMSetError(pDevIns, VERR_INVALID_PARAMETER, RT_SRC_POS,
                                    N_("AHCI configuration error: CmdSlotsAvail=%u should be at least 1"),
                                    pThis->cCmdSlotsAvail);
+
+    rc = CFGMR3QueryBoolDef(pCfg, "PortsHotpluggable", &pThis->fPortsHotpluggable, true);
+    if (RT_FAILURE(rc))
+        return PDMDEV_SET_ERROR(pDevIns, rc,
+                                N_("AHCI configuration error: failed to read \"PortsHotpluggable\" as boolean"));
 
     /*
      * Initialize the instance data (everything touched by the destructor need

@@ -209,6 +209,18 @@ udp_input(PNATState pData, register struct mbuf *m, int iphlen)
     }
 
     /*
+     * XXX: DNS proxy currently relies on the fact that each socket
+     * only serves one request.
+     */
+    if (   pData->fUseDnsProxy
+        && CTL_CHECK(ip->ip_dst.s_addr, CTL_DNS)
+        && (uh->uh_dport == RT_H2N_U16_C(53)))
+    {
+        so = NULL;
+        goto new_socket;
+    }
+
+    /*
      * Locate pcb for datagram.
      */
     so = udp_last_so;
@@ -235,6 +247,7 @@ udp_input(PNATState pData, register struct mbuf *m, int iphlen)
         }
     }
 
+  new_socket:
     if (so == NULL)
     {
         /*
@@ -344,19 +357,7 @@ udp_input(PNATState pData, register struct mbuf *m, int iphlen)
         *ip = save_ip;
         Log2(("NAT: UDP tx errno = %d (%s) on sent to %RTnaipv4\n",
               errno, strerror(errno), ip->ip_dst));
-#if 0
-        /* ICMP_SOURCEQUENCH haven't got any effect, the idea here
-         * inform guest about the exosting NAT resources with assumption that
-         * that guest reduce traffic. But it doesn't work
-         */
-        if(    errno == EAGAIN
-            || errno == EWOULDBLOCK
-            || errno == EINPROGRESS
-            || errno == ENOTCONN)
-            icmp_error(pData, m, ICMP_SOURCEQUENCH, 0, 1, strerror(errno));
-        else
-#endif
-            icmp_error(pData, m, ICMP_UNREACH, ICMP_UNREACH_NET, 0, strerror(errno));
+	icmp_error(pData, m, ICMP_UNREACH, ICMP_UNREACH_NET, 0, strerror(errno));
         so->so_m = NULL;
         LogFlowFuncLeave();
         return;
