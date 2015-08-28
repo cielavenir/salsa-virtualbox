@@ -1,3 +1,10 @@
+virtualbox (4.1.40-dfsg-1+deb7u1) wheezy-security; urgency=medium
+
+  * New upstream release.
+  * Remove all the CVE related patches, and refresh patches.
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 28 Aug 2015 16:01:27 +0200
+
 virtualbox (4.1.18-dfsg-2+deb7u5) wheezy-security; urgency=medium
 
   * d/p/CVE-2015-3456.patch fix for CVE-2015-3456 a.k.a. VENOM

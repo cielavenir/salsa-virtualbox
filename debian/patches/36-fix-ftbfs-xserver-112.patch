@@ -9,6 +9,6 @@ Bug-Debian: http://bugs.debian.org/671061
  #include <elf.h>
  #include <unistd.h>
 +#include "xorg-server.h"
- #include "xf86.h"
- 
- #define VBOX_NO_MESA_PATCH_REPORTS
+ /** X server message type definitions. */
+ typedef enum {
+     X_PROBED,			/* Value was probed */
