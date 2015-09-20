@@ -1,3 +1,12 @@
+virtualbox (4.3.30-dfsg-1+deb8u2) jessie; urgency=medium
+
+  * Demote virtualbox-dkms | virtualbox-source to pre-depends,
+    needed to fully configure virtualbox kernel module prior
+    to reload virtualbox service, avoiding a race condition.
+    (Closes: #798527, #798979)
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 18 Sep 2015 23:35:08 +0200
+
 virtualbox (4.3.30-dfsg-1+deb8u1) jessie-security; urgency=medium
 
   [ Ritesh Raj Sarraf ]
