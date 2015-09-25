@@ -1,7 +1,7 @@
 virtualbox (4.3.30-dfsg-1+deb8u2) jessie-security; urgency=medium
 
   [ Ritesh Raj Sarraf ]
-  * Promote virtualbox-dkms | virtualbox-source to pre-depends,
+  * Move virtualbox-dkms | virtualbox-source to Depends,
     needed to fully configure virtualbox kernel module prior
     to reload virtualbox service, avoiding a race condition.
     (Closes: #798527, #798979)
