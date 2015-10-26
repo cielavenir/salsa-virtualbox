@@ -785,7 +785,7 @@ static int supHardNtViCheckIfNotSignedOk(RTLDRMOD hLdrMod, PCRTUTF16 pwszName, u
         if (supHardViUtf16PathIsEqual(pwsz, "apisetschema.dll"))
             return IS_W70() ? VINF_LDRVI_NOT_SIGNED : rc;
         if (supHardViUtf16PathIsEqual(pwsz, "apphelp.dll"))
-            return uNtVer < SUP_MAKE_NT_VER_SIMPLE(6, 4) ? VINF_LDRVI_NOT_SIGNED : rc;
+            return VINF_LDRVI_NOT_SIGNED; /* So far, never signed... */
 #ifdef VBOX_PERMIT_VERIFIER_DLL
         if (supHardViUtf16PathIsEqual(pwsz, "verifier.dll"))
             return uNtVer < SUP_NT_VER_W81 ? VINF_LDRVI_NOT_SIGNED : rc;
@@ -922,7 +922,17 @@ static int supHardNtViCheckIfNotSignedOk(RTLDRMOD hLdrMod, PCRTUTF16 pwszName, u
 
 
 /**
- * @callback_method_impl{RTCRPKCS7VERIFYCERTCALLBACK,
+ * @callback_method_impl{FNRTDUMPPRINTFV, Formats into RTERRINFO. }
+ */
+static DECLCALLBACK(void) supHardNtViAsn1DumpToErrInfo(void *pvUser, const char *pszFormat, va_list va)
+{
+    PRTERRINFO pErrInfo = (PRTERRINFO)pvUser;
+    RTErrInfoAddV(pErrInfo, pErrInfo->rc, pszFormat, va);
+}
+
+
+/**
+ * @callback_method_impl{FNRTCRPKCS7VERIFYCERTCALLBACK,
  * Standard code signing.  Use this for Microsoft SPC.}
  */
 static DECLCALLBACK(int) supHardNtViCertVerifyCallback(PCRTCRX509CERTIFICATE pCert, RTCRX509CERTPATHS hCertPaths,
@@ -940,7 +950,15 @@ static DECLCALLBACK(int) supHardNtViCertVerifyCallback(PCRTCRX509CERTIFICATE pCe
     {
         if (RTCrX509Certificate_Compare(pCert, &g_BuildX509Cert) == 0) /* healthy paranoia */
             return VINF_SUCCESS;
-        return RTErrInfoSetF(pErrInfo, VERR_SUP_VP_NOT_BUILD_CERT_IPE, "Not valid kernel code signature.");
+        int rc = RTErrInfoSetF(pErrInfo, VERR_SUP_VP_NOT_BUILD_CERT_IPE, "Not valid kernel code signature (fFlags=%#x).", fFlags);
+        if (pErrInfo)
+        {
+            RTErrInfoAdd(pErrInfo, rc, "\n\nExe cert:\n");
+            RTAsn1Dump(&pCert->SeqCore.Asn1Core, 0 /*fFlags*/, 0 /*uLevel*/, supHardNtViAsn1DumpToErrInfo, pErrInfo);
+            RTErrInfoAdd(pErrInfo, rc, "\n\nBuild cert:\n");
+            RTAsn1Dump(&g_BuildX509Cert.SeqCore.Asn1Core, 0 /*fFlags*/, 0 /*uLevel*/, supHardNtViAsn1DumpToErrInfo, pErrInfo);
+        }
+        return rc;
     }
 
     /*
@@ -1256,7 +1274,7 @@ DECLHIDDEN(int) supHardenedWinVerifyImageByHandle(HANDLE hFile, PCRTUTF16 pwszNa
             supHardNtViRdrDestroy(&pNtViRdr->Core);
     }
     SUP_DPRINTF(("supHardenedWinVerifyImageByHandle: -> %d (%ls)%s\n",
-                 rc, pwszName, pfWinVerifyTrust && *pfWinVerifyTrust ? "WinVerifyTrust" : ""));
+                 rc, pwszName, pfWinVerifyTrust && *pfWinVerifyTrust ? " WinVerifyTrust" : ""));
     return rc;
 }
 

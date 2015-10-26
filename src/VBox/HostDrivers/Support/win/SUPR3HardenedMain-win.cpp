@@ -213,7 +213,7 @@ typedef struct SUPR3WINPROCPARAMS
     /** Where if message. */
     char                        szWhere[80];
     /** Error message / path name string space. */
-    char                        szErrorMsg[4096];
+    char                        szErrorMsg[16384+1024];
 } SUPR3WINPROCPARAMS;
 
 
@@ -790,7 +790,9 @@ DECLHIDDEN(void) supR3HardenedWinVerifyCacheScheduleImports(RTLDRMOD hLdrMod, PC
                     if (   RTStrCmp(uBuf.szName, "kernel32.dll") == 0
                         || RTStrCmp(uBuf.szName, "kernelbase.dll") == 0
                         || RTStrCmp(uBuf.szName, "ntdll.dll") == 0
-                        || RTStrNCmp(uBuf.szName, RT_STR_TUPLE("api-ms-win-")) == 0 )
+                        || RTStrNCmp(uBuf.szName, RT_STR_TUPLE("api-ms-win-")) == 0
+                        || RTStrNCmp(uBuf.szName, RT_STR_TUPLE("ext-ms-win-")) == 0
+                       )
                     {
                         continue;
                     }
@@ -1708,8 +1710,11 @@ supR3HardenedMonitor_LdrLoadDll(PWSTR pwszSearchPath, PULONG pfFlags, PUNICODE_S
      * Not an absolute path.  Check if it's one of those special API set DLLs
      * or something we're known to use but should be taken from WinSxS.
      */
-    else if (supHardViUtf16PathStartsWithEx(pName->Buffer, pName->Length / sizeof(WCHAR),
-                                            L"api-ms-win-", 11, false /*fCheckSlash*/))
+    else if (   supHardViUtf16PathStartsWithEx(pName->Buffer, pName->Length / sizeof(WCHAR),
+                                               L"api-ms-win-", 11, false /*fCheckSlash*/)
+             || supHardViUtf16PathStartsWithEx(pName->Buffer, pName->Length / sizeof(WCHAR),
+                                               L"ext-ms-win-", 11, false /*fCheckSlash*/)
+            )
     {
         memcpy(wszPath, pName->Buffer, pName->Length);
         wszPath[pName->Length / sizeof(WCHAR)] = '\0';
@@ -4172,17 +4177,18 @@ DECLHIDDEN(char *) supR3HardenedWinReadErrorInfoDevice(char *pszErrorInfo, size_
             offRead.QuadPart = 0;
             rcNt = NtReadFile(hFile, NULL /*hEvent*/, NULL /*ApcRoutine*/, NULL /*ApcContext*/, &Ios,
                               &pszErrorInfo[cchPrefix], (ULONG)(cbErrorInfo - cchPrefix - 1), &offRead, NULL);
-            if (NT_SUCCESS(rcNt))
+            if (NT_SUCCESS(rcNt) && NT_SUCCESS(Ios.Status) && Ios.Information > 0)
             {
                 memcpy(pszErrorInfo, pszPrefix, cchPrefix);
-                pszErrorInfo[cbErrorInfo - 1] = '\0';
+                pszErrorInfo[RT_MIN(cbErrorInfo - 1, Ios.Information)] = '\0';
                 SUP_DPRINTF(("supR3HardenedWinReadErrorInfoDevice: '%s'", &pszErrorInfo[cchPrefix]));
             }
             else
             {
                 *pszErrorInfo = '\0';
-                if (rcNt != STATUS_END_OF_FILE)
-                    SUP_DPRINTF(("supR3HardenedWinReadErrorInfoDevice: NtReadFile -> %#x\n", rcNt));
+                if (rcNt != STATUS_END_OF_FILE || Ios.Status != STATUS_END_OF_FILE)
+                    SUP_DPRINTF(("supR3HardenedWinReadErrorInfoDevice: NtReadFile -> %#x / %#x / %p\n",
+                                 rcNt, Ios.Status, Ios.Information));
             }
         }
         else
@@ -4346,7 +4352,7 @@ static void supR3HardenedWinOpenStubDevice(void)
          * extra information that goes into VBoxStartup.log so that we stand a
          * better chance resolving the issue.
          */
-        char szErrorInfo[_4K];
+        char szErrorInfo[16384];
         int rc = VERR_OPEN_FAILED;
         if (SUP_NT_STATUS_IS_VBOX(rcNt)) /* See VBoxDrvNtErr2NtStatus. */
         {
@@ -4392,7 +4398,7 @@ static void supR3HardenedWinOpenStubDevice(void)
             supR3HardenedFatalMsg("supR3HardenedWinReSpawn", kSupInitOp_Driver, rc,
                                   "NtCreateFile(%ls) failed: %Rrc (rcNt=%#x)%s", s_wszName, rc, rcNt,
                                   supR3HardenedWinReadErrorInfoDevice(szErrorInfo, sizeof(szErrorInfo),
-                                                                    "\nVBoxDrvStub error: "));
+                                                                      "\nVBoxDrvStub error: "));
         }
         else
         {

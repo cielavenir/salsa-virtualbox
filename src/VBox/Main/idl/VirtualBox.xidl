@@ -2957,7 +2957,7 @@
 
   <interface
     name="IInternalMachineControl" extends="$unknown"
-    uuid="ec824977-e43f-479c-81c9-ac6cae1423a5"
+    uuid="1cfdddf7-e1c0-4df7-9573-60b6d28d6796"
     internal="yes"
     wsmap="suppress"
     >
@@ -3373,6 +3373,11 @@
       <param name="flags" type="wstring" dir="in">
         <desc>
           The flags of the property.
+        </desc>
+      </param>
+      <param name="notify" type="boolean" dir="return">
+        <desc>
+          Returns if a guest property change notification event should be fired.
         </desc>
       </param>
     </method>

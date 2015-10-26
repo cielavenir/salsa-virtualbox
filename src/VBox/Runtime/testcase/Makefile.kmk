@@ -147,10 +147,6 @@ PROGRAMS.l4 += \
 PROGRAMS.darwin += \
 	tstDarwinSched \
 	tstRTDarwinMachKernel
-ifdef VBOX_WITH_LIBCURL
- PROGRAMS += \
-	tstRTS3
-endif
 if1of ($(KBUILD_TARGET_ARCH), amd64 x86)
  PROGRAMS += \
  	tstLdr-2 \

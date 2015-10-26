@@ -48,6 +48,7 @@
 #endif
 
 #include <iprt/buildconfig.h>
+#include <iprt/ctype.h>
 #include <iprt/err.h>
 #include <iprt/initterm.h>
 #include <iprt/process.h>
@@ -664,35 +665,69 @@ int main (int argc, char **argv, char **envp)
 #else  /* VBOX_WITH_HARDENING */
 
 /**
- * Hardened main failed, report the error without any unnecessary fuzz.
+ * Special entrypoint used by the hardening code when something goes south.
  *
- * @remarks Do not call IPRT here unless really required, it might not be
- *          initialized.
+ * Display an error dialog to the user.
+ *
+ * @param   pszWhere    Indicates where the error occured.
+ * @param   enmWhat     Indicates what init operation was going on at the time.
+ * @param   rc          The VBox status code corresponding to the error.
+ * @param   pszMsgFmt   The message format string.
+ * @param   va          Format arguments.
  */
 extern "C" DECLEXPORT(void) TrustedError(const char *pszWhere, SUPINITOP enmWhat, int rc, const char *pszMsgFmt, va_list va)
 {
 # if defined(RT_OS_DARWIN)
     ShutUpAppKit();
 # endif
+    char szMsgBuf[_16K];
 
     /*
-     * Init the Qt application object. This is a bit hackish as we
-     * don't have the argument vector handy.
+     * We have to create QApplication anyway just to show the only one error-message.
+     * This is a bit hackish as we don't have the argument vector handy.
      */
     int argc = 0;
     char *argv[2] = { NULL, NULL };
     QApplication a (argc, &argv[0]);
 
     /*
-     * Compose and show the error message.
+     * The details starts off a properly formatted rc and where/what, we use
+     * the szMsgBuf for this, thus this have to come before the actual message
+     * formatting.
      */
-    QString msgTitle = QApplication::tr ("VirtualBox - Error In %1").arg (pszWhere);
+    RTStrPrintf(szMsgBuf, sizeof(szMsgBuf),
+                "<!--EOM-->"
+                "where: %s\n"
+                "what:  %d\n"
+                "%Rra\n",
+                pszWhere, enmWhat, rc);
+    QString strDetails = szMsgBuf;
 
-    char szMsgBuf[1024];
+    /*
+     * Format the error message. Take whatever comes after a double new line as
+     * something better off in the details section.
+     */
     RTStrPrintfV(szMsgBuf, sizeof(szMsgBuf), pszMsgFmt, va);
+
+    char *pszDetails = strstr(szMsgBuf, "\n\n");
+    if (pszDetails)
+    {
+        while (RT_C_IS_SPACE(*pszDetails))
+            *pszDetails++ = '\0';
+        if (*pszDetails)
+        {
+            strDetails += "\n";
+            strDetails += pszDetails;
+        }
+        RTStrStripR(szMsgBuf);
+    }
+
     QString strText = QApplication::tr("<html><b>%1 (rc=%2)</b><br/><br/>").arg(szMsgBuf).arg(rc);
     strText.replace(QString("\n"), QString("<br>"));
 
+    /*
+     * Append possibly helpful hints to the error message.
+     */
     switch (enmWhat)
     {
         case kSupInitOp_Driver:
@@ -729,17 +764,28 @@ extern "C" DECLEXPORT(void) TrustedError(const char *pszWhere, SUPINITOP enmWhat
 
     strText += "</html>";
 
+
 # ifdef RT_OS_LINUX
+    /*
+     * We have to to make sure that we display the error-message
+     * after the parent displayed its own message.
+     */
     sleep(2);
 # endif
-    QMessageBox::critical (
-        0,                      /* parent */
-        msgTitle,               /* title */
-        strText,                /* text */
-        QMessageBox::Abort,     /* button0 */
-        0);                     /* button1 */
-    qFatal ("%s", strText.toAscii().constData());
+
+    /*
+     * Create the message box and show it.
+     */
+    QString strTitle = QApplication::tr("VirtualBox - Error In %1").arg(pszWhere);
+    QIMessageBox msgBox(strTitle, strText, QIMessageBox::Critical, QIMessageBox::Ok | QIMessageBox::Default);
+    if (!strDetails.isEmpty())
+        msgBox.setDetailsText(strDetails);
+
+    msgBox.exec();
+
+    qFatal("%s", strText.toAscii().constData());
 }
 
 #endif /* VBOX_WITH_HARDENING */
+
 

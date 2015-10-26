@@ -1,4 +1,4 @@
-/* $Rev: 95893 $ */
+/* $Rev: 103362 $ */
 /** @file
  * VBoxDrv - The VirtualBox Support Driver - Linux specifics.
  */
@@ -82,6 +82,10 @@
 
 #ifdef CONFIG_X86_HIGH_ENTRY
 # error "CONFIG_X86_HIGH_ENTRY is not supported by VBoxDrv at this time."
+#endif
+
+#ifdef CONFIG_X86_SMAP
+# error "CONFIG_X86_SMAP is only supported by 4.3 and higher. Please upgrade VirtualBox."
 #endif
 
 /* to include the version number of VirtualBox into kernel backtraces */
