@@ -359,7 +359,10 @@ RuntimeR3_SOURCES       = \
 	common/crypto/tsp-sanity.cpp \
 	common/crypto/store.cpp \
 	common/crypto/store-inmem.cpp \
-	common/crypto/RTCrStoreCertAddFromFile.cpp \
+	common/crypto/store-cert-add-basic.cpp \
+	common/crypto/RTCrStoreCertAddFromJavaKeyStore.cpp \
+	common/crypto/RTCrStoreCertAddWantedFromFishingExpedition.cpp \
+	common/crypto/RTCrStoreCertExportAsPem.cpp \
 	common/dbg/dbg.cpp \
 	common/dbg/dbgas.cpp \
 	common/dbg/dbgcfg.cpp \
@@ -449,8 +452,10 @@ RuntimeR3_SOURCES       = \
 	common/path/RTPathChangeToUnixSlashes.cpp \
 	common/path/RTPathCopyComponents.cpp \
 	common/path/RTPathCountComponents.cpp \
+	common/path/RTPathEnsureTrailingSeparator.cpp \
 	common/path/RTPathExt.cpp \
 	common/path/RTPathFilename.cpp \
+	common/path/RTPathGlob.cpp \
 	common/path/RTPathHasExt.cpp \
 	common/path/RTPathHasPath.cpp \
 	common/path/RTPathJoin.cpp \
@@ -713,6 +718,7 @@ RuntimeR3_SOURCES.win = \
  	r3/nt/pathint-nt.cpp \
  	r3/nt/RTProcQueryParent-r3-nt.cpp \
 	r3/win/env-win.cpp \
+	r3/win/RTCrStoreCreateSnapshotById-win.cpp \
 	r3/win/RTHandleGetStandard-win.cpp \
 	r3/win/RTSystemQueryOSInfo-win.cpp \
 	r3/win/RTSystemShutdown-win.cpp \
@@ -752,11 +758,16 @@ RuntimeR3_SOURCES.win = \
 	win/RTErrConvertFromWin32.cpp \
 	common/string/mempcpy.asm
 
-RuntimeR3_SOURCES.win.amd64 := $(RuntimeWin64ASM_SOURCES)
-RuntimeR3_SOURCES.win.x86   := $(RuntimeWin32ASM_SOURCES)
+RuntimeR3_SOURCES.win.amd64 := \
+	$(RuntimeWin64ASM_SOURCES) \
+	common/string/memrchr.asm
+RuntimeR3_SOURCES.win.x86   := \
+	$(RuntimeWin32ASM_SOURCES) \
+	common/string/memrchr.asm
 
 RuntimeR3_SOURCES.linux = \
 	generic/cdrom-generic.cpp \
+	generic/RTCrStoreCreateSnapshotById-generic.cpp \
 	generic/RTDirQueryInfo-generic.cpp \
 	generic/RTDirSetTimes-generic.cpp \
 	generic/RTFileMove-generic.cpp \
@@ -843,7 +854,9 @@ else
 endif
 
 RuntimeR3_SOURCES.os2   = \
+	common/string/memrchr.asm \
 	generic/cdrom-generic.cpp \
+	generic/RTCrStoreCreateSnapshotById-generic.cpp \
 	generic/RTDirQueryInfo-generic.cpp \
 	generic/RTDirSetTimes-generic.cpp \
 	generic/RTFileMove-generic.cpp \
@@ -942,6 +955,7 @@ RuntimeR3_SOURCES.darwin = \
 	generic/uuid-generic.cpp\
 	generic/RTProcIsRunningByName-generic.cpp \
 	generic/RTThreadGetNativeState-generic.cpp \
+	r3/darwin/RTCrStoreCreateSnapshotById-darwin.cpp \
 	r3/darwin/filelock-darwin.cpp \
 	r3/darwin/mp-darwin.cpp \
 	r3/darwin/pathhost-darwin.cpp \
@@ -984,10 +998,13 @@ RuntimeR3_SOURCES.darwin = \
 	r3/posix/timelocal-posix.cpp \
 	r3/posix/tls-posix.cpp \
 	r3/posix/utf8-posix.cpp
+RuntimeR3_SOURCES.darwin.x86   += common/string/memrchr.asm
+RuntimeR3_SOURCES.darwin.amd64 += common/string/memrchr.asm
 
 ## @todo Make BSD sched, implement RTMP*.
 RuntimeR3_SOURCES.freebsd = \
 	generic/cdrom-generic.cpp \
+	generic/RTCrStoreCreateSnapshotById-generic.cpp \
 	generic/RTDirQueryInfo-generic.cpp \
 	generic/RTDirSetTimes-generic.cpp \
 	generic/RTFileMove-generic.cpp \
@@ -1057,9 +1074,12 @@ RuntimeR3_SOURCES.freebsd = \
 	r3/posix/timer-posix.cpp \
 	r3/posix/tls-posix.cpp \
 	r3/posix/utf8-posix.cpp
+RuntimeR3_SOURCES.freebsd.x86   += common/string/memrchr.asm
+RuntimeR3_SOURCES.freebsd.amd64 += common/string/memrchr.asm
 
 RuntimeR3_SOURCES.solaris = \
 	generic/cdrom-generic.cpp \
+	generic/RTCrStoreCreateSnapshotById-generic.cpp \
 	generic/RTDirQueryInfo-generic.cpp \
 	generic/RTDirSetTimes-generic.cpp \
 	generic/RTFileMove-generic.cpp \
@@ -1124,9 +1144,11 @@ RuntimeR3_SOURCES.solaris = \
 	r3/solaris/RTSystemShutdown-solaris.cpp \
 	r3/solaris/thread-affinity-solaris.cpp
 RuntimeR3_SOURCES.solaris.amd64 = \
+	common/string/memrchr.asm \
 	r3/solaris/coredumper-solaris.cpp \
 	r3/solaris/RTSystemQueryDmiString-solaris.cpp
 RuntimeR3_SOURCES.solaris.x86 = \
+	common/string/memrchr.asm \
 	r3/solaris/coredumper-solaris.cpp \
 	r3/solaris/RTSystemQueryDmiString-solaris.cpp
 RuntimeR3_SOURCES.solaris.sparc32 = \
@@ -1135,6 +1157,7 @@ RuntimeR3_SOURCES.solaris.sparc64 = \
 	generic/RTSystemQueryDmiString-generic.cpp
 
 RuntimeR3_SOURCES.haiku = \
+	generic/RTCrStoreCreateSnapshotById-generic.cpp \
 	generic/RTDirQueryInfo-generic.cpp \
 	generic/RTDirSetTimes-generic.cpp \
 	generic/RTFileMove-generic.cpp \
@@ -1195,6 +1218,8 @@ RuntimeR3_SOURCES.haiku = \
 	r3/posix/timelocal-posix.cpp \
 	r3/posix/tls-posix.cpp \
 	r3/posix/utf8-posix.cpp
+RuntimeR3_SOURCES.haiku.x86   += common/string/memrchr.asm
+RuntimeR3_SOURCES.haiku.amd64 += common/string/memrchr.asm
 
 ## PORTME: Porters add their selection of platform specific files for Ring-3 here.
 
@@ -1310,8 +1335,9 @@ VBoxRT_SOURCES                := \
 	common/checksum/crc32-zlib.cpp \
 	common/misc/aiomgr.cpp
 ifdef VBOX_WITH_LIBCURL
- VBoxRT_SOURCES               += common/misc/s3.cpp
- VBoxRT_SOURCES               += common/misc/http.cpp
+ VBoxRT_SOURCES               += \
+ 	common/misc/s3.cpp \
+ 	generic/http-curl.cpp
 endif
 VBoxRT_SOURCES.$(KBUILD_TARGET) = $(RuntimeR3_SOURCES.$(KBUILD_TARGET))
 VBoxRT_SOURCES.$(KBUILD_TARGET).$(KBUILD_TARGET_ARCH) := $(RuntimeR3_SOURCES.$(KBUILD_TARGET).$(KBUILD_TARGET_ARCH))
@@ -1380,7 +1406,13 @@ VBoxRT_LIBS.win                = \
 	$(PATH_SDK_$(VBOX_WINDDK)_LIB)/vccomsup.lib \
 	$(PATH_SDK_$(VBOX_WINDDK)_LIB)/wbemuuid.lib \
 	$(PATH_TOOL_$(VBOX_VCC_TOOL)_LIB)/delayimp.lib
-VBoxRT_LDFLAGS.darwin          = -framework IOKit -framework CoreFoundation -framework CoreServices -install_name $(VBOX_DYLD_EXECUTABLE_PATH)/VBoxRT.dylib
+VBoxRT_LDFLAGS.darwin          = \
+	-framework IOKit \
+	-framework CoreFoundation \
+	-framework CoreServices \
+	-framework Security \
+	-framework SystemConfiguration \
+	-install_name $(VBOX_DYLD_EXECUTABLE_PATH)/VBoxRT.dylib
 VBoxRT_LDFLAGS.win             = /MANIFEST \
 	/delayload:gdi32.dll \
 	/delayload:user32.dll \
@@ -1847,6 +1879,7 @@ RuntimeR0Drv_SOURCES.linux = \
 	generic/RTLogWriteStdOut-stub-generic.cpp \
 	generic/RTMpGetCoreCount-generic.cpp \
 	generic/mppresent-generic.cpp \
+	generic/RTMpOnPair-generic.cpp \
 	r0drv/linux/alloc-r0drv-linux.c \
 	r0drv/linux/assert-r0drv-linux.c \
 	r0drv/linux/initterm-r0drv-linux.c \
@@ -1978,6 +2011,7 @@ RuntimeR0Drv_SOURCES.win = \
 	generic/RTTimerCreate-generic.cpp \
 	generic/mppresent-generic.cpp \
 	generic/RTMpGetCoreCount-generic.cpp \
+	generic/RTMpOnPair-generic.cpp \
 	nt/RTErrConvertFromNtStatus.cpp \
 	r0drv/generic/threadctxhooks-r0drv-generic.cpp \
 	r0drv/memobj-r0drv.cpp \
@@ -2017,6 +2051,7 @@ RuntimeR0Drv_SOURCES.darwin = \
 	generic/RTAssertShouldPanic-generic.cpp \
 	generic/RTTimerCreate-generic.cpp \
 	generic/RTMpGetCoreCount-generic.cpp \
+	generic/RTMpOnPair-generic.cpp \
 	generic/mppresent-generic.cpp \
 	generic/timer-generic.cpp \
 	r0drv/generic/mpnotification-r0drv-generic.cpp \
@@ -2114,6 +2149,7 @@ RuntimeR0Drv_SOURCES.freebsd = \
 	generic/RTAssertShouldPanic-generic.cpp \
 	generic/RTLogWriteDebugger-generic.cpp \
 	generic/RTLogWriteStdOut-stub-generic.cpp \
+	generic/RTMpOnPair-generic.cpp \
 	generic/RTTimerCreate-generic.cpp \
 	generic/mppresent-generic.cpp \
 	r0drv/generic/RTMpIsCpuWorkPending-r0drv-generic.cpp \
@@ -2144,6 +2180,7 @@ RuntimeR0Drv_SOURCES.solaris = \
 	generic/RTAssertShouldPanic-generic.cpp \
 	generic/RTLogWriteStdOut-stub-generic.cpp \
 	generic/RTMpGetCoreCount-generic.cpp \
+	generic/RTMpOnPair-generic.cpp \
 	generic/RTTimerCreate-generic.cpp \
 	generic/mppresent-generic.cpp \
 	r0drv/memobj-r0drv.cpp \
@@ -2179,6 +2216,7 @@ RuntimeR0Drv_SOURCES.haiku = \
 	common/string/memcmp.asm \
 	common/string/strchr.asm \
 	generic/RTAssertShouldPanic-generic.cpp \
+	generic/RTMpOnPair-generic.cpp \
 	generic/RTTimerCreate-generic.cpp \
 	generic/mppresent-generic.cpp \
 	r0drv/generic/RTMpIsCpuWorkPending-r0drv-generic.cpp \

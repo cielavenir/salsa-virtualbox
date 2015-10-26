@@ -1079,6 +1079,14 @@
           <para>Currently only Linux and Solaris Guest Additions support
           symlinks.</para>
         </listitem>
+
+        <listitem>
+          <para>For security reasons the guest OS is not allowed to create
+          symlinks by default. If you trust the guest OS to not abuse the
+          functionality, you can enable creation of symlinks for "sharename"
+          with:
+          <screen>VBoxManage setextradata "VM name" VBoxInternal2/SharedFoldersEnableSymlinksCreate/sharename 1</screen></para>
+        </listitem>
       </orderedlist></para>
 
     <sect2 id="sf_mount_manual">
@@ -1729,7 +1737,11 @@ Name: /VirtualBox/GuestInfo/OS/Version, value: #59-Ubuntu SMP Thu Jan 28 01:23:0
       of fused pages, whereas the per-VM metric
       <computeroutput>Guest/RAM/Usage/Shared</computeroutput> will return the
       amount of fused memory for a given VM. Please refer to <xref
-      linkend="metrics" /> for information on how to query metrics.</para>
+        linkend="metrics" /> for information on how to query metrics.</para>
+
+      <note><para>Enabling Page Fusion might indirectly increase the chances
+      for malicious guests to successfully attack other VMs running on the
+      same host, see <xref linkend="pot-insecure"/>.</para></note>
     </sect2>
   </sect1>
 </chapter>

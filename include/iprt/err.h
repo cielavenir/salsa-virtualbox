@@ -926,6 +926,10 @@ RT_C_DECLS_END
 #define VWRN_UNABLE_TO_SATISFY_REQUIREMENTS 22406
 /** The requested allocation is too big. */
 #define VERR_ALLOCATION_TOO_BIG             (-22407)
+/** Mismatch. */
+#define VERR_MISMATCH                       (-22408)
+/** Wrong type. */
+#define VERR_WRONG_TYPE                     (-22409)
 /** @} */
 
 
@@ -1605,6 +1609,10 @@ RT_C_DECLS_END
 #define VERR_CPU_OFFLINE                        (-800)
 /** The specified cpu was not found. */
 #define VERR_CPU_NOT_FOUND                      (-801)
+/** Not all of the requested CPUs showed up in the PFNRTMPWORKER. */
+#define VERR_NOT_ALL_CPUS_SHOWED                (-802)
+/** Internal processing error in the RTMp code.*/
+#define VERR_CPU_IPE_1                          (-803)
 /** @} */
 
 /** @name RTGetOpt status codes
@@ -1671,6 +1679,12 @@ RT_C_DECLS_END
 #define VERR_HTTP_ABORTED                       (-893)
 /** Request was redirected. */
 #define VERR_HTTP_REDIRECTED                    (-894)
+/** Proxy couldn't be resolved. */
+#define VERR_HTTP_PROXY_NOT_FOUND               (-895)
+/** Unexpected cURL error configure the proxy. */
+#define VERR_HTTP_CURL_PROXY_CONFIG             (-897)
+/** Generic CURL error. */
+#define VERR_HTTP_CURL_ERROR                    (-899)
 /** @} */
 
 /** @name RTManifest status codes
@@ -2430,10 +2444,46 @@ RT_C_DECLS_END
 
 /** @name RTCrDigest status codes.
  * @{ */
-/** OpenSSL failed to initialize the digest algorithm contextn. */
+/** OpenSSL failed to initialize the digest algorithm context. */
 #define VERR_CR_DIGEST_OSSL_DIGEST_INIT_ERROR       (-24200)
 /** OpenSSL failed to clone the digest algorithm contextn. */
 #define VERR_CR_DIGEST_OSSL_DIGEST_CTX_COPY_ERROR   (-24201)
+/** @} */
+
+/** @name RTPath  status codes.
+ * @{ */
+/** Unknown glob variable.  */
+#define VERR_PATH_MATCH_UNKNOWN_VARIABLE            (-24400)
+/** The specified glob variable must be first in the pattern. */
+#define VERR_PATH_MATCH_VARIABLE_MUST_BE_FIRST      (-24401)
+/** Hit unimplemented glob pattern matching feature.  */
+#define VERR_PATH_MATCH_FEATURE_NOT_IMPLEMENTED     (-24402)
+/** Unknown character class in glob pattern.   */
+#define VERR_PATH_GLOB_UNKNOWN_CHAR_CLASS           (-24403)
+/** @} */
+
+/** @name RTUri status codes.
+ * @{ */
+/** The URI is empty */
+#define VERR_URI_EMPTY                              (-24600)
+/** The URI is too short to be a valid URI. */
+#define VERR_URI_TOO_SHORT                          (-24601)
+/** Invalid scheme.  */
+#define VERR_URI_INVALID_SCHEME                     (-24602)
+/** Invalid port number.  */
+#define VERR_URI_INVALID_PORT_NUMBER                (-24603)
+/** Invalid escape sequence.  */
+#define VERR_URI_INVALID_ESCAPE_SEQ                 (-24604)
+/** Escape URI char decodes as zero (the C string terminator). */
+#define VERR_URI_ESCAPED_ZERO                       (-24605)
+/** Escaped URI characters does not decode to valid UTF-8. */
+#define VERR_URI_ESCAPED_CHARS_NOT_VALID_UTF8       (-24606)
+/** Escaped URI character is not a valid UTF-8 lead byte. */
+#define VERR_URI_INVALID_ESCAPED_UTF8_LEAD_BYTE     (-24607)
+/** Escaped URI character sequence with invalid UTF-8 continutation byte. */
+#define VERR_URI_INVALID_ESCAPED_UTF8_CONTINUATION_BYTE (-24608)
+/** Missing UTF-8 continutation in escaped URI character sequence. */
+#define VERR_URI_MISSING_UTF8_CONTINUATION_BYTE     (-24609)
 /** @} */
 
 /* SED-END */

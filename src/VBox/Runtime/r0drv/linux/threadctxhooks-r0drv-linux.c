@@ -163,18 +163,31 @@ DECLINLINE(void) rtThreadCtxHooksDeregister(PRTTHREADCTXINT pThis)
 RTDECL(int) RTThreadCtxHooksCreate(PRTTHREADCTX phThreadCtx)
 {
     PRTTHREADCTXINT pThis;
+    IPRT_LINUX_SAVE_EFL_AC();
+
+    /*
+     * Validate input.
+     */
     Assert(RTThreadPreemptIsEnabled(NIL_RTTHREAD));
 
     pThis = (PRTTHREADCTXINT)RTMemAllocZ(sizeof(*pThis));
     if (RT_UNLIKELY(!pThis))
+    {
+        IPRT_LINUX_RESTORE_EFL_AC();
         return VERR_NO_MEMORY;
+    }
     pThis->u32Magic    = RTTHREADCTXINT_MAGIC;
     pThis->hOwner      = RTThreadNativeSelf();
     pThis->fRegistered = false;
     preempt_notifier_init(&pThis->hPreemptNotifier, &pThis->hPreemptOps);
     pThis->cRefs       = 1;
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+    preempt_notifier_inc();
+#endif
+
     *phThreadCtx = pThis;
+    IPRT_LINUX_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 }
 RT_EXPORT_SYMBOL(RTThreadCtxHooksCreate);
@@ -217,6 +230,8 @@ RTDECL(uint32_t) RTThreadCtxHooksRelease(RTTHREADCTX hThreadCtx)
     cRefs = ASMAtomicDecU32(&pThis->cRefs);
     if (!cRefs)
     {
+        IPRT_LINUX_SAVE_EFL_AC();
+
         /*
          * If there's still a registered thread-context hook, deregister it now before destroying the object.
          */
@@ -230,8 +245,13 @@ RTDECL(uint32_t) RTThreadCtxHooksRelease(RTTHREADCTX hThreadCtx)
         Assert(!pThis->hPreemptOps.sched_out);
         Assert(!pThis->hPreemptOps.sched_in);
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+        preempt_notifier_dec();
+#endif
+
         ASMAtomicWriteU32(&pThis->u32Magic, ~RTTHREADCTXINT_MAGIC);
         RTMemFree(pThis);
+        IPRT_LINUX_RESTORE_EFL_AC();
     }
     else
         Assert(cRefs < UINT32_MAX / 2);
@@ -243,6 +263,8 @@ RT_EXPORT_SYMBOL(RTThreadCtxHooksRelease);
 
 RTDECL(int) RTThreadCtxHooksRegister(RTTHREADCTX hThreadCtx, PFNRTTHREADCTXHOOK pfnThreadCtxHook, void *pvUser)
 {
+    IPRT_LINUX_SAVE_EFL_AC();
+
     /*
      * Validate input.
      */
@@ -266,6 +288,7 @@ RTDECL(int) RTThreadCtxHooksRegister(RTTHREADCTX hThreadCtx, PFNRTTHREADCTXHOOK 
     pThis->fRegistered           = true;
     preempt_notifier_register(&pThis->hPreemptNotifier);
 
+    IPRT_LINUX_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 }
 RT_EXPORT_SYMBOL(RTThreadCtxHooksRegister);
@@ -273,6 +296,8 @@ RT_EXPORT_SYMBOL(RTThreadCtxHooksRegister);
 
 RTDECL(int) RTThreadCtxHooksDeregister(RTTHREADCTX hThreadCtx)
 {
+    IPRT_LINUX_SAVE_EFL_AC();
+
     /*
      * Validate input.
      */
@@ -289,6 +314,8 @@ RTDECL(int) RTThreadCtxHooksDeregister(RTTHREADCTX hThreadCtx)
      * Deregister the callback.
      */
     rtThreadCtxHooksDeregister(pThis);
+
+    IPRT_LINUX_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 }
 RT_EXPORT_SYMBOL(RTThreadCtxHooksDeregister);
@@ -307,6 +334,7 @@ RTDECL(bool) RTThreadCtxHooksAreRegistered(RTTHREADCTX hThreadCtx)
 
     return pThis->fRegistered;
 }
+RT_EXPORT_SYMBOL(RTThreadCtxHooksAreRegistered);
 
 #else    /* Not supported / Not needed */
 

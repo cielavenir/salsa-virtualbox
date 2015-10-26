@@ -15,9 +15,9 @@
  */
 
 
-/*******************************************************************************
-*   Header Files                                                               *
-*******************************************************************************/
+/*********************************************************************************************************************************
+*   Header Files                                                                                                                 *
+*********************************************************************************************************************************/
 #define LOG_GROUP LOG_GROUP_DEV_VMSVGA
 #include <VBox/vmm/pdmdev.h>
 #include <VBox/version.h>
@@ -31,30 +31,23 @@
 #include <iprt/mem.h>
 #include <iprt/avl.h>
 
-#include <VBox/VMMDev.h>
-#include <VBox/VBoxVideo.h>
-#include <VBox/bioslogo.h>
+#include <VBox/VBoxVideo.h> /* required by DevVGA.h */
 
 /* should go BEFORE any other DevVGA include to make all DevVGA.h config defines be visible */
 #include "DevVGA.h"
 
 #include "DevVGA-SVGA.h"
 #include "DevVGA-SVGA3d.h"
-#include "vmsvga/svga_reg.h"
-#include "vmsvga/svga3d_reg.h"
-#include "vmsvga/svga3d_shaderdefs.h"
+#define VMSVGA3D_INCL_STRUCTURE_DESCRIPTORS
+#include "DevVGA-SVGA3d-internal.h"
 
 
 #ifdef RT_OS_WINDOWS
-/*******************************************************************************
-*   Structures and Typedefs                                                    *
-*******************************************************************************/
-#define     VMSVGA3D_WNDCLASSNAME       "VMSVGA3DWNDCLS"
+# define VMSVGA3D_WNDCLASSNAME  "VMSVGA3DWNDCLS"
 
 static LONG WINAPI vmsvga3dWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-#endif
 
-#ifdef RT_OS_WINDOWS
+
 /**
  * Send a message to the async window thread and wait for a reply
  *
@@ -145,35 +138,34 @@ DECLCALLBACK(int) vmsvga3dWindowThread(RTTHREAD ThreadSelf, void *pvUser)
                 pCS->cx = rectClient.right - rectClient.left;
                 pCS->cy = rectClient.bottom - rectClient.top;
 #endif
-                *pHwnd = CreateWindowEx(pCS->dwExStyle, 
-                                        VMSVGA3D_WNDCLASSNAME, 
-                                        pCS->lpszName, 
+                *pHwnd = CreateWindowEx(pCS->dwExStyle,
+                                        VMSVGA3D_WNDCLASSNAME,
+                                        pCS->lpszName,
                                         pCS->style,
 #ifdef DEBUG_GFX_WINDOW
                                         0,
                                         0,
 #else
-                                        pCS->x, 
-                                        pCS->y, 
+                                        pCS->x,
+                                        pCS->y,
 #endif
-                                        pCS->cx, 
+                                        pCS->cx,
                                         pCS->cy,
 #ifdef DEBUG_GFX_WINDOW
                                         0,
 #else
-                                        pCS->hwndParent, 
+                                        pCS->hwndParent,
 #endif
-                                        pCS->hMenu, 
-                                        pCS->hInstance, 
+                                        pCS->hMenu,
+                                        pCS->hInstance,
                                         NULL);
-                AssertMsg(*pHwnd, ("CreateWindowEx %x %s %s %x (%d,%d)(%d,%d), %x %x %x error=%x\n", pCS->dwExStyle, pCS->lpszName, VMSVGA3D_WNDCLASSNAME, pCS->style, pCS->x, 
+                AssertMsg(*pHwnd, ("CreateWindowEx %x %s %s %x (%d,%d)(%d,%d), %x %x %x error=%x\n", pCS->dwExStyle, pCS->lpszName, VMSVGA3D_WNDCLASSNAME, pCS->style, pCS->x,
                                     pCS->y, pCS->cx, pCS->cy,pCS->hwndParent, pCS->hMenu, pCS->hInstance, GetLastError()));
 
                 /* Signal to the caller that we're done. */
                 RTSemEventSignal(WndRequestSem);
                 continue;
             }
-            else
             if (msg.message == WM_VMSVGA3D_DESTROYWINDOW)
             {
                 BOOL ret = DestroyWindow((HWND)msg.wParam);
@@ -182,7 +174,6 @@ DECLCALLBACK(int) vmsvga3dWindowThread(RTTHREAD ThreadSelf, void *pvUser)
                 RTSemEventSignal(WndRequestSem);
                 continue;
             }
-            else
             if (msg.message == WM_VMSVGA3D_RESIZEWINDOW)
             {
                 HWND hwnd = (HWND)msg.wParam;
@@ -227,17 +218,58 @@ static LONG WINAPI vmsvga3dWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM l
     switch (uMsg)
     {
         case WM_CLOSE:
+            Log6(("vmsvga3dWndProc(%p): WM_CLOSE\n", hwnd));
             break;
 
         case WM_DESTROY:
+            Log6(("vmsvga3dWndProc(%p): WM_DESTROY\n", hwnd));
             break;
 
         case WM_NCHITTEST:
+            Log6(("vmsvga3dWndProc(%p): WM_NCHITTEST\n", hwnd));
             return HTNOWHERE;
+
+# if 0 /* flicker experiment, no help here. */
+        case WM_PAINT:
+            Log6(("vmsvga3dWndProc(%p): WM_PAINT %p %p\n", hwnd, wParam, lParam));
+            ValidateRect(hwnd, NULL);
+            return 0;
+        case WM_ERASEBKGND:
+            Log6(("vmsvga3dWndProc(%p): WM_ERASEBKGND %p %p\n", hwnd, wParam, lParam));
+            return TRUE;
+        case WM_NCPAINT:
+            Log6(("vmsvga3dWndProc(%p): WM_NCPAINT %p %p\n", hwnd, wParam, lParam));
+            break;
+        case WM_WINDOWPOSCHANGING:
+        {
+            PWINDOWPOS pPos = (PWINDOWPOS)lParam;
+            Log6(("vmsvga3dWndProc(%p): WM_WINDOWPOSCHANGING %p %p pos=(%d,%d) size=(%d,%d) flags=%#x\n",
+                  hwnd, wParam, lParam, pPos->x, pPos->y, pPos->cx, pPos->cy, pPos->flags));
+            break;
+        }
+        case WM_WINDOWPOSCHANGED:
+        {
+            PWINDOWPOS pPos = (PWINDOWPOS)lParam;
+            Log6(("vmsvga3dWndProc(%p): WM_WINDOWPOSCHANGED %p %p pos=(%d,%d) size=(%d,%d) flags=%#x\n",
+                  hwnd, wParam, lParam, pPos->x, pPos->y, pPos->cx, pPos->cy, pPos->flags));
+            break;
+        }
+        case WM_MOVE:
+            Log6(("vmsvga3dWndProc(%p): WM_MOVE %p %p\n", hwnd, wParam, lParam));
+            break;
+        case WM_SIZE:
+            Log6(("vmsvga3dWndProc(%p): WM_SIZE %p %p\n", hwnd, wParam, lParam));
+            break;
+
+        default:
+            Log6(("vmsvga3dWndProc(%p): %#x %p %p\n", hwnd, uMsg, wParam, lParam));
+# endif
     }
     return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
+
 #endif /* RT_OS_WINDOWS */
+
 
 /**
  * Calculate the size of one pixel
@@ -340,11 +372,14 @@ uint32_t vmsvga3dSurfaceFormatSize(SVGA3dSurfaceFormat format)
         return 32;
     case SVGA3D_A16B16G16R16:
         return 8;
+
+    default:
+        AssertFailedReturn(4);
     }
-    AssertFailedReturn(4);
 }
 
 #ifdef LOG_ENABLED
+
 const char *vmsvga3dGetCapString(uint32_t idxCap)
 {
     switch (idxCap)
@@ -579,7 +614,7 @@ const char *vmsvga3dGetRenderStateName(uint32_t state)
 {
     switch (state)
     {
-    case SVGA3D_RS_ZENABLE:                /* SVGA3dBool */            
+    case SVGA3D_RS_ZENABLE:                /* SVGA3dBool */
         return "SVGA3D_RS_ZENABLE";
     case SVGA3D_RS_ZWRITEENABLE:           /* SVGA3dBool */
         return "SVGA3D_RS_ZWRITEENABLE";
@@ -991,114 +1026,6 @@ const char *vmsvgaDeclType2String(SVGA3dDeclType type)
     }
 }
 
-const char *vmsvgaSurfaceType2String(SVGA3dSurfaceFormat format)
-{
-    switch (format)
-    {
-    case SVGA3D_X8R8G8B8:
-        return "SVGA3D_X8R8G8B8";
-    case SVGA3D_A8R8G8B8:
-        return "SVGA3D_A8R8G8B8";
-    case SVGA3D_R5G6B5:
-        return "SVGA3D_R5G6B5";
-    case SVGA3D_X1R5G5B5:
-        return "SVGA3D_X1R5G5B5";
-    case SVGA3D_A1R5G5B5:
-        return "SVGA3D_A1R5G5B5";
-    case SVGA3D_A4R4G4B4:
-        return "SVGA3D_A4R4G4B4";
-    case SVGA3D_Z_D32:
-        return "SVGA3D_Z_D32";
-    case SVGA3D_Z_D16:
-        return "SVGA3D_Z_D16";
-    case SVGA3D_Z_D24S8:
-        return "SVGA3D_Z_D24S8";
-    case SVGA3D_Z_D15S1:
-        return "SVGA3D_Z_D15S1";
-    case SVGA3D_Z_D24X8:
-        return "SVGA3D_Z_D24X8";
-    case SVGA3D_Z_DF16:
-        return "SVGA3D_Z_DF16";
-    case SVGA3D_Z_DF24:
-        return "SVGA3D_Z_DF24";
-    case SVGA3D_Z_D24S8_INT:
-        return "SVGA3D_Z_D24S8_INT";
-    case SVGA3D_LUMINANCE8:
-        return "SVGA3D_LUMINANCE8";
-    case SVGA3D_LUMINANCE4_ALPHA4:
-        return "SVGA3D_LUMINANCE4_ALPHA4";
-    case SVGA3D_LUMINANCE16:
-        return "SVGA3D_LUMINANCE16";
-    case SVGA3D_LUMINANCE8_ALPHA8:
-        return "SVGA3D_LUMINANCE8_ALPHA8";
-    case SVGA3D_DXT1:
-        return "SVGA3D_DXT1";
-    case SVGA3D_DXT2:
-        return "SVGA3D_DXT2";
-    case SVGA3D_DXT3:
-        return "SVGA3D_DXT3";
-    case SVGA3D_DXT4:
-        return "SVGA3D_DXT4";
-    case SVGA3D_DXT5:
-        return "SVGA3D_DXT5";
-    case SVGA3D_BUMPU8V8:
-        return "SVGA3D_BUMPU8V8";
-    case SVGA3D_BUMPL6V5U5:
-        return "SVGA3D_BUMPL6V5U5";
-    case SVGA3D_BUMPX8L8V8U8:
-        return "SVGA3D_BUMPX8L8V8U8";
-    case SVGA3D_BUMPL8V8U8:
-        return "SVGA3D_BUMPL8V8U8";
-    case SVGA3D_V8U8:
-        return "SVGA3D_V8U8";
-    case SVGA3D_Q8W8V8U8:
-        return "SVGA3D_Q8W8V8U8";
-    case SVGA3D_CxV8U8:
-        return "SVGA3D_CxV8U8";
-    case SVGA3D_X8L8V8U8:
-        return "SVGA3D_X8L8V8U8";
-    case SVGA3D_A2W10V10U10:
-        return "SVGA3D_A2W10V10U10";
-    case SVGA3D_ARGB_S10E5:
-        return "SVGA3D_ARGB_S10E5";
-    case SVGA3D_ARGB_S23E8:
-        return "SVGA3D_ARGB_S23E8";
-    case SVGA3D_A2R10G10B10:
-        return "SVGA3D_A2R10G10B10";
-    case SVGA3D_ALPHA8:
-        return "SVGA3D_ALPHA8";
-    case SVGA3D_R_S10E5:
-        return "SVGA3D_R_S10E5";
-    case SVGA3D_R_S23E8:
-        return "SVGA3D_R_S23E8";
-    case SVGA3D_RG_S10E5:
-        return "SVGA3D_RG_S10E5";
-    case SVGA3D_RG_S23E8:
-        return "SVGA3D_RG_S23E8";
-    case SVGA3D_BUFFER:
-        return "SVGA3D_BUFFER";
-    case SVGA3D_V16U16:
-        return "SVGA3D_V16U16";
-    case SVGA3D_G16R16:
-        return "SVGA3D_G16R16";
-    case SVGA3D_A16B16G16R16:
-        return "SVGA3D_A16B16G16R16";
-    case SVGA3D_UYVY:
-        return "SVGA3D_UYVY";
-    case SVGA3D_YUY2:
-        return "SVGA3D_YUY2";
-    case SVGA3D_NV12:
-        return "SVGA3D_NV12";
-    case SVGA3D_AYUV:
-        return "SVGA3D_AYUV";
-    case SVGA3D_BC4_UNORM:
-        return "SVGA3D_BC4_UNORM";
-    case SVGA3D_BC5_UNORM:
-        return "SVGA3D_BC5_UNORM";
-    }
-    return "UNKNOWN!!";
-}
-
 const char *vmsvga3dPrimitiveType2String(SVGA3dPrimitiveType PrimitiveType)
 {
     switch (PrimitiveType)
@@ -1121,3 +1048,4 @@ const char *vmsvga3dPrimitiveType2String(SVGA3dPrimitiveType PrimitiveType)
 }
 
 #endif /* LOG_ENABLED */
+

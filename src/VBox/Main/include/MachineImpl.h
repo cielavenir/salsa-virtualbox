@@ -756,7 +756,7 @@ public:
 
     void getLogFolder(Utf8Str &aLogFolder);
     Utf8Str queryLogFilename(ULONG idx);
-    Utf8Str i_getStartupLogFilename(void);
+    Utf8Str i_getHardeningLogFilename(void);
 
     void composeSavedStateFilename(Utf8Str &strStateFilePath);
 
@@ -1085,7 +1085,8 @@ public:
     STDMETHOD(PullGuestProperties)(ComSafeArrayOut(BSTR, aNames), ComSafeArrayOut(BSTR, aValues),
               ComSafeArrayOut(LONG64, aTimestamps), ComSafeArrayOut(BSTR, aFlags));
     STDMETHOD(PushGuestProperty)(IN_BSTR aName, IN_BSTR aValue,
-                                  LONG64 aTimestamp, IN_BSTR aFlags);
+                                 LONG64 aTimestamp, IN_BSTR aFlags,
+                                 BOOL *aNotify);
     STDMETHOD(LockMedia)();
     STDMETHOD(UnlockMedia)();
     STDMETHOD(EjectMedium)(IMediumAttachment *aAttachment,
