@@ -3,6 +3,8 @@ virtualbox (4.3.32-dfsg-1+deb8u1) jessie-security; urgency=medium
   [ Gianfranco Costamagna ]
   * New upstream security release.
     - Addressed CVE-2015-4813 and CVE-2015-4896
+  * Use my uid to fix NMU warning
+  * Remove pre-depends on dpkg, useless now.
 
   [ Ritesh Raj Sarraf ]
   * Move virtualbox-dkms | virtualbox-source to Depends,
