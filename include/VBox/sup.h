@@ -97,6 +97,8 @@ typedef enum SUPPAGINGMODE
  */
 /** GDT is read-only. */
 #define SUPKERNELFEATURES_GDT_READ_ONLY     RT_BIT(0)
+/** SMAP is possibly enabled. */
+#define SUPKERNELFEATURES_SMAP              RT_BIT(1)
 /** @} */
 
 
@@ -1429,13 +1431,33 @@ SUPR0DECL(int) SUPR0PageFree(PSUPDRVSESSION pSession, RTR3PTR pvR3);
 SUPR0DECL(int) SUPR0GipMap(PSUPDRVSESSION pSession, PRTR3PTR ppGipR3, PRTHCPHYS pHCPhysGip);
 SUPR0DECL(int) SUPR0QueryVTCaps(PSUPDRVSESSION pSession, uint32_t *pfCaps);
 SUPR0DECL(int) SUPR0GipUnmap(PSUPDRVSESSION pSession);
-SUPR0DECL(int) SUPR0Printf(const char *pszFormat, ...);
 SUPR0DECL(SUPPAGINGMODE) SUPR0GetPagingMode(void);
-SUPR0DECL(uint32_t) SUPR0GetKernelFeatures(void);
 SUPR0DECL(RTCCUINTREG) SUPR0ChangeCR4(RTCCUINTREG fOrMask, RTCCUINTREG fAndMask);
 SUPR0DECL(int) SUPR0EnableVTx(bool fEnable);
 SUPR0DECL(bool) SUPR0SuspendVTxOnCpu(void);
 SUPR0DECL(void) SUPR0ResumeVTxOnCpu(bool fSuspended);
+
+SUPR0DECL(void) SUPR0BadContext(PSUPDRVSESSION pSession, const char *pszFile, uint32_t uLine, const char *pszExpr);
+
+/**
+ * Writes to the debugger and/or kernel log.
+ *
+ * The length of the formatted message is somewhat limited, so keep things short
+ * and to the point.
+ *
+ * @returns Number of bytes written, mabye.
+ * @param   pszFormat       IPRT format string.
+ * @param   ...             Arguments referenced by the format string.
+ */
+SUPR0DECL(int)  SUPR0Printf(const char *pszFormat, ...);
+
+/**
+ * Returns configuration flags of the host kernel.
+ *
+ * @returns Combination of SUPKERNELFEATURES_XXX flags.
+ */
+SUPR0DECL(uint32_t) SUPR0GetKernelFeatures(void);
+
 
 /** @name Absolute symbols
  * Take the address of these, don't try call them.

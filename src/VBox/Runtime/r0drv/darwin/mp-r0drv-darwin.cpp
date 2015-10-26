@@ -48,6 +48,8 @@ static int32_t volatile g_cMaxCpus = -1;
 
 static int rtMpDarwinInitMaxCpus(void)
 {
+    IPRT_DARWIN_SAVE_EFL_AC();
+
     int32_t cCpus = -1;
     size_t  oldLen = sizeof(cCpus);
     int rc = sysctlbyname("hw.ncpu", &cCpus, &oldLen, NULL, NULL);
@@ -58,6 +60,8 @@ static int rtMpDarwinInitMaxCpus(void)
     }
 
     ASMAtomicWriteS32(&g_cMaxCpus, cCpus);
+
+    IPRT_DARWIN_RESTORE_EFL_AC();
     return cCpus;
 }
 
@@ -174,13 +178,16 @@ RTDECL(bool) RTMpIsCpuWorkPending(void)
 static void rtmpOnAllDarwinWrapper(void *pvArg)
 {
     PRTMPARGS pArgs = (PRTMPARGS)pvArg;
+    IPRT_DARWIN_SAVE_EFL_AC();
     pArgs->pfnWorker(cpu_number(), pArgs->pvUser1, pArgs->pvUser2);
+    IPRT_DARWIN_RESTORE_EFL_AC();
 }
 
 
 RTDECL(int) RTMpOnAll(PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
 {
     RT_ASSERT_INTS_ON();
+    IPRT_DARWIN_SAVE_EFL_AC();
 
     RTMPARGS Args;
     Args.pfnWorker = pfnWorker;
@@ -189,6 +196,8 @@ RTDECL(int) RTMpOnAll(PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
     Args.idCpu = NIL_RTCPUID;
     Args.cHits = 0;
     mp_rendezvous_no_intrs(rtmpOnAllDarwinWrapper, &Args);
+
+    IPRT_DARWIN_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 }
 
@@ -204,13 +213,18 @@ static void rtmpOnOthersDarwinWrapper(void *pvArg)
     PRTMPARGS pArgs = (PRTMPARGS)pvArg;
     RTCPUID idCpu = cpu_number();
     if (pArgs->idCpu != idCpu)
+    {
+        IPRT_DARWIN_SAVE_EFL_AC();
         pArgs->pfnWorker(idCpu, pArgs->pvUser1, pArgs->pvUser2);
+        IPRT_DARWIN_RESTORE_EFL_AC();
+    }
 }
 
 
 RTDECL(int) RTMpOnOthers(PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
 {
     RT_ASSERT_INTS_ON();
+    IPRT_DARWIN_SAVE_EFL_AC();
 
     int rc;
     RTMPARGS Args;
@@ -220,6 +234,8 @@ RTDECL(int) RTMpOnOthers(PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
     Args.idCpu = RTMpCpuId();
     Args.cHits = 0;
     mp_rendezvous_no_intrs(rtmpOnOthersDarwinWrapper, &Args);
+
+    IPRT_DARWIN_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 }
 
@@ -236,8 +252,10 @@ static void rtmpOnSpecificDarwinWrapper(void *pvArg)
     RTCPUID idCpu = cpu_number();
     if (pArgs->idCpu == idCpu)
     {
+        IPRT_DARWIN_SAVE_EFL_AC();
         pArgs->pfnWorker(idCpu, pArgs->pvUser1, pArgs->pvUser2);
         ASMAtomicIncU32(&pArgs->cHits);
+        IPRT_DARWIN_RESTORE_EFL_AC();
     }
 }
 
@@ -245,6 +263,7 @@ static void rtmpOnSpecificDarwinWrapper(void *pvArg)
 RTDECL(int) RTMpOnSpecific(RTCPUID idCpu, PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
 {
     RT_ASSERT_INTS_ON();
+    IPRT_DARWIN_SAVE_EFL_AC();
 
     int rc;
     RTMPARGS Args;
@@ -254,6 +273,8 @@ RTDECL(int) RTMpOnSpecific(RTCPUID idCpu, PFNRTMPWORKER pfnWorker, void *pvUser1
     Args.idCpu = idCpu;
     Args.cHits = 0;
     mp_rendezvous_no_intrs(rtmpOnSpecificDarwinWrapper, &Args);
+
+    IPRT_DARWIN_RESTORE_EFL_AC();
     return Args.cHits == 1
          ? VINF_SUCCESS
          : VERR_CPU_NOT_FOUND;
@@ -266,7 +287,9 @@ RTDECL(int) RTMpPokeCpu(RTCPUID idCpu)
 
     if (g_pfnR0DarwinCpuInterrupt == NULL)
         return VERR_NOT_SUPPORTED;
+    IPRT_DARWIN_SAVE_EFL_AC(); /* paranoia */
     g_pfnR0DarwinCpuInterrupt(idCpu);
+    IPRT_DARWIN_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 }
 

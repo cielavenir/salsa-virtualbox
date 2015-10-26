@@ -192,6 +192,7 @@ public:
     AudioSniffer *getAudioSniffer() const { return mAudioSniffer; }
 
     const ComPtr<IMachine> &machine() const { return mMachine; }
+    const Bstr &getId() const { return mstrUuid; }
 
     bool useHostClipboard() { return mfUseHostClipboard; }
 
@@ -956,6 +957,9 @@ private:
 
     /** Local machine state value. */
     MachineState_T mMachineState;
+
+    /** Machine uuid string. */
+    Bstr mstrUuid;
 
     /** Pointer to the progress object of a live cancelable task.
      *

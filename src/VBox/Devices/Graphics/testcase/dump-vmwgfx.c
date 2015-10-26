@@ -16,9 +16,9 @@
  */
 
 
-/*******************************************************************************
-*   Header Files                                                               *
-*******************************************************************************/
+/*********************************************************************************************************************************
+*   Header Files                                                                                                                 *
+*********************************************************************************************************************************/
 #include <assert.h>
 #include <dirent.h>
 #include <errno.h>
@@ -33,9 +33,9 @@
 #include <unistd.h>
 
 
-/*******************************************************************************
-*   Defined Constants And Macros                                               *
-*******************************************************************************/
+/*********************************************************************************************************************************
+*   Defined Constants And Macros                                                                                                 *
+*********************************************************************************************************************************/
 #define DRM_IOCTL_BASE              'd'
 #define DRM_COMMAND_BASE            0x40
 #define DRM_VMW_GET_PARAM           0
@@ -58,9 +58,9 @@
 #define DRM_VMW_PARAM_MAX_MOB_SIZE     10
 
 
-/*******************************************************************************
-*   Structures and Typedefs                                                    *
-*******************************************************************************/
+/*********************************************************************************************************************************
+*   Structures and Typedefs                                                                                                      *
+*********************************************************************************************************************************/
 struct drm_vmw_get_3d_cap_arg
 {
     uint64_t buffer;
@@ -79,7 +79,7 @@ struct SVGA3dCapsRecord
 {
     /* Skipped if DRM_VMW_PARAM_MAX_MOB_MEMORY is read. */
     struct SVGA3dCapsRecordHeader header;
-    uint32_t data[1];    
+    uint32_t data[1];
 };
 
 struct drm_vmw_getparam_arg
@@ -98,9 +98,9 @@ typedef struct FLAGDESC
 typedef FLAGDESC const *PCFLAGDESC;
 
 
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
+/*********************************************************************************************************************************
+*   Global Variables                                                                                                             *
+*********************************************************************************************************************************/
 /** The size of the 3D capabilities. */
 static uint32_t     g_cb3dCaps;
 /** Set if the driver will return the new 3D capability format. */
@@ -340,7 +340,7 @@ static int QueryParam(int fd, uint32_t uParam, const char *pszParam)
         }
     }
     else
-        printf("%32s: failed: rc=%d errno=%d (%s)\n", pszParam, rc, errno, strerror(errno));    
+        printf("%32s: failed: rc=%d errno=%d (%s)\n", pszParam, rc, errno, strerror(errno));
     return rc;
 }
 
@@ -595,7 +595,7 @@ int main(int argc, char **argv)
     const char *pszDev = "/dev/dri/card0";
     if (argc == 2)
         pszDev = argv[1];
-    
+
     int fd = open(pszDev, O_RDWR);
     if (fd != -1)
     {
@@ -606,7 +606,7 @@ int main(int argc, char **argv)
          * Parameters.
          */
         rcExit = Dump3DParameters(fd, rcExit);
-    
+
         /*
          * 3D capabilities.
          */
@@ -624,6 +624,6 @@ int main(int argc, char **argv)
         fprintf(stderr, "error opening '%s': %d\n", pszDev, errno);
         rcExit = 1;
     }
-    
+
     return rcExit;
 }

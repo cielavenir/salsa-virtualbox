@@ -165,6 +165,7 @@ static void rtThreadNativeMain(void *pvArg, wait_result_t Ignored)
 DECLHIDDEN(int) rtThreadNativeCreate(PRTTHREADINT pThreadInt, PRTNATIVETHREAD pNativeThread)
 {
     RT_ASSERT_PREEMPTIBLE();
+    IPRT_DARWIN_SAVE_EFL_AC();
 
     thread_t NativeThread;
     kern_return_t kr = kernel_thread_start(rtThreadNativeMain, pThreadInt, &NativeThread);
@@ -172,8 +173,10 @@ DECLHIDDEN(int) rtThreadNativeCreate(PRTTHREADINT pThreadInt, PRTNATIVETHREAD pN
     {
         *pNativeThread = (RTNATIVETHREAD)NativeThread;
         thread_deallocate(NativeThread);
+        IPRT_DARWIN_RESTORE_EFL_AC();
         return VINF_SUCCESS;
     }
+    IPRT_DARWIN_RESTORE_EFL_AC();
     return RTErrConvertFromMachKernReturn(kr);
 }
 

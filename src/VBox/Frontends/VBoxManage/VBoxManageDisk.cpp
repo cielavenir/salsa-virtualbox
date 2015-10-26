@@ -597,8 +597,10 @@ int handleModifyHardDisk(HandlerArg *a)
                 RTMsgError("Resize hard disk operation is not implemented!");
             else if (rc == VBOX_E_NOT_SUPPORTED)
                 RTMsgError("Resize hard disk operation for this format is not implemented yet!");
+            else if (!progress.isNull())
+                CHECK_PROGRESS_ERROR(progress, ("Failed to resize medium"));
             else
-                CHECK_PROGRESS_ERROR(progress, ("Failed to resize hard disk"));
+                RTMsgError("Failed to resize medium!");
         }
     }
 

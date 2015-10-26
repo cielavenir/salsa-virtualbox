@@ -2201,7 +2201,7 @@ int vgaR3UpdateDisplay(VGAState *s, unsigned xStart, unsigned yStart, unsigned w
  * graphic modes
  */
 static int vmsvga_draw_graphic(PVGASTATE pThis, bool full_update, bool fFailOnResize, bool reset_dirty,
-                PDMIDISPLAYCONNECTOR *pDrv)
+                               PDMIDISPLAYCONNECTOR *pDrv)
 {
     int y, page_min, page_max, linesize, y_start;
     int width, height, page0, page1, bwidth, bits;
@@ -2211,8 +2211,11 @@ static int vmsvga_draw_graphic(PVGASTATE pThis, bool full_update, bool fFailOnRe
     vga_draw_line_func *vga_draw_line;
 
     if (    pThis->svga.uWidth  == VMSVGA_VAL_UNINITIALIZED
+        ||  pThis->svga.uWidth  == 0
         ||  pThis->svga.uHeight == VMSVGA_VAL_UNINITIALIZED
-        ||  pThis->svga.uBpp    == VMSVGA_VAL_UNINITIALIZED)
+        ||  pThis->svga.uHeight == 0
+        ||  pThis->svga.uBpp    == VMSVGA_VAL_UNINITIALIZED
+        ||  pThis->svga.uBpp    == 0)
     {
         /* Intermediate state; skip redraws. */
         return VINF_SUCCESS;
@@ -4161,10 +4164,9 @@ static DECLCALLBACK(void) vgaInfoState(PPDMDEVINS pDevIns, PCDBGFINFOHLP pHlp, c
     pHlp->pfnPrintf(pHlp, "display refresh interval: %u ms\n", pThis->cMilliesRefreshInterval);
 
 #ifdef VBOX_WITH_VMSVGA
-    if (pThis->svga.fEnabled) {
+    if (pThis->svga.fEnabled)
         pHlp->pfnPrintf(pHlp, pThis->svga.f3DEnabled ? "VMSVGA 3D enabled: %ux%ux%u\n" : "VMSVGA enabled: %ux%ux%u",
                         pThis->svga.uWidth, pThis->svga.uHeight, pThis->svga.uBpp);
-    }
 #endif
 }
 
@@ -6064,7 +6066,9 @@ static DECLCALLBACK(int)   vgaR3Construct(PPDMDEVINS pDevIns, int iInstance, PCF
     pThis->IPort.pfnCopyRect            = vgaPortCopyRect;
     pThis->IPort.pfnSetRenderVRAM       = vgaPortSetRenderVRAM;
 #ifdef VBOX_WITH_VMSVGA
-    pThis->IPort.pfnSetViewPort         = vmsvgaPortSetViewPort;
+    pThis->IPort.pfnSetViewport         = vmsvgaPortSetViewport;
+#else
+    pThis->IPort.pfnSetViewport         = NULL;
 #endif
     pThis->IPort.pfnSendModeHint        = vbvaPortSendModeHint;
     pThis->IPort.pfnReportHostCursorCapabilities

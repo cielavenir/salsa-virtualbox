@@ -200,6 +200,7 @@ static void rtmpLinuxWrapper(void *pvInfo)
 
 RTDECL(int) RTMpOnAll(PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
 {
+    IPRT_LINUX_SAVE_EFL_AC();
     int rc;
     RTMPARGS Args;
 
@@ -225,6 +226,8 @@ RTDECL(int) RTMpOnAll(PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
     RTThreadPreemptRestore(&PreemptState);
 #endif /* older kernels */
     Assert(rc == 0); NOREF(rc);
+
+    IPRT_LINUX_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 }
 RT_EXPORT_SYMBOL(RTMpOnAll);
@@ -232,6 +235,7 @@ RT_EXPORT_SYMBOL(RTMpOnAll);
 
 RTDECL(int) RTMpOnOthers(PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
 {
+    IPRT_LINUX_SAVE_EFL_AC();
     int rc;
     RTMPARGS Args;
 
@@ -251,6 +255,7 @@ RTDECL(int) RTMpOnOthers(PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
     RTThreadPreemptRestore(&PreemptState);
 
     Assert(rc == 0); NOREF(rc);
+    IPRT_LINUX_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 }
 RT_EXPORT_SYMBOL(RTMpOnOthers);
@@ -279,6 +284,7 @@ static void rtmpOnSpecificLinuxWrapper(void *pvInfo)
 
 RTDECL(int) RTMpOnSpecific(RTCPUID idCpu, PFNRTMPWORKER pfnWorker, void *pvUser1, void *pvUser2)
 {
+    IPRT_LINUX_SAVE_EFL_AC();
     int rc;
     RTMPARGS Args;
 
@@ -318,6 +324,7 @@ RTDECL(int) RTMpOnSpecific(RTCPUID idCpu, PFNRTMPWORKER pfnWorker, void *pvUser1
     RTThreadPreemptRestore(&PreemptState);;
 
     NOREF(rc);
+    IPRT_LINUX_RESTORE_EFL_AC();
     return rc;
 }
 RT_EXPORT_SYMBOL(RTMpOnSpecific);
@@ -340,6 +347,7 @@ RTDECL(int) RTMpPokeCpu(RTCPUID idCpu)
 {
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 19)
     int rc;
+    IPRT_LINUX_SAVE_EFL_AC();
 
     if (!RTMpIsCpuPossible(idCpu))
         return VERR_CPU_NOT_FOUND;
@@ -355,6 +363,7 @@ RTDECL(int) RTMpPokeCpu(RTCPUID idCpu)
 # endif /* older kernels */
     NOREF(rc);
     Assert(rc == 0);
+    IPRT_LINUX_RESTORE_EFL_AC();
     return VINF_SUCCESS;
 
 #else  /* older kernels */

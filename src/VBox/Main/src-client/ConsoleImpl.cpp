@@ -302,7 +302,7 @@ public:
     {
     }
 
-    STDMETHOD(HandleEvent)(VBoxEventType_T aType, IEvent * aEvent)
+    STDMETHOD(HandleEvent)(VBoxEventType_T aType, IEvent *aEvent)
     {
         switch(aType)
         {
@@ -314,12 +314,9 @@ public:
                 HRESULT rc = E_FAIL;
                 Assert(pNREv);
 
-                Bstr interestedId;
-                rc = pMachine->COMGETTER(Id)(interestedId.asOutParam());
-                AssertComRC(rc);
                 rc = pNREv->COMGETTER(MachineId)(id.asOutParam());
                 AssertComRC(rc);
-                if (id != interestedId)
+                if (id != mConsole->getId())
                     break;
                 /* now we can operate with redirects */
                 NATProtocol_T proto;
@@ -378,6 +375,7 @@ public:
             default:
               AssertFailed();
         }
+
         return S_OK;
     }
 private:
@@ -504,6 +502,9 @@ HRESULT Console::init(IMachine *aMachine, IInternalMachineControl *aControl, Loc
     /* Cache essential properties and objects, and create child objects */
 
     rc = mMachine->COMGETTER(State)(&mMachineState);
+    AssertComRCReturnRC(rc);
+
+    rc = mMachine->COMGETTER(Id)(mstrUuid.asOutParam());
     AssertComRCReturnRC(rc);
 
 #ifdef VBOX_WITH_EXTPACK
@@ -1094,14 +1095,10 @@ int Console::VRDPClientLogon(uint32_t u32ClientId, const char *pszUser, const ch
         return VERR_ACCESS_DENIED;
     }
 
-    Bstr id;
-    HRESULT hrc = mMachine->COMGETTER(Id)(id.asOutParam());
-    Guid uuid = Guid(id);
-
-    AssertComRCReturn(hrc, VERR_ACCESS_DENIED);
+    Guid uuid = Guid(getId());
 
     AuthType_T authType = AuthType_Null;
-    hrc = mVRDEServer->COMGETTER(AuthType)(&authType);
+    HRESULT hrc = mVRDEServer->COMGETTER(AuthType)(&authType);
     AssertComRCReturn(hrc, VERR_ACCESS_DENIED);
 
     ULONG authTimeout = 0;
@@ -1443,16 +1440,12 @@ void Console::VRDPClientDisconnect(uint32_t u32ClientId,
         }
     }
 
-    Bstr uuid;
-    HRESULT hrc = mMachine->COMGETTER(Id)(uuid.asOutParam());
-    AssertComRC(hrc);
-
     AuthType_T authType = AuthType_Null;
-    hrc = mVRDEServer->COMGETTER(AuthType)(&authType);
+    HRESULT hrc = mVRDEServer->COMGETTER(AuthType)(&authType);
     AssertComRC(hrc);
 
     if (authType == AuthType_External)
-        mConsoleVRDPServer->AuthDisconnect(uuid, u32ClientId);
+        mConsoleVRDPServer->AuthDisconnect(getId(), u32ClientId);
 
 #ifdef VBOX_WITH_GUEST_PROPS
     guestPropertiesVRDPUpdateDisconnect(u32ClientId);
@@ -1787,10 +1780,12 @@ DECLCALLBACK(int) Console::doGuestPropNotification(void *pvExtension,
     Bstr value(pCBData->pcszValue);
     Bstr flags(pCBData->pcszFlags);
     ComObjPtr<Console> pConsole = reinterpret_cast<Console *>(pvExtension);
+    BOOL fNotify = FALSE;
     HRESULT hrc = pConsole->mControl->PushGuestProperty(name.raw(),
                                                         value.raw(),
                                                         pCBData->u64Timestamp,
-                                                        flags.raw());
+                                                        flags.raw(),
+                                                        &fNotify);
     if (SUCCEEDED(hrc))
         rc = VINF_SUCCESS;
     else
@@ -1799,6 +1794,8 @@ DECLCALLBACK(int) Console::doGuestPropNotification(void *pvExtension,
                  hrc, pCBData->pcszName, pCBData->pcszValue, pCBData->pcszFlags));
         rc = Global::vboxStatusCodeFromCOM(hrc);
     }
+    if (fNotify)
+        fireGuestPropertyChangedEvent(pConsole->mEventSource, pConsole->getId().raw(), name.raw(), value.raw(), flags.raw());
     return rc;
 }
 
@@ -2440,7 +2437,7 @@ HRESULT Console::doCPURemove(ULONG aCpu, PUVM pUVM)
         vrc = VMR3ReqCallU(pUVM, 0, &pReq, 0 /* no wait! */, VMREQFLAGS_VBOX_STATUS,
                            (PFNRT)unplugCpu, 3,
                            this, pUVM, (VMCPUID)aCpu);
-    
+
         /* release the lock before a VMR3* call (EMT might wait for it, @bugref{7648})! */
         alock.release();
 
@@ -3548,7 +3545,7 @@ HRESULT Console::convertBusPortDeviceToLun(StorageBus_T enmBus, LONG port, LONG 
 
 // private methods
 /////////////////////////////////////////////////////////////////////////////
-    
+
 /**
  * Suspend the VM before we do any medium or network attachment change.
  *
@@ -5753,10 +5750,8 @@ HRESULT Console::onExtraDataChange(IN_BSTR aMachineId, IN_BSTR aKey, IN_BSTR aVa
 
     HRESULT hrc = S_OK;
     Bstr idMachine(aMachineId);
-    Bstr idSelf;
-    hrc = mMachine->COMGETTER(Id)(idSelf.asOutParam());
     if (   FAILED(hrc)
-        || idMachine != idSelf)
+        || idMachine != getId())
         return hrc;
 
     /* don't do anything if the VM isn't running */
@@ -7188,7 +7183,7 @@ HRESULT Console::powerUp(IProgress **aProgress, bool aPaused)
                 throw rc;
         }
 
-        if (!fCurrentSnapshotIsOnline)
+        if (savedStateFile.isEmpty() && !fCurrentSnapshotIsOnline)
         {
             LogFlowThisFunc(("Looking for immutable images to reset\n"));
 

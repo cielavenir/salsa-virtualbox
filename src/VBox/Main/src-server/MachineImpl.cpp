@@ -5804,8 +5804,9 @@ HRESULT Machine::deleteTaskWorker(DeleteTask &task)
                     RTFileDelete(log.c_str());
                 }
 #if defined(RT_OS_WINDOWS)
-                log = Utf8StrFmt("%s%cVBoxStartup.log",
-                                 logFolder.c_str(), RTPATH_DELIMITER);
+                log = Utf8StrFmt("%s%cVBoxStartup.log", logFolder.c_str(), RTPATH_DELIMITER);
+                RTFileDelete(log.c_str());
+                log = Utf8StrFmt("%s%cVBoxHardening.log", logFolder.c_str(), RTPATH_DELIMITER);
                 RTFileDelete(log.c_str());
 #endif
 
@@ -7915,14 +7916,14 @@ Utf8Str Machine::queryLogFilename(ULONG idx)
 }
 
 /**
- * Returns the full path to the machine's (hardened) startup log file.
+ * Returns the full path to the machine's hardened log file.
  */
-Utf8Str Machine::i_getStartupLogFilename(void)
+Utf8Str Machine::i_getHardeningLogFilename(void)
 {
     Utf8Str strFilename;
     getLogFolder(strFilename);
     Assert(strFilename.length());
-    strFilename.append(RTPATH_SLASH_STR "VBoxStartup.log");
+    strFilename.append(RTPATH_SLASH_STR "VBoxHardening.log");
     return strFilename;
 }
 
@@ -8093,23 +8094,29 @@ HRESULT Machine::launchVMProcess(IInternalSessionControl *aControl,
             RTStrFree(newEnvStr);
     }
 
-    /* Hardened startup logging */
+    /* Hardening logging */
 #if defined(RT_OS_WINDOWS) && defined(VBOX_WITH_HARDENING)
-    Utf8Str strSupStartLogArg("--sup-startup-log=");
+    Utf8Str strSupHardeningLogArg("--sup-hardening-log=");
     {
-        Utf8Str strStartupLogFile = i_getStartupLogFilename();
-        int vrc2 = RTFileDelete(strStartupLogFile.c_str());
+        Utf8Str strHardeningLogFile = i_getHardeningLogFilename();
+        int vrc2 = RTFileDelete(strHardeningLogFile.c_str());
         if (vrc2 == VERR_PATH_NOT_FOUND || vrc2 == VERR_FILE_NOT_FOUND)
         {
-            Utf8Str strStartupLogDir = strStartupLogFile;
+            Utf8Str strStartupLogDir = strHardeningLogFile;
             strStartupLogDir.stripFilename();
             RTDirCreateFullPath(strStartupLogDir.c_str(), 0755); /** @todo add a variant for creating the path to a file without stripping the file. */
         }
-        strSupStartLogArg.append(strStartupLogFile);
+        strSupHardeningLogArg.append(strHardeningLogFile);
+
+        /* Remove legacy log filename to avoid confusion. */
+        Utf8Str strOldStartupLogFile;
+        getLogFolder(strOldStartupLogFile);
+        strOldStartupLogFile.append(RTPATH_SLASH_STR "VBoxStartup.log");
+        RTFileDelete(strOldStartupLogFile.c_str());
     }
-    const char *pszSupStartupLogArg = strSupStartLogArg.c_str();
+    const char *pszSupHardeningLogArg = strSupHardeningLogArg.c_str();
 #else
-    const char *pszSupStartupLogArg = NULL;
+    const char *pszSupHardeningLogArg = NULL;
 #endif
 
 
@@ -8160,7 +8167,7 @@ HRESULT Machine::launchVMProcess(IInternalSessionControl *aControl,
             "--comment", mUserData->s.strName.c_str(),
             "--startvm", idStr.c_str(),
             "--no-startvm-errormsgbox",
-            pszSupStartupLogArg,
+            pszSupHardeningLogArg,
             NULL
         };
         vrc = RTProcCreate(szPath, apszArgs, env, 0, &pid);
@@ -8185,7 +8192,7 @@ HRESULT Machine::launchVMProcess(IInternalSessionControl *aControl,
             szPath,
             "--comment", mUserData->s.strName.c_str(),
             "--startvm", idStr.c_str(),
-            pszSupStartupLogArg,
+            pszSupHardeningLogArg,
             NULL
         };
         vrc = RTProcCreate(szPath, apszArgs, env, 0, &pid);
@@ -8222,13 +8229,13 @@ HRESULT Machine::launchVMProcess(IInternalSessionControl *aControl,
             "--startvm", idStr.c_str(),
             "--vrde", "config",
             0, /* For "--capture". */
-            0, /* For "--sup-startup-log". */
+            0, /* For "--sup-hardening-log". */
             0
         };
         unsigned iArg = 7;
         if (strFrontend == "capture")
             apszArgs[iArg++] = "--capture";
-        apszArgs[iArg++] = pszSupStartupLogArg;
+        apszArgs[iArg++] = pszSupHardeningLogArg;
 
 # ifdef RT_OS_WINDOWS
         vrc = RTProcCreate(szPath, apszArgs, env, RTPROC_FLAGS_NO_WINDOW, &pid);
@@ -8417,11 +8424,11 @@ bool Machine::checkForSpawnFailure()
         /* If the startup logfile exists and is of non-zero length, tell the
            user to look there for more details to encourage them to attach it
            when reporting startup issues. */
-        Utf8Str strStartupLogFile = i_getStartupLogFilename();
+        Utf8Str strHardeningLogFile = i_getHardeningLogFilename();
         uint64_t cbStartupLogFile = 0;
-        int vrc2 = RTFileQuerySize(strStartupLogFile.c_str(), &cbStartupLogFile);
+        int vrc2 = RTFileQuerySize(strHardeningLogFile.c_str(), &cbStartupLogFile);
         if (RT_SUCCESS(vrc2) && cbStartupLogFile > 0)
-            strExtraInfo.append(Utf8StrFmt(tr(".  More details may be available in '%s'"), strStartupLogFile.c_str()));
+            strExtraInfo.append(Utf8StrFmt(tr(".  More details may be available in '%s'"), strHardeningLogFile.c_str()));
 #endif
 
         if (RT_SUCCESS(vrc) && status.enmReason == RTPROCEXITREASON_NORMAL)
@@ -13893,7 +13900,8 @@ STDMETHODIMP SessionMachine::PullGuestProperties(ComSafeArrayOut(BSTR, aNames),
 STDMETHODIMP SessionMachine::PushGuestProperty(IN_BSTR aName,
                                                IN_BSTR aValue,
                                                LONG64 aTimestamp,
-                                               IN_BSTR aFlags)
+                                               IN_BSTR aFlags,
+                                               BOOL *aNotify)
 {
     LogFlowThisFunc(("\n"));
 
@@ -13903,6 +13911,8 @@ STDMETHODIMP SessionMachine::PushGuestProperty(IN_BSTR aName,
     CheckComArgStrNotEmptyOrNull(aName);
     CheckComArgNotNull(aValue);
     CheckComArgNotNull(aFlags);
+
+    *aNotify = FALSE;
 
     try
     {
@@ -13989,6 +13999,7 @@ STDMETHODIMP SessionMachine::PushGuestProperty(IN_BSTR aName,
                                            aName,
                                            aValue,
                                            aFlags);
+            *aNotify = TRUE;
         }
     }
     catch (...)
