@@ -1614,6 +1614,10 @@
 #define VERR_SUPDRV_CSRSS_NOT_FOUND                 (-3741)
 /** Type error opening the ApiPort LPC object. */
 #define VERR_SUPDRV_APIPORT_OPEN_ERROR_TYPE         (-3742)
+/** The process trying to open VBoxDrv is not a budding VM process (1). */
+#define VERR_SUPDRV_NOT_BUDDING_VM_PROCESS_1          (-3748)
+/** The process trying to open VBoxDrv is not a budding VM process (2). */
+#define VERR_SUPDRV_NOT_BUDDING_VM_PROCESS_2          (-3748)
 /** @} */
 
 

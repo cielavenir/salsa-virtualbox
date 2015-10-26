@@ -4533,60 +4533,128 @@ DECLINLINE(void) ataPIOTransferFinish(PATACONTROLLER pCtl, ATADevState *s)
 
 #endif /* IN_RING3 */
 
-static int ataDataWrite(PATACONTROLLER pCtl, uint32_t addr, uint32_t cbSize, const uint8_t *pbBuf)
+/**
+ * Fallback for ataCopyPioData124 that handles unaligned and out of bounds cases.
+ *
+ * @param   pIf         The device interface to work with.
+ * @param   pbDst       The destination buffer.
+ * @param   pbSrc       The source buffer.
+ * @param   cbCopy      The number of bytes to copy, either 1, 2 or 4 bytes.
+ */
+DECL_NO_INLINE(static, void) ataCopyPioData124Slow(ATADevState *pIf, uint8_t *pbDst, const uint8_t *pbSrc, uint32_t cbCopy)
+{
+    uint32_t const offStart = pIf->iIOBufferPIODataStart;
+    uint32_t const offNext  = offStart + cbCopy;
+
+    if (offStart + cbCopy > pIf->cbIOBuffer)
+    {
+        Log(("%s: cbCopy=%#x offStart=%#x cbIOBuffer=%#x offNext=%#x (iIOBufferPIODataEnd=%#x)\n",
+             __FUNCTION__, cbCopy, offStart, pIf->cbIOBuffer, offNext, pIf->iIOBufferPIODataEnd));
+        if (offStart < pIf->cbIOBuffer)
+            cbCopy = pIf->cbIOBuffer - offStart;
+        else
+            cbCopy = 0;
+    }
+
+    switch (cbCopy)
+    {
+        case 4: pbDst[3] = pbSrc[3]; /* fall thru */
+        case 3: pbDst[2] = pbSrc[2]; /* fall thru */
+        case 2: pbDst[1] = pbSrc[1]; /* fall thru */
+        case 1: pbDst[0] = pbSrc[0]; /* fall thru */
+        case 0: break;
+        default: AssertFailed(); /* impossible */
+    }
+
+    pIf->iIOBufferPIODataStart = offNext;
+
+}
+
+
+/**
+ * Work for ataDataWrite & ataDataRead that copies data without using memcpy.
+ *
+ * This also updates pIf->iIOBufferPIODataStart.
+ *
+ * The two buffers are either stack (32-bit aligned) or somewhere within
+ * pIf->pbIOBuffer.
+ *
+ * @param   pIf         The device interface to work with.
+ * @param   pbDst       The destination buffer.
+ * @param   pbSrc       The source buffer.
+ * @param   cbCopy      The number of bytes to copy, either 1, 2 or 4 bytes.
+ */
+DECLINLINE(void) ataCopyPioData124(ATADevState *pIf, uint8_t *pbDst, const uint8_t *pbSrc, uint32_t cbCopy)
+{
+    /*
+     * Quick bounds checking can be done by checking that the pbIOBuffer offset
+     * (iIOBufferPIODataStart) is aligned at the transfer size (which is ASSUMED
+     * to be 1, 2 or 4).  However, since we're paranoid and don't currently
+     * trust iIOBufferPIODataEnd to be within bounds, we current check against the
+     * IO buffer size too.
+     */
+    Assert(cbCopy == 1 || cbCopy == 2 || cbCopy == 4);
+    uint32_t const offStart = pIf->iIOBufferPIODataStart;
+    if (RT_LIKELY(   !(offStart & (cbCopy - 1))
+                  && offStart + cbCopy <= pIf->cbIOBuffer))
+    {
+        switch (cbCopy)
+        {
+            case 4: *(uint32_t *)pbDst = *(uint32_t const *)pbSrc; break;
+            case 2: *(uint16_t *)pbDst = *(uint16_t const *)pbSrc; break;
+            case 1: *pbDst = *pbSrc; break;
+        }
+        pIf->iIOBufferPIODataStart = offStart + cbCopy;
+    }
+    else
+        ataCopyPioData124Slow(pIf, pbDst, pbSrc, cbCopy);
+}
+
+static int ataDataWrite(PATACONTROLLER pCtl, uint32_t addr, uint32_t cbSize, const uint8_t *pbSrc)
 {
     ATADevState *s = &pCtl->aIfs[pCtl->iSelectedIf];
-    uint8_t *p;
 
     if (s->iIOBufferPIODataStart < s->iIOBufferPIODataEnd)
     {
+        uint8_t *pbDst = s->CTX_SUFF(pbIOBuffer) + s->iIOBufferPIODataStart;
+
         Assert(s->uTxDir == PDMBLOCKTXDIR_TO_DEVICE);
-        p = s->CTX_SUFF(pbIOBuffer) + s->iIOBufferPIODataStart;
 #ifndef IN_RING3
         /* All but the last transfer unit is simple enough for GC, but
          * sending a request to the async IO thread is too complicated. */
         if (s->iIOBufferPIODataStart + cbSize < s->iIOBufferPIODataEnd)
-        {
-            memcpy(p, pbBuf, cbSize);
-            s->iIOBufferPIODataStart += cbSize;
-        }
+            ataCopyPioData124(s, pbDst, pbSrc, cbSize);
         else
             return VINF_IOM_HC_IOPORT_WRITE;
 #else /* IN_RING3 */
-        memcpy(p, pbBuf, cbSize);
-        s->iIOBufferPIODataStart += cbSize;
+        ataCopyPioData124(s, pbDst, pbSrc, cbSize);
         if (s->iIOBufferPIODataStart >= s->iIOBufferPIODataEnd)
             ataPIOTransferFinish(pCtl, s);
 #endif /* !IN_RING3 */
     }
     else
         Log2(("%s: DUMMY data\n", __FUNCTION__));
-    Log3(("%s: addr=%#x val=%.*Rhxs\n", __FUNCTION__, addr, cbSize, pbBuf));
+    Log3(("%s: addr=%#x val=%.*Rhxs\n", __FUNCTION__, addr, cbSize, pbSrc));
     return VINF_SUCCESS;
 }
 
-static int ataDataRead(PATACONTROLLER pCtl, uint32_t addr, uint32_t cbSize, uint8_t *pbBuf)
+static int ataDataRead(PATACONTROLLER pCtl, uint32_t addr, uint32_t cbSize, uint8_t *pbDst)
 {
     ATADevState *s = &pCtl->aIfs[pCtl->iSelectedIf];
-    uint8_t *p;
 
     if (s->iIOBufferPIODataStart < s->iIOBufferPIODataEnd)
     {
         Assert(s->uTxDir == PDMBLOCKTXDIR_FROM_DEVICE);
-        p = s->CTX_SUFF(pbIOBuffer) + s->iIOBufferPIODataStart;
+        uint8_t const *pbSrc = s->CTX_SUFF(pbIOBuffer) + s->iIOBufferPIODataStart;
 #ifndef IN_RING3
         /* All but the last transfer unit is simple enough for GC, but
          * sending a request to the async IO thread is too complicated. */
         if (s->iIOBufferPIODataStart + cbSize < s->iIOBufferPIODataEnd)
-        {
-            memcpy(pbBuf, p, cbSize);
-            s->iIOBufferPIODataStart += cbSize;
-        }
+            ataCopyPioData124(s, pbDst, pbSrc, cbSize);
         else
             return VINF_IOM_HC_IOPORT_READ;
 #else /* IN_RING3 */
-        memcpy(pbBuf, p, cbSize);
-        s->iIOBufferPIODataStart += cbSize;
+        ataCopyPioData124(s, pbDst, pbSrc, cbSize);
         if (s->iIOBufferPIODataStart >= s->iIOBufferPIODataEnd)
             ataPIOTransferFinish(pCtl, s);
 #endif /* !IN_RING3 */
@@ -4594,9 +4662,9 @@ static int ataDataRead(PATACONTROLLER pCtl, uint32_t addr, uint32_t cbSize, uint
     else
     {
         Log2(("%s: DUMMY data\n", __FUNCTION__));
-        memset(pbBuf, '\xff', cbSize);
+        memset(pbDst, '\xff', cbSize);
     }
-    Log3(("%s: addr=%#x val=%.*Rhxs\n", __FUNCTION__, addr, cbSize, pbBuf));
+    Log3(("%s: addr=%#x val=%.*Rhxs\n", __FUNCTION__, addr, cbSize, pbDst));
     return VINF_SUCCESS;
 }
 

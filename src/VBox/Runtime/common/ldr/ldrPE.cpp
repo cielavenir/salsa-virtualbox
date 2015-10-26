@@ -3477,7 +3477,7 @@ static int rtldrPEValidateDirectoriesAndRememberStuff(PRTLDRMODPE pModPe, const 
                 Log(("rtldrPEOpen: %s: load cfg dir: Header (%d) and directory (%d) size mismatch, applying the ATI kludge\n",
                      pszLogName, u.Cfg64.Size, Dir.Size));
                 Dir.Size = u.Cfg64.Size;
-                memset(&u.Cfg64, 0, sizeof(u.Cfg64));
+                RT_ZERO(u.Cfg64);
                 rc = rtldrPEReadRVA(pModPe, &u.Cfg64, Dir.Size, Dir.VirtualAddress);
                 if (RT_FAILURE(rc))
                     return rc;
@@ -3487,7 +3487,21 @@ static int rtldrPEValidateDirectoriesAndRememberStuff(PRTLDRMODPE pModPe, const 
             /* Kludge #2, ntdll.dll from XP seen with Dir.Size=0x40 and Cfg64.Size=0x00. */
             if (Dir.Size == 0x40 && u.Cfg64.Size == 0x00 && !pModPe->f64Bit)
             {
+                Log(("rtldrPEOpen: %s: load cfg dir: Header (%d) and directory (%d) size mismatch, applying the XP kludge\n",
+                     pszLogName, u.Cfg64.Size, Dir.Size));
                 u.Cfg64.Size = 0x40;
+            }
+
+            /* Kludge #3, imagehlp.dll from W10/32 seen with Dir.Size=0x40 (V1) and Cfg64.Size=0x68 (V3). */
+            if (Dir.Size == 0x40 && u.Cfg64.Size == 0x68 && !pModPe->f64Bit)
+            {
+                Log(("rtldrPEOpen: %s: load cfg dir: Header (%d) and directory (%d) size mismatch, applying the W10/32 kludge\n",
+                     pszLogName, u.Cfg64.Size, Dir.Size));
+                Dir.Size = u.Cfg64.Size;
+                RT_ZERO(u.Cfg64);
+                rc = rtldrPEReadRVA(pModPe, &u.Cfg64, Dir.Size, Dir.VirtualAddress);
+                if (RT_FAILURE(rc))
+                    return rc;
                 rtldrPEConvert32BitLoadConfigTo64Bit(&u.Cfg64);
             }
 
@@ -3597,10 +3611,9 @@ static int rtldrPEValidateDirectoriesAndRememberStuff(PRTLDRMODPE pModPe, const 
             } while (off < Dir.Size);
         }
         RTMemTmpFree(pFirst);
-        if (RT_FAILURE(rc))
+        if (RT_FAILURE(rc) && !(fFlags & RTLDR_O_FOR_DEBUG))
             return rc;
     }
-
 
     return VINF_SUCCESS;
 }

@@ -93,7 +93,6 @@ WITH_VNC=0
 WITH_EXTPACK=1
 WITH_DOCS=1
 BUILD_LIBXML2=
-BUILD_LIBCURL=
 BUILD_LIBSSL=
 PASSIVE_MESA=0
 CC="gcc"
@@ -129,15 +128,11 @@ INCVNCSERVER=""
 LIBVNCSERVER="-lvncserver"
 CXX_FLAGS=""
 if [ "$OS" = "freebsd" ]; then
-  INCCURL="-I/usr/local/include"
-  LIBCURL="-L/usr/local/lib -lcurl"
   INCPULSE="-I/usr/local/include"
   LIBPULSE="-L/usr/local/lib"
   INCPNG="-I/usr/local/include"
   LIBPNG="-L/usr/local/lib -lpng"
 else
-  INCCURL=""
-  LIBCURL="-lcurl"
   INCPNG=""
   LIBPNG="-lpng"
 fi
@@ -915,38 +910,6 @@ EOF
   if test_compile "$LIBVNCSERVER $INCVNCSERVER" libvncserver libvncserver; then
     if test_execute; then
       cnf_append "VBOX_WITH_VNC" "1"
-    fi
-  fi
-}
-
-#
-# Check for libcurl, needed by S3
-#
-check_curl()
-{
-  if [ -z "$BUILD_LIBCURL" ]; then
-    test_header libcurl
-    cat > $ODIR.tmp_src.cc << EOF
-#include <cstdio>
-#include <curl/curl.h>
-extern "C" int main(void)
-{
-  printf("found version %s", LIBCURL_VERSION);
-#if 10000*LIBCURL_VERSION_MAJOR + 100*LIBCURL_VERSION_MINOR + LIBCURL_VERSION_PATCH >= 71601
-  printf(", OK.\n");
-  return 0;
-#else
-  printf(", expected version 7.16.1 or higher\n");
-  return 1;
-#endif
-}
-EOF
-    [ -n "$INCCURL" ] && I_INCCURL=`prefix_I "$INCCURL"`
-    if test_compile "$LIBCURL $I_INCCURL" libcurl libcurl; then
-      if test_execute; then
-        cnf_append "SDK_VBOX_LIBCURL_LIBS" "`strip_l "$LIBCURL"`"
-        cnf_append "SDK_VBOX_LIBCURL_INCS" "$INCCURL"
-      fi
     fi
   fi
 }
@@ -2133,7 +2096,6 @@ cat << EOF
 EOF
 [ $OSE -eq 0 ] && cat << EOF
   --build-libssl           build openssl from sources
-  --build-libcurl          build libcurl from sources
 EOF
 [ "$OS"   != "darwin" ] && echo "  --setup-wine             setup a Wine directory and register the hhc hack"
 cat << EOF
@@ -2187,7 +2149,6 @@ if [ "$OS" = "darwin" ]; then
   WITH_DBUS=0
   WITH_KMODS=0
   BUILD_LIBXML2=1
-  [ $OSE -eq 1 ] || BUILD_LIBCURL=1
 fi
 
 # scan command line options
@@ -2322,9 +2283,6 @@ for option in $*; do
       ;;
     --build-libssl)
       BUILD_LIBSSL=1
-      ;;
-    --build-libcurl)
-      BUILD_LIBCURL=1
       ;;
     --build-headless)
       HEADLESS=1
@@ -2501,7 +2459,6 @@ check_gcc
 check_libxml2
 [ $WITH_LIBIDL -eq 1 ] && check_libidl
 check_ssl
-check_curl
 [ "$OS" != "darwin"  ] && check_z
 [ "$OS" != "darwin"  ] && check_png
 [ $OSE -eq 0 -a "$OS" = "linux" ] && check_pam
