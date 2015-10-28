@@ -1,3 +1,15 @@
+virtualbox (4.3.32-dfsg-1+deb8u2) jessie-security; urgency=medium
+
+  * d/rules: re-enable VBOX_WITH_VMSVGA and
+     VBOX_WITH_VMSVGA3D (Closes: #795531).
+     - the CVEs are already fixed
+     - this patch makes it build more coherently
+       with how upstream builds it.
+     - the proper patch should be on upstream changeset 57410
+       but we don't need it anymore
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 28 Oct 2015 13:58:16 +0100
+
 virtualbox (4.3.32-dfsg-1+deb8u1) jessie-security; urgency=medium
 
   [ Gianfranco Costamagna ]
