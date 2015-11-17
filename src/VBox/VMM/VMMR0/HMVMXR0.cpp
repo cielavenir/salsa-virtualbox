@@ -150,12 +150,12 @@ typedef RTHCUINTREG                   HMVMXHCUINTREG;
  * - #PF need not be intercepted even in real-mode if we have Nested Paging
  * support.
  */
-#define HMVMX_REAL_MODE_XCPT_MASK    (  RT_BIT(X86_XCPT_DE)            /* RT_BIT(X86_XCPT_DB) */ | RT_BIT(X86_XCPT_NMI)   \
+#define HMVMX_REAL_MODE_XCPT_MASK    (  RT_BIT(X86_XCPT_DE)  /* always: | RT_BIT(X86_XCPT_DB) */ | RT_BIT(X86_XCPT_NMI)   \
                                       | RT_BIT(X86_XCPT_BP)             | RT_BIT(X86_XCPT_OF)    | RT_BIT(X86_XCPT_BR)    \
                                       | RT_BIT(X86_XCPT_UD)            /* RT_BIT(X86_XCPT_NM) */ | RT_BIT(X86_XCPT_DF)    \
                                       | RT_BIT(X86_XCPT_CO_SEG_OVERRUN) | RT_BIT(X86_XCPT_TS)    | RT_BIT(X86_XCPT_NP)    \
                                       | RT_BIT(X86_XCPT_SS)             | RT_BIT(X86_XCPT_GP)   /* RT_BIT(X86_XCPT_PF) */ \
-                                     /* RT_BIT(X86_XCPT_MF) */          | RT_BIT(X86_XCPT_AC)    | RT_BIT(X86_XCPT_MC)    \
+                                     /* RT_BIT(X86_XCPT_MF)     always: | RT_BIT(X86_XCPT_AC) */ | RT_BIT(X86_XCPT_MC)    \
                                       | RT_BIT(X86_XCPT_XF))
 
 /**
@@ -403,6 +403,7 @@ static FNVMXEXITHANDLER hmR0VmxExitInvpcid;
 static int          hmR0VmxExitXcptNM(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVmxTransient);
 static int          hmR0VmxExitXcptPF(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVmxTransient);
 static int          hmR0VmxExitXcptMF(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVmxTransient);
+static int          hmR0VmxExitXcptAC(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVmxTransient);
 static int          hmR0VmxExitXcptDB(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVmxTransient);
 static int          hmR0VmxExitXcptBP(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVmxTransient);
 static int          hmR0VmxExitXcptGP(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVmxTransient);
@@ -2125,7 +2126,15 @@ static int hmR0VmxInitXcptBitmap(PVM pVM, PVMCPU pVCpu)
 
     LogFlowFunc(("pVM=%p pVCpu=%p\n", pVM, pVCpu));
 
-    uint32_t u32XcptBitmap = 0;
+    /*
+     * #AC: We always intercept it to prevent the guest from hanging the CPU.
+     *
+     * #DB: Because we need to maintain the DR6 state even when intercepting DRx reads
+     *      and writes, and because recursive #DBs can cause the CPU hang, we must always
+     *      intercept it.
+     */
+    uint32_t u32XcptBitmap =   RT_BIT(X86_XCPT_AC)
+                             | RT_BIT(X86_XCPT_DB);
 
     /* Without Nested Paging, #PF must cause a VM-exit so we can sync our shadow page tables. */
     if (!pVM->hm.s.fNestedPaging)
@@ -3370,7 +3379,6 @@ static int hmR0VmxLoadSharedCR0(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
 #ifdef HMVMX_ALWAYS_TRAP_ALL_XCPTS
         pVCpu->hm.s.vmx.u32XcptBitmap |= 0
                                          | RT_BIT(X86_XCPT_BP)
-                                         | RT_BIT(X86_XCPT_DB)
                                          | RT_BIT(X86_XCPT_DE)
                                          | RT_BIT(X86_XCPT_NM)
                                          | RT_BIT(X86_XCPT_UD)
@@ -3401,6 +3409,8 @@ static int hmR0VmxLoadSharedCR0(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
         /* Write VT-x's view of the guest CR0 into the VMCS and update the exception bitmap. */
         rc = VMXWriteVmcs32(VMX_VMCS_GUEST_CR0, u32GuestCR0);
         AssertRCReturn(rc, rc);
+        Assert(pVCpu->hm.s.vmx.u32XcptBitmap & RT_BIT_32(X86_XCPT_AC));
+        Assert(pVCpu->hm.s.vmx.u32XcptBitmap & RT_BIT_32(X86_XCPT_DB));
         rc = VMXWriteVmcs32(VMX_VMCS32_CTRL_EXCEPTION_BITMAP, pVCpu->hm.s.vmx.u32XcptBitmap);
         AssertRCReturn(rc, rc);
         Log4(("Load: VMX_VMCS_GUEST_CR0=%#RX32 (uSetCR0=%#RX32 uZapCR0=%#RX32)\n", u32GuestCR0, uSetCR0, uZapCR0));
@@ -3681,7 +3691,7 @@ static int hmR0VmxLoadSharedDebugState(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
 
     int  rc;
     PVM  pVM              = pVCpu->CTX_SUFF(pVM);
-    bool fInterceptDB     = false;
+    bool fSteppingDB      = false;
     bool fInterceptMovDRx = false;
     if (   pVCpu->hm.s.fSingleInstruction
         || DBGFIsStepping(pVCpu))
@@ -3692,18 +3702,18 @@ static int hmR0VmxLoadSharedDebugState(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
             pVCpu->hm.s.vmx.u32ProcCtls |= VMX_VMCS_CTRL_PROC_EXEC_MONITOR_TRAP_FLAG;
             rc = VMXWriteVmcs32(VMX_VMCS32_CTRL_PROC_EXEC, pVCpu->hm.s.vmx.u32ProcCtls);
             AssertRCReturn(rc, rc);
-            Assert(fInterceptDB == false);
+            Assert(fSteppingDB == false);
         }
         else
         {
             pMixedCtx->eflags.u32 |= X86_EFL_TF;
             pVCpu->hm.s.fClearTrapFlag = true;
             HMCPU_CF_SET(pVCpu, HM_CHANGED_GUEST_RFLAGS);
-            fInterceptDB = true;
+            fSteppingDB = true;
         }
     }
 
-    if (   fInterceptDB
+    if (   fSteppingDB
         || (CPUMGetHyperDR7(pVCpu) & X86_DR7_ENABLED_MASK))
     {
         /*
@@ -3735,7 +3745,6 @@ static int hmR0VmxLoadSharedDebugState(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
         AssertRCReturn(rc, rc);
 
         pVCpu->hm.s.fUsingHyperDR7 = true;
-        fInterceptDB = true;
         fInterceptMovDRx = true;
     }
     else
@@ -3764,12 +3773,13 @@ static int hmR0VmxLoadSharedDebugState(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
                 Assert(!CPUMIsHyperDebugStateActive(pVCpu));
                 STAM_COUNTER_INC(&pVCpu->hm.s.StatDRxArmed);
             }
-            Assert(!fInterceptDB);
             Assert(!fInterceptMovDRx);
         }
         /*
          * If no debugging enabled, we'll lazy load DR0-3.  Unlike on AMD-V, we
-         * must intercept #DB in order to maintain a correct DR6 guest value.
+         * must intercept #DB in order to maintain a correct DR6 guest value, and
+         * because we need to intercept it to prevent nested #DBs from hanging the
+         * CPU, we end up always having to intercept it.  See hmR0VmxInitXcptBitmap.
          */
 #if HC_ARCH_BITS == 32 && defined(VBOX_WITH_64_BITS_GUESTS) && !defined(VBOX_WITH_HYBRID_32BIT_KERNEL)
         else if (   !CPUMIsGuestDebugStateActivePending(pVCpu)
@@ -3779,7 +3789,6 @@ static int hmR0VmxLoadSharedDebugState(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
 #endif
         {
             fInterceptMovDRx = true;
-            fInterceptDB = true;
         }
 
         /* Update guest DR7. */
@@ -3788,21 +3797,6 @@ static int hmR0VmxLoadSharedDebugState(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
 
         pVCpu->hm.s.fUsingHyperDR7 = false;
     }
-
-    /*
-     * Update the exception bitmap regarding intercepting #DB generated by the guest.
-     */
-    if (   fInterceptDB
-        || pVCpu->hm.s.vmx.RealMode.fRealOnV86Active)
-        pVCpu->hm.s.vmx.u32XcptBitmap |= RT_BIT(X86_XCPT_DB);
-    else
-    {
-#ifndef HMVMX_ALWAYS_TRAP_ALL_XCPTS
-        pVCpu->hm.s.vmx.u32XcptBitmap &= ~RT_BIT(X86_XCPT_DB);
-#endif
-    }
-    rc = VMXWriteVmcs32(VMX_VMCS32_CTRL_EXCEPTION_BITMAP, pVCpu->hm.s.vmx.u32XcptBitmap);
-    AssertRCReturn(rc, rc);
 
     /*
      * Update the processor-based VM-execution controls regarding intercepting MOV DRx instructions.
@@ -5375,6 +5369,7 @@ DECLINLINE(void) hmR0VmxSetPendingXcptDF(PVMCPU pVCpu, PCPUMCTX pMixedCtx)
  * @retval VINF_HM_DOUBLE_FAULT if a #DF condition was detected and we ought to
  *         continue execution of the guest which will delivery the #DF.
  * @retval VINF_EM_RESET if we detected a triple-fault condition.
+ * @retval VERR_EM_GUEST_CPU_HANG if we detected a guest CPU hang.
  *
  * @param   pVCpu           Pointer to the VMCPU.
  * @param   pMixedCtx       Pointer to the guest-CPU context. The data may be
@@ -5402,6 +5397,7 @@ static int hmR0VmxCheckExitDueToEventDelivery(PVMCPU pVCpu, PCPUMCTX pMixedCtx, 
             VMXREFLECTXCPT_XCPT,    /* Reflect the exception to the guest or for further evaluation by VMM. */
             VMXREFLECTXCPT_DF,      /* Reflect the exception as a double-fault to the guest. */
             VMXREFLECTXCPT_TF,      /* Indicate a triple faulted state to the VMM. */
+            VMXREFLECTXCPT_HANG,    /* Indicate bad VM trying to deadlock the CPU. */
             VMXREFLECTXCPT_NONE     /* Nothing to reflect. */
         } VMXREFLECTXCPT;
 
@@ -5424,6 +5420,12 @@ static int hmR0VmxCheckExitDueToEventDelivery(PVMCPU pVCpu, PCPUMCTX pMixedCtx, 
                 {
                     pVmxTransient->fVectoringPF = true;
                     Log4(("IDT: vcpu[%RU32] Vectoring #PF uCR2=%#RX64\n", pVCpu->idCpu, pMixedCtx->cr2));
+                }
+                else if (   uExitVector == X86_XCPT_AC
+                         && uIdtVector == X86_XCPT_AC)
+                {
+                    Log4(("IDT: Nested #AC - Bad guest\n"));
+                    enmReflect = VMXREFLECTXCPT_HANG;
                 }
                 else if (   (pVCpu->hm.s.vmx.u32XcptBitmap & HMVMX_CONTRIBUTORY_XCPT_MASK)
                          && hmR0VmxIsContributoryXcpt(uExitVector)
@@ -5505,12 +5507,18 @@ static int hmR0VmxCheckExitDueToEventDelivery(PVMCPU pVCpu, PCPUMCTX pMixedCtx, 
                 break;
             }
 
+            case VMXREFLECTXCPT_HANG:
+            {
+                rc = VERR_EM_GUEST_CPU_HANG;
+                break;
+            }
+
             default:
                 Assert(rc == VINF_SUCCESS);
                 break;
         }
     }
-    Assert(rc == VINF_SUCCESS || rc == VINF_HM_DOUBLE_FAULT || rc == VINF_EM_RESET);
+    Assert(rc == VINF_SUCCESS || rc == VINF_HM_DOUBLE_FAULT || rc == VINF_EM_RESET || rc == VERR_EM_GUEST_CPU_HANG);
     return rc;
 }
 
@@ -9218,13 +9226,10 @@ HMVMX_EXIT_DECL hmR0VmxExitXcptOrNmi(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANS
 
     /* If this VM-exit occurred while delivering an event through the guest IDT, handle it accordingly. */
     rc = hmR0VmxCheckExitDueToEventDelivery(pVCpu, pMixedCtx, pVmxTransient);
-    if (RT_UNLIKELY(rc == VINF_HM_DOUBLE_FAULT))
+    if (RT_UNLIKELY(rc != VINF_SUCCESS))
     {
-        STAM_PROFILE_ADV_STOP(&pVCpu->hm.s.StatExitXcptNmi, y3);
-        return VINF_SUCCESS;
-    }
-    else if (RT_UNLIKELY(rc == VINF_EM_RESET))
-    {
+        if (rc == VINF_HM_DOUBLE_FAULT)
+            rc = VINF_SUCCESS;
         STAM_PROFILE_ADV_STOP(&pVCpu->hm.s.StatExitXcptNmi, y3);
         return rc;
     }
@@ -9249,6 +9254,7 @@ HMVMX_EXIT_DECL hmR0VmxExitXcptOrNmi(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANS
                 case X86_XCPT_MF: rc = hmR0VmxExitXcptMF(pVCpu, pMixedCtx, pVmxTransient);      break;
                 case X86_XCPT_DB: rc = hmR0VmxExitXcptDB(pVCpu, pMixedCtx, pVmxTransient);      break;
                 case X86_XCPT_BP: rc = hmR0VmxExitXcptBP(pVCpu, pMixedCtx, pVmxTransient);      break;
+                case X86_XCPT_AC: rc = hmR0VmxExitXcptAC(pVCpu, pMixedCtx, pVmxTransient);      break;
 #ifdef HMVMX_ALWAYS_TRAP_ALL_XCPTS
                 case X86_XCPT_XF: STAM_COUNTER_INC(&pVCpu->hm.s.StatExitGuestXF);
                                   rc = hmR0VmxExitXcptGeneric(pVCpu, pMixedCtx, pVmxTransient); break;
@@ -10486,10 +10492,12 @@ HMVMX_EXIT_DECL hmR0VmxExitApicAccess(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRAN
 
     /* If this VM-exit occurred while delivering an event through the guest IDT, handle it accordingly. */
     int rc = hmR0VmxCheckExitDueToEventDelivery(pVCpu, pMixedCtx, pVmxTransient);
-    if (RT_UNLIKELY(rc == VINF_HM_DOUBLE_FAULT))
-        return VINF_SUCCESS;
-    else if (RT_UNLIKELY(rc == VINF_EM_RESET))
+    if (RT_UNLIKELY(rc != VINF_SUCCESS))
+    {
+        if (rc == VINF_HM_DOUBLE_FAULT)
+            rc = VINF_SUCCESS;
         return rc;
+    }
 
 #if 0
     /** @todo Investigate if IOMMMIOPhysHandler() requires a lot of state, for now
@@ -10573,19 +10581,12 @@ HMVMX_EXIT_DECL hmR0VmxExitMovDRx(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIEN
         && !pVCpu->hm.s.fSingleInstruction
         && !pVmxTransient->fWasHyperDebugStateActive)
     {
-        /* Don't intercept MOV DRx and #DB any more. */
+        Assert(pVCpu->hm.s.vmx.u32XcptBitmap & RT_BIT_32(X86_XCPT_DB));
+
+        /* Don't intercept MOV DRx any more. */
         pVCpu->hm.s.vmx.u32ProcCtls &= ~VMX_VMCS_CTRL_PROC_EXEC_MOV_DR_EXIT;
         rc = VMXWriteVmcs32(VMX_VMCS32_CTRL_PROC_EXEC, pVCpu->hm.s.vmx.u32ProcCtls);
         AssertRCReturn(rc, rc);
-
-        if (!pVCpu->hm.s.vmx.RealMode.fRealOnV86Active)
-        {
-#ifndef HMVMX_ALWAYS_TRAP_ALL_XCPTS
-            pVCpu->hm.s.vmx.u32XcptBitmap &= ~RT_BIT(X86_XCPT_DB);
-            rc = VMXWriteVmcs32(VMX_VMCS32_CTRL_EXCEPTION_BITMAP, pVCpu->hm.s.vmx.u32XcptBitmap);
-            AssertRCReturn(rc, rc);
-#endif
-        }
 
         /* We're playing with the host CPU state here, make sure we can't preempt or longjmp. */
         VMMRZCallRing3Disable(pVCpu);
@@ -10660,10 +10661,12 @@ HMVMX_EXIT_DECL hmR0VmxExitEptMisconfig(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTR
 
     /* If this VM-exit occurred while delivering an event through the guest IDT, handle it accordingly. */
     int rc = hmR0VmxCheckExitDueToEventDelivery(pVCpu, pMixedCtx, pVmxTransient);
-    if (RT_UNLIKELY(rc == VINF_HM_DOUBLE_FAULT))
-        return VINF_SUCCESS;
-    else if (RT_UNLIKELY(rc == VINF_EM_RESET))
+    if (RT_UNLIKELY(rc != VINF_SUCCESS))
+    {
+        if (rc == VINF_HM_DOUBLE_FAULT)
+            rc = VINF_SUCCESS;
         return rc;
+    }
 
     RTGCPHYS GCPhys = 0;
     rc = VMXReadVmcs64(VMX_VMCS64_EXIT_GUEST_PHYS_ADDR_FULL, &GCPhys);
@@ -10715,10 +10718,12 @@ HMVMX_EXIT_DECL hmR0VmxExitEptViolation(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTR
 
     /* If this VM-exit occurred while delivering an event through the guest IDT, handle it accordingly. */
     int rc = hmR0VmxCheckExitDueToEventDelivery(pVCpu, pMixedCtx, pVmxTransient);
-    if (RT_UNLIKELY(rc == VINF_HM_DOUBLE_FAULT))
-        return VINF_SUCCESS;
-    else if (RT_UNLIKELY(rc == VINF_EM_RESET))
+    if (RT_UNLIKELY(rc != VINF_SUCCESS))
+    {
+        if (rc == VINF_HM_DOUBLE_FAULT)
+            rc = VINF_SUCCESS;
         return rc;
+    }
 
     RTGCPHYS GCPhys = 0;
     rc  = VMXReadVmcs64(VMX_VMCS64_EXIT_GUEST_PHYS_ADDR_FULL, &GCPhys);
@@ -10835,6 +10840,27 @@ static int hmR0VmxExitXcptBP(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVm
 
     Assert(rc == VINF_SUCCESS || rc == VINF_EM_RAW_GUEST_TRAP || rc == VINF_EM_DBG_BREAKPOINT);
     return rc;
+}
+
+
+/**
+ * VM-exit exception handler for \#AC (alignment check exception).
+ */
+static int hmR0VmxExitXcptAC(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PVMXTRANSIENT pVmxTransient)
+{
+    HMVMX_VALIDATE_EXIT_XCPT_HANDLER_PARAMS();
+
+    /*
+     * Re-inject it. We'll detect any nesting before getting here.
+     */
+    int rc = hmR0VmxReadExitIntErrorCodeVmcs(pVCpu, pVmxTransient);
+    rc    |= hmR0VmxReadExitInstrLenVmcs(pVCpu, pVmxTransient);
+    AssertRCReturn(rc, rc);
+    Assert(pVmxTransient->fVmcsFieldsRead & HMVMX_UPDATED_TRANSIENT_EXIT_INTERRUPTION_INFO);
+
+    hmR0VmxSetPendingEvent(pVCpu, VMX_VMCS_CTRL_ENTRY_IRQ_INFO_FROM_EXIT_INT_INFO(pVmxTransient->uExitIntInfo),
+                           pVmxTransient->cbInstr, pVmxTransient->uExitIntErrorCode, 0 /* GCPtrFaultAddress */);
+    return VINF_SUCCESS;
 }
 
 

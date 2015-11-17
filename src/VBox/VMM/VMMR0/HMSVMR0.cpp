@@ -102,9 +102,10 @@
     do \
     { \
         int rc = hmR0SvmCheckExitDueToEventDelivery(pVCpu, pCtx, pSvmTransient); \
-        if (RT_UNLIKELY(rc == VINF_HM_DOUBLE_FAULT)) \
+        if (RT_LIKELY(rc == VINF_SUCCESS)) { /* likely */ } \
+        else if (rc == VINF_HM_DOUBLE_FAULT) \
             return VINF_SUCCESS; \
-        else if (RT_UNLIKELY(rc == VINF_EM_RESET)) \
+        else \
             return rc; \
     } while (0)
 
@@ -291,6 +292,7 @@ static FNSVMEXITHANDLER hmR0SvmExitXcptPF;
 static FNSVMEXITHANDLER hmR0SvmExitXcptNM;
 static FNSVMEXITHANDLER hmR0SvmExitXcptMF;
 static FNSVMEXITHANDLER hmR0SvmExitXcptDB;
+static FNSVMEXITHANDLER hmR0SvmExitXcptAC;
 /** @} */
 
 DECLINLINE(int) hmR0SvmHandleExit(PVMCPU pVCpu, PCPUMCTX pMixedCtx, PSVMTRANSIENT pSvmTransient);
@@ -667,6 +669,12 @@ VMMR0DECL(int) SVMR0SetupVM(PVM pVM)
         PSVMVMCB pVmcb = (PSVMVMCB)pVM->aCpus[i].hm.s.svm.pvVmcb;
 
         AssertMsgReturn(pVmcb, ("Invalid pVmcb for vcpu[%u]\n", i), VERR_SVM_INVALID_PVMCB);
+
+        /* Always trap #AC for reasons of security. */
+        pVmcb->ctrl.u32InterceptException |= RT_BIT_32(X86_XCPT_AC);
+
+        /* Always trap #DB for reasons of security. */
+        pVmcb->ctrl.u32InterceptException |= RT_BIT_32(X86_XCPT_DB);
 
         /* Trap exceptions unconditionally (debug purposes). */
 #ifdef HMSVM_ALWAYS_TRAP_PF
@@ -1089,6 +1097,8 @@ DECLINLINE(void) hmR0SvmAddXcptIntercept(PSVMVMCB pVmcb, uint32_t u32Xcpt)
  */
 DECLINLINE(void) hmR0SvmRemoveXcptIntercept(PSVMVMCB pVmcb, uint32_t u32Xcpt)
 {
+    Assert(u32Xcpt != X86_XCPT_DB);
+    Assert(u32Xcpt != X86_XCPT_AC);
 #ifndef HMSVM_ALWAYS_TRAP_ALL_XCPTS
     if (pVmcb->ctrl.u32InterceptException & RT_BIT(u32Xcpt))
     {
@@ -1409,7 +1419,6 @@ static void hmR0SvmLoadSharedDebugState(PVMCPU pVCpu, PSVMVMCB pVmcb, PCPUMCTX p
     Assert((pCtx->dr[6] & X86_DR6_RA1_MASK) == X86_DR6_RA1_MASK); Assert((pCtx->dr[6] & X86_DR6_RAZ_MASK) == 0);
     Assert((pCtx->dr[7] & X86_DR7_RA1_MASK) == X86_DR7_RA1_MASK); Assert((pCtx->dr[7] & X86_DR7_RAZ_MASK) == 0);
 
-    bool fInterceptDB     = false;
     bool fInterceptMovDRx = false;
 
     /*
@@ -1422,7 +1431,6 @@ static void hmR0SvmLoadSharedDebugState(PVMCPU pVCpu, PSVMVMCB pVmcb, PCPUMCTX p
     {
         pVCpu->hm.s.fClearTrapFlag = true;
         pVmcb->guest.u64RFlags |= X86_EFL_TF;
-        fInterceptDB = true;
         fInterceptMovDRx = true; /* Need clean DR6, no guest mess. */
     }
 
@@ -1465,7 +1473,6 @@ static void hmR0SvmLoadSharedDebugState(PVMCPU pVCpu, PSVMVMCB pVmcb, PCPUMCTX p
 
         /** @todo If we cared, we could optimize to allow the guest to read registers
          *        with the same values. */
-        fInterceptDB = true;
         fInterceptMovDRx = true;
         Log5(("hmR0SvmLoadSharedDebugState: Loaded hyper DRx\n"));
     }
@@ -1512,6 +1519,10 @@ static void hmR0SvmLoadSharedDebugState(PVMCPU pVCpu, PSVMVMCB pVmcb, PCPUMCTX p
         /*
          * If no debugging enabled, we'll lazy load DR0-3. We don't need to
          * intercept #DB as DR6 is updated in the VMCB.
+         *
+         * Note! If we cared and dared, we could skip intercepting \#DB here.
+         *       However, \#DB shouldn't be performance critical, so we'll play safe
+         *       and keep the code similar to the VT-x code and always intercept it.
          */
 #if HC_ARCH_BITS == 32 && defined(VBOX_WITH_64_BITS_GUESTS) && !defined(VBOX_WITH_HYBRID_32BIT_KERNEL)
         else if (   !CPUMIsGuestDebugStateActivePending(pVCpu)
@@ -1524,14 +1535,7 @@ static void hmR0SvmLoadSharedDebugState(PVMCPU pVCpu, PSVMVMCB pVmcb, PCPUMCTX p
         }
     }
 
-    /*
-     * Set up the intercepts.
-     */
-    if (fInterceptDB)
-        hmR0SvmAddXcptIntercept(pVmcb, X86_XCPT_DB);
-    else
-        hmR0SvmRemoveXcptIntercept(pVmcb, X86_XCPT_DB);
-
+    Assert(pVmcb->ctrl.u32InterceptException & RT_BIT_32(X86_XCPT_DB));
     if (fInterceptMovDRx)
     {
         if (   pVmcb->ctrl.u16InterceptRdDRx != 0xffff
@@ -3259,6 +3263,9 @@ DECLINLINE(int) hmR0SvmHandleExit(PVMCPU pVCpu, PCPUMCTX pCtx, PSVMTRANSIENT pSv
         case SVM_EXIT_EXCEPTION_1:   /* X86_XCPT_DB */
             return hmR0SvmExitXcptDB(pVCpu, pCtx, pSvmTransient);
 
+        case SVM_EXIT_EXCEPTION_11:  /* X86_XCPT_AC */
+            return hmR0SvmExitXcptAC(pVCpu, pCtx, pSvmTransient);
+
         case SVM_EXIT_MONITOR:
             return hmR0SvmExitMonitor(pVCpu, pCtx, pSvmTransient);
 
@@ -3366,7 +3373,7 @@ DECLINLINE(int) hmR0SvmHandleExit(PVMCPU pVCpu, PCPUMCTX pCtx, PSVMTRANSIENT pSv
                 case SVM_EXIT_EXCEPTION_D:             /* X86_XCPT_GP */
                 /*   SVM_EXIT_EXCEPTION_E: */          /* X86_XCPT_PF - Handled above. */
                 /*   SVM_EXIT_EXCEPTION_10: */         /* X86_XCPT_MF - Handled above. */
-                case SVM_EXIT_EXCEPTION_11:            /* X86_XCPT_AC */
+                /*   SVM_EXIT_EXCEPTION_11: */         /* X86_XCPT_AC - Handled above. */
                 case SVM_EXIT_EXCEPTION_12:            /* X86_XCPT_MC */
                 case SVM_EXIT_EXCEPTION_13:            /* X86_XCPT_XF */
                 case SVM_EXIT_EXCEPTION_F:             /* Reserved */
@@ -3762,6 +3769,7 @@ DECLINLINE(bool) hmR0SvmIsContributoryXcpt(const uint32_t uVector)
  * @retval VINF_HM_DOUBLE_FAULT if a #DF condition was detected and we ought to
  *         continue execution of the guest which will delivery the #DF.
  * @retval VINF_EM_RESET if we detected a triple-fault condition.
+ * @retval VERR_EM_GUEST_CPU_HANG if we detected a guest CPU hang.
  *
  * @param   pVCpu           Pointer to the VMCPU.
  * @param   pCtx            Pointer to the guest-CPU context.
@@ -3785,6 +3793,7 @@ static int hmR0SvmCheckExitDueToEventDelivery(PVMCPU pVCpu, PCPUMCTX pCtx, PSVMT
             SVMREFLECTXCPT_XCPT,    /* Reflect the exception to the guest or for further evaluation by VMM. */
             SVMREFLECTXCPT_DF,      /* Reflect the exception as a double-fault to the guest. */
             SVMREFLECTXCPT_TF,      /* Indicate a triple faulted state to the VMM. */
+            SVMREFLECTXCPT_HANG,    /* Indicate bad VM trying to deadlock the CPU. */
             SVMREFLECTXCPT_NONE     /* Nothing to reflect. */
         } SVMREFLECTXCPT;
 
@@ -3807,6 +3816,12 @@ static int hmR0SvmCheckExitDueToEventDelivery(PVMCPU pVCpu, PCPUMCTX pCtx, PSVMT
                 {
                     pSvmTransient->fVectoringPF = true;
                     Log4(("IDT: Vectoring #PF uCR2=%#RX64\n", pCtx->cr2));
+                }
+                else if (   uExitVector == X86_XCPT_AC
+                         && uIdtVector == X86_XCPT_AC)
+                {
+                    Log4(("IDT: Nested #AC - Bad guest\n"));
+                    enmReflect = SVMREFLECTXCPT_HANG;
                 }
                 else if (   (pVmcb->ctrl.u32InterceptException & HMSVM_CONTRIBUTORY_XCPT_MASK)
                          && hmR0SvmIsContributoryXcpt(uExitVector)
@@ -3867,12 +3882,18 @@ static int hmR0SvmCheckExitDueToEventDelivery(PVMCPU pVCpu, PCPUMCTX pCtx, PSVMT
                 break;
             }
 
+            case SVMREFLECTXCPT_HANG:
+            {
+                rc = VERR_EM_GUEST_CPU_HANG;
+                break;
+            }
+
             default:
                 Assert(rc == VINF_SUCCESS);
                 break;
         }
     }
-    Assert(rc == VINF_SUCCESS || rc == VINF_HM_DOUBLE_FAULT || rc == VINF_EM_RESET);
+    Assert(rc == VINF_SUCCESS || rc == VINF_HM_DOUBLE_FAULT || rc == VINF_EM_RESET || rc == VERR_EM_GUEST_CPU_HANG);
     return rc;
 }
 
@@ -4992,6 +5013,26 @@ HMSVM_EXIT_DECL hmR0SvmExitXcptDB(PVMCPU pVCpu, PCPUMCTX pCtx, PSVMTRANSIENT pSv
     }
 
     return rc;
+}
+
+
+/**
+ * \#VMEXIT handler for alignment check exceptions (SVM_EXIT_EXCEPTION_11).
+ * Conditional \#VMEXIT.
+ */
+HMSVM_EXIT_DECL hmR0SvmExitXcptAC(PVMCPU pVCpu, PCPUMCTX pCtx, PSVMTRANSIENT pSvmTransient)
+{
+    HMSVM_VALIDATE_EXIT_HANDLER_PARAMS();
+
+    HMSVM_CHECK_EXIT_DUE_TO_EVENT_DELIVERY();
+
+    SVMEVENT Event;
+    Event.u          = 0;
+    Event.n.u1Valid  = 1;
+    Event.n.u3Type   = SVM_EVENT_EXCEPTION;
+    Event.n.u8Vector = X86_XCPT_AC;
+    hmR0SvmSetPendingEvent(pVCpu, &Event, 0 /* GCPtrFaultAddress */);
+    return VINF_SUCCESS;
 }
 
 /** @} */

@@ -10754,9 +10754,8 @@ HRESULT Machine::saveHardware(settings::Hardware &data, settings::Debugging *pDb
         if (FAILED(rc)) throw rc;
 
         /* USB Controller (required) */
-        for (USBControllerList::const_iterator it = mUSBControllers->begin();
-             it != mUSBControllers->end();
-             ++it)
+        data.usbSettings.llUSBControllers.clear();
+        for (USBControllerList::const_iterator it = mUSBControllers->begin(); it != mUSBControllers->end(); ++it)
         {
             ComObjPtr<USBController> ctrl = *it;
             settings::USBController settingsCtrl;
@@ -10859,6 +10858,7 @@ HRESULT Machine::saveHardware(settings::Hardware &data, settings::Debugging *pDb
         if (FAILED(rc)) throw rc;
 
         /* Host PCI devices */
+        data.pciAttachments.clear();
         for (HWData::PCIDeviceAssignmentList::const_iterator it = mHWData->mPCIDeviceAssignments.begin();
              it != mHWData->mPCIDeviceAssignments.end();
              ++it)
