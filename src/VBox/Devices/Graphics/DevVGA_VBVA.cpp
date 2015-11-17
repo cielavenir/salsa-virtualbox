@@ -265,8 +265,7 @@ static bool vbvaFetchCmd (VBVAPARTIALRECORD *pPartialRecord, VBVABUFFER *pVBVA, 
             /* The command does not cross buffer boundary. Return address in the buffer. */
             *ppHdr = (VBVACMDHDR *)src;
 
-            /* Advance data offset. */
-            pVBVA->off32Data = (pVBVA->off32Data + cbRecord) % pVBVA->cbData;
+            /* Data offset will be updated in vbvaReleaseCmd. */
         }
         else
         {
@@ -309,7 +308,8 @@ static void vbvaReleaseCmd (VBVAPARTIALRECORD *pPartialRecord, VBVABUFFER *pVBVA
         /* The pointer is inside ring buffer. Must be continuous chunk. */
         Assert (pVBVA->cbData - ((uint8_t *)pHdr - au8RingBuffer) >= cbCmd);
 
-        /* Do nothing. */
+        /* Advance data offset. */
+        pVBVA->off32Data = (pVBVA->off32Data + cbCmd) % pVBVA->cbData;
 
         Assert (!pPartialRecord->pu8 && pPartialRecord->cb == 0);
     }

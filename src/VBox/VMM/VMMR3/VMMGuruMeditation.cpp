@@ -600,6 +600,7 @@ VMMR3DECL(void) VMMR3FatalDump(PVM pVM, PVMCPU pVCpu, int rcErr)
 
         case VERR_IEM_INSTR_NOT_IMPLEMENTED:
         case VERR_IEM_ASPECT_NOT_IMPLEMENTED:
+        case VERR_EM_GUEST_CPU_HANG:
         {
             DBGFR3Info(pVM->pUVM, "cpumguest", NULL, pHlp);
             DBGFR3Info(pVM->pUVM, "cpumguestinstr", NULL, pHlp);

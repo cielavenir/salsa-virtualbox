@@ -1,6 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
   <sect1>
+    <title>Version 4.3.34 (2015-11-10)</title>
+
+    <para>This is a maintenance release. The following items were fixed and/or
+      added:</para>
+
+    <itemizedlist>
+
+      <listitem>
+        <para>NAT: support TCP in DNS proxy (bug #14736)</para>
+      </listitem>
+
+      <listitem>
+        <para>NAT Network: fixed sporadic crashes on Windows hosts (bug #13899)</para>
+      </listitem>
+      
+      <listitem>
+        <para>USB: fixed a crash under certain conditions on hosts with Linux
+          kernels older than version 3.3</para>
+      </listitem>
+
+      <listitem>
+        <para>OVF: fixed duplicate USB controller entries in exported OVA/OVF
+          (bug #14749)</para>
+      </listitem>
+
+      <listitem>
+        <para>Webcam: passthrough fix for certain devices (Windows hosts only)</para>
+      </listitem>
+
+      <listitem>
+        <para>Mac OS X hosts: use the correct kernel on certain hosts</para>
+      </listitem>
+
+      <listitem>
+        <para>Windows hosts: fixes for a shared folder path with extended-length
+          path prefix (bug #14651)</para>
+      </listitem>
+
+    </itemizedlist>
+
+  </sect1>
+
+  <sect1>
     <title>Version 4.3.32 (2015-10-20)</title>
 
     <para>This is a maintenance release. The following items were fixed and/or
