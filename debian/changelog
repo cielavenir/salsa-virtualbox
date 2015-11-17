@@ -1,3 +1,9 @@
+virtualbox (4.3.34-dfsg-1+deb8u1) UNRELEASED; urgency=medium
+
+  * New upstream bugfix release.
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 17 Nov 2015 14:44:04 +0100
+
 virtualbox (4.3.32-dfsg-1+deb8u2) jessie-security; urgency=medium
 
   * d/rules: re-enable VBOX_WITH_VMSVGA and
