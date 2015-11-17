@@ -319,6 +319,7 @@ int emR3HwaccmHandleRC(PVM pVM, PVMCPU pVCpu, PCPUMCTX pCtx, int rc)
         case VERR_VMM_RING0_ASSERTION:
         case VERR_VMM_HYPER_CR3_MISMATCH:
         case VERR_VMM_RING3_CALL_DISABLED:
+        case VERR_EM_GUEST_CPU_HANG:
             break;
 
 #ifdef EMHANDLERC_WITH_HWACCM

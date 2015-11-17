@@ -1318,6 +1318,10 @@ static void vmxR0UpdateExceptionBitmap(PVM pVM, PVMCPU pVCpu, PCPUMCTX pCtx)
         &&  pVM->hwaccm.s.vmx.pRealModeTSS)
         u32TrapMask |= HWACCM_VMX_TRAP_MASK_REALMODE;
 
+    /* Always intercept #AC and #DB for security reasons. */
+    Assert(u32TrapMask & RT_BIT(X86_XCPT_AC));
+    Assert(u32TrapMask & RT_BIT(X86_XCPT_DB));
+
     int rc = VMXWriteVMCS(VMX_VMCS_CTRL_EXCEPTION_BITMAP, u32TrapMask);
     AssertRC(rc);
 }
@@ -3075,6 +3079,24 @@ ResumeExecution:
                 /* Return to ring 3 to deal with the debug exit code. */
                 Log(("Debugger hardware BP at %04x:%RGv (rc=%Rrc)\n", pCtx->cs, pCtx->rip, VBOXSTRICTRC_VAL(rc)));
                 break;
+            }
+
+            case X86_XCPT_AC:   /* Alignment Check. */
+            {
+                if (   pVCpu->hwaccm.s.Event.fPending
+                    && VMX_EXIT_INTERRUPTION_INFO_TYPE(pVCpu->hwaccm.s.Event.intInfo)   == VMX_EXIT_INTERRUPTION_INFO_TYPE_HWEXCPT
+                    && VMX_EXIT_INTERRUPTION_INFO_VECTOR(pVCpu->hwaccm.s.Event.intInfo) == X86_XCPT_AC)
+                {
+                    Assert(VMX_EXIT_INTERRUPTION_INFO_VALID(pVCpu->hwaccm.s.Event.intInfo));
+                    Log(("Nested #AC - Bad guest\n"));
+                    rc = VERR_EM_GUEST_CPU_HANG;
+                    STAM_PROFILE_ADV_STOP(&pVCpu->hwaccm.s.StatExit2Sub3, y3);
+                    break;
+                }
+                rc2 = VMXR0InjectEvent(pVM, pVCpu, pCtx, VMX_VMCS_CTRL_ENTRY_IRQ_INFO_FROM_EXIT_INT_INFO(intInfo), cbInstr, errCode);
+                AssertRC(rc2);
+                STAM_PROFILE_ADV_STOP(&pVCpu->hwaccm.s.StatExit2Sub3, y3);
+                goto ResumeExecution;
             }
 
             case X86_XCPT_BP:   /* Breakpoint. */

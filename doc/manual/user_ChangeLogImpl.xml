@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
   <sect1>
+      <title>Version 4.1.44 (2015-11-11)</title>
+
+    <para>This is a maintenance release. The following items were fixed and/or
+          added:</para>
+
+    <itemizedlist>
+
+      <listitem>
+        <para>several fixes</para>
+      </listitem>
+
+    </itemizedlist>
+
+  </sect1>
+
+  <sect1>
       <title>Version 4.1.42 (2015-10-20)</title>
 
     <para>This is a maintenance release. The following items were fixed and/or

@@ -240,6 +240,8 @@
 #define VERR_EM_INTERNAL_DISAS_ERROR        (-1153)
 /** Unexpected guest mapping conflict detected. */
 #define VERR_EM_UNEXPECTED_MAPPING_CONFLICT (-1154)
+/** Guest tried to trigger a CPU hang.  The guest is probably up to no good. */
+#define VERR_EM_GUEST_CPU_HANG              (-1155)
 /** @} */
 
 
@@ -1615,9 +1617,9 @@
 /** Type error opening the ApiPort LPC object. */
 #define VERR_SUPDRV_APIPORT_OPEN_ERROR_TYPE         (-3742)
 /** The process trying to open VBoxDrv is not a budding VM process (1). */
-#define VERR_SUPDRV_NOT_BUDDING_VM_PROCESS_1          (-3748)
+#define VERR_SUPDRV_NOT_BUDDING_VM_PROCESS_1        (-3748)
 /** The process trying to open VBoxDrv is not a budding VM process (2). */
-#define VERR_SUPDRV_NOT_BUDDING_VM_PROCESS_2          (-3748)
+#define VERR_SUPDRV_NOT_BUDDING_VM_PROCESS_2        (-3749)
 /** @} */
 
 
