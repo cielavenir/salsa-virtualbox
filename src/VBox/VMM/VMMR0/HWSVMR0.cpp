@@ -929,14 +929,9 @@ VMMR0DECL(int) SVMR0LoadGuestState(PVM pVM, PVMCPU pVCpu, PCPUMCTX pCtx)
     pVMCB->guest.u64SFMASK          = pCtx->msrSFMASK;          /* syscall flag mask */
     pVMCB->guest.u64KernelGSBase    = pCtx->msrKERNELGSBASE;    /* swapgs exchange value */
 
-#ifdef DEBUG
-    /* Intercept X86_XCPT_DB if stepping is enabled */
-    if (    DBGFIsStepping(pVCpu)
-        ||  CPUMIsHyperDebugStateActive(pVCpu))
-        pVMCB->ctrl.u32InterceptException |=  RT_BIT(X86_XCPT_DB);
-    else
-        pVMCB->ctrl.u32InterceptException &= ~RT_BIT(X86_XCPT_DB);
-#endif
+    /* Always intercept #AC and #DB for security reasons. */
+    Assert(pVMCB->ctrl.u32InterceptException & RT_BIT(X86_XCPT_AC));
+    Assert(pVMCB->ctrl.u32InterceptException & RT_BIT(X86_XCPT_DB));
 
     /* Done. */
     pVCpu->hwaccm.s.fContextUseFlags &= ~HWACCM_CHANGED_ALL_GUEST;
@@ -1615,6 +1610,27 @@ ResumeExecution:
         Log2(("Hardware/software interrupt %d\n", vector));
         switch (vector)
         {
+        case X86_XCPT_AC:
+        {
+            if (   pVCpu->hwaccm.s.Event.fPending
+                && pVMCB->ctrl.ExitIntInfo.n.u3Type == SVM_EVENT_EXCEPTION
+                && pVMCB->ctrl.ExitIntInfo.n.u8Vector == X86_XCPT_AC)
+            {
+                Assert(pVMCB->ctrl.ExitIntInfo.n.u1Valid);
+                Log(("Nested #AC - Bad guest\n"));
+                rc = VERR_EM_GUEST_CPU_HANG;
+                break;
+            }
+
+            /* Reinject the exception. */
+            Event.au64[0]    = 0;
+            Event.n.u3Type   = SVM_EVENT_EXCEPTION;
+            Event.n.u1Valid  = 1;
+            Event.n.u8Vector = X86_XCPT_AC;
+            SVMR0InjectEvent(pVCpu, pVMCB, pCtx, &Event);
+            goto ResumeExecution;
+        }
+
         case X86_XCPT_DB:
         {
             STAM_COUNTER_INC(&pVCpu->hwaccm.s.StatExitGuestDB);
