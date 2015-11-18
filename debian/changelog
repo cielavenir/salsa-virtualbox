@@ -1,3 +1,10 @@
+virtualbox (4.1.44-dfsg-1+deb7u1) wheezy-security; urgency=medium
+
+  * New upstream release.
+    - Addressed CVE-2015-7183
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 18 Nov 2015 09:28:42 +0100
+
 virtualbox (4.1.42-dfsg-1+deb7u1) wheezy-security; urgency=medium
 
   * New upstream release.
