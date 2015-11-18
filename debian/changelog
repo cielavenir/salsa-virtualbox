@@ -1,6 +1,7 @@
-virtualbox (4.3.34-dfsg-1+deb8u1) UNRELEASED; urgency=medium
+virtualbox (4.3.34-dfsg-1+deb8u1) jessie-security; urgency=medium
 
   * New upstream bugfix release.
+    - Addressed CVE-2015-7183
 
  -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 17 Nov 2015 14:44:04 +0100
 
