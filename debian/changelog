@@ -1,3 +1,10 @@
+virtualbox (5.0.10-dfsg-4~bpo8+2) jessie-backports; urgency=medium
+
+  * Rebuild for jessie-backports.
+  * Revert incompatible change for rootless X
+
+ -- Aron Xu <aron@debian.org>  Wed, 02 Dec 2015 10:11:02 +0800
+
 virtualbox (5.0.10-dfsg-4) unstable; urgency=low
 
   * Add vboxweb.service from Sérgio Basto
