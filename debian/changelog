@@ -1,3 +1,11 @@
+virtualbox (4.3.36-dfsg-1+deb8u1) jessie-security; urgency=medium
+
+  * New upstream bugfix release.
+    - Addressed CVE-2016-0592, CVE-2016-0495, CVE-2015-8104,
+      CVE-2015-7183, CVE-2015-5307
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 26 Jan 2016 10:23:11 +0100
+
 virtualbox (4.3.34-dfsg-1+deb8u1) jessie-security; urgency=medium
 
   * New upstream bugfix release.
