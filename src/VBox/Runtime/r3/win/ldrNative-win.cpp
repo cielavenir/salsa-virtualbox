@@ -44,6 +44,7 @@
 #include <iprt/once.h>
 #include <iprt/string.h>
 #include "internal/ldr.h"
+#include "internal-r3-win.h"
 
 
 int rtldrNativeLoad(const char *pszFilename, uintptr_t *phHandle, uint32_t fFlags, PRTERRINFO pErrInfo)
@@ -53,6 +54,8 @@ int rtldrNativeLoad(const char *pszFilename, uintptr_t *phHandle, uint32_t fFlag
     AssertLogRelMsgReturn(RTPathStartsWithRoot(pszFilename),  /* Relative names will still be applied to the search path. */
                           ("pszFilename='%s'\n", pszFilename),
                           VERR_INTERNAL_ERROR_2);
+    AssertReleaseMsg(g_hModKernel32,
+                     ("rtldrNativeLoad(%s,,) is called before IPRT has configured the windows loader!\n", pszFilename));
 
     /*
      * Do we need to add an extension?
@@ -116,6 +119,9 @@ DECLCALLBACK(int) rtldrNativeClose(PRTLDRMODINTERNAL pMod)
 
 int rtldrNativeLoadSystem(const char *pszFilename, const char *pszExt, uint32_t fFlags, PRTLDRMOD phLdrMod)
 {
+    AssertReleaseMsg(g_hModKernel32,
+                     ("rtldrNativeLoadSystem(%s,,) is called before IPRT has configured the windows loader!\n", pszFilename));
+
     /*
      * We only try the System32 directory.
      */
