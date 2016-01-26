@@ -1,6 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
   <sect1>
+    <title>Version 4.3.36 (201x-xx-xx)</title>
+
+    <para>This is a maintenance release. The following items were fixed and/or
+      added:</para>
+
+    <itemizedlist>
+
+      <listitem>
+        <para>GUI: improved handling of text selection mouse pointer (bug #750)</para>
+      </listitem>
+      
+      <listitem>
+        <para>GUI: properly limit the number of VCPUs to the number of physical
+          cores on Mac OS X (bug #15018)</para>
+      </listitem>
+
+      <listitem>
+        <para>3D: fixed state handling under certain conditions (bug #13487)</para>
+      </listitem>
+
+      <listitem>
+        <para>Host services: fixed a crash during VM shutdown under rare
+          conditions (4.3.32 regression; bug #14841)</para>
+      </listitem>
+
+      <listitem>
+        <para>ExtPack: black-list Extension Packs older than 4.3.30 due to
+          incompatible changes not being properly handled in the past</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux hosts: .desktop file compatibility issue (bug #14808)</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux hosts / guests: fixes for RHEL 7.2 (bug #14866)</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux/Mac OS X hosts: fixed a VM hang during startup under certain
+          circumstances (bug #14933)</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux Additions: prevent the compiler from doing dead-code
+          elemination on vital code in guest / host communication (bug #14497)</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux Additions: fixes for Linux 4.5 (bug #15032)</para>
+      </listitem>
+
+      <listitem>
+        <para>X11 Additions: added basic support for X.Org Server 1.18 (3D
+          requires additional fixes)</para>
+      </listitem>
+
+    </itemizedlist>
+  </sect1>
+
+  <sect1>
     <title>Version 4.3.34 (2015-11-10)</title>
 
     <para>This is a maintenance release. The following items were fixed and/or
@@ -15,7 +76,7 @@
       <listitem>
         <para>NAT Network: fixed sporadic crashes on Windows hosts (bug #13899)</para>
       </listitem>
-      
+
       <listitem>
         <para>USB: fixed a crash under certain conditions on hosts with Linux
           kernels older than version 3.3</para>

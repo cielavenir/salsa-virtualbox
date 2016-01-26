@@ -208,7 +208,7 @@ VBOX_VERSION_MINOR = 3
 # This is the current build number. It should be increased every time we publish a
 # new build. The define is available in every source file. Only even build numbers
 # will be published, odd numbers are set during development.
-VBOX_VERSION_BUILD = 34
+VBOX_VERSION_BUILD = 36
 # The raw version string. This *must not* contain any other information/fields than
 # major, minor and build revision (as it is now) -- also will be used for host/guest version
 # comparison.
@@ -1864,6 +1864,9 @@ VBOX_MAKE_ALTERNATIVE_SOURCE ?= $(PATH_OBJ)/MakeAlternativeSource/MakeAlternativ
 # VBoxDef2LazyLoad (lazy dynamic library loader assembly generator)
 VBOX_DEF_2_LAZY_LOAD ?= $(PATH_OBJ)/VBoxDef2LazyLoad/VBoxDef2LazyLoad$(HOSTSUFF_EXE)
 
+# VBoxCheckImports (checks what we imports from on windows)
+VBOX_CHECK_IMPORTS ?= $(PATH_OBJ)/VBoxCheckImports/VBoxCheckImports$(HOSTSUFF_EXE)
+
 # GNU tar if present.
 if1of ($(KBUILD_TARGET), linux os2 win)
  VBOX_GTAR ?= tar
@@ -2866,7 +2869,7 @@ SDK_VBOX_LIBXML2_DEFS.win += WIN32 _WINDOWS _MBCS
 # libxml against VBoxRT
 
 SDK_VBOX_LIBPNG       = .
-SDK_VBOX_LIBPNG_INCS ?= $(PATH_ROOT)/src/libs/libpng-1.2.53
+SDK_VBOX_LIBPNG_INCS ?= $(PATH_ROOT)/src/libs/libpng-1.2.54
 SDK_VBOX_LIBPNG_LIBS ?= $(PATH_STAGE_LIB)/VBox-libpng$(VBOX_SUFF_LIB)
 
 SDK_VBOX_ZLIB         = .
@@ -5734,7 +5737,7 @@ endif
 SVN                    ?= svn$(HOSTSUFF_EXE)
 VBOX_SVN_REV_KMK        = $(PATH_OUT)/revision.kmk
 ifndef VBOX_SVN_REV
- VBOX_SVN_REV_FALLBACK := $(patsubst %:,,  $Rev: 104062 $  )
+ VBOX_SVN_REV_FALLBACK := $(patsubst %:,,  $Rev: 105129 $  )
  VBOX_SVN_DEP          := $(firstword $(wildcard $(PATH_ROOT)/.svn/wc.db $(abspath $(PATH_ROOT)/../.svn/wc.db) $(abspath $(PATH_ROOT)/../../.svn/wc.db) $(PATH_ROOT)/.svn/entries))
  ifeq ($(which $(SVN)),)
   VBOX_SVN_DEP         :=

@@ -1559,7 +1559,7 @@ int Service::initialize()
                             this,
                             0 /* default stack size */,
                             RTTHREADTYPE_DEFAULT,
-                            0, /* no flags. */
+                            RTTHREADFLAGS_WAITABLE,
                             "GSTPROPNTFY");
     }
 
@@ -1586,7 +1586,8 @@ int Service::uninit()
         int rc = RTReqQueueCall(mhReqQNotifyHost, &pReq, 10000, (PFNRT)wakeupNotifyHost, 0);
         if (RT_SUCCESS(rc))
             RTReqRelease(pReq);
-
+        rc = RTThreadWait(mhThreadNotifyHost, 10000, NULL);
+        AssertRC(rc);
         rc = RTReqQueueDestroy(mhReqQNotifyHost);
         AssertRC(rc);
         mhReqQNotifyHost = NIL_RTREQQUEUE;
