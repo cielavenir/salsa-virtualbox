@@ -525,7 +525,6 @@ EXPORTS
     RTLdrLoad
     RTLdrLoadAppPriv
     RTLdrOpen
-    RTLdrOpenkLdr
     RTLdrRelocate
     RTLdrSize
     RTLinuxFindDevicePath

@@ -342,6 +342,18 @@
         <comment>col.1 text, col.2 name: col.2 text, col.3 name: col.3 text, col.4 name: col.4 text</comment>
         <translation>%1, %2: %3, %4: %5, %6: %7</translation>
     </message>
+    <message>
+        <source>Full</source>
+        <translation type="obsolete">Completo</translation>
+    </message>
+    <message>
+        <source>Read-only</source>
+        <translation type="obsolete">Apenas para Leitura</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="obsolete">Sim</translation>
+    </message>
 </context>
 <context>
     <name>UIActionPool</name>
@@ -1785,6 +1797,198 @@
         <source>Enable audio input</source>
         <translation>Habilita entrada de áudio</translation>
     </message>
+    <message>
+        <source>&amp;Find</source>
+        <translation type="obsolete">Procurar(&amp;F)</translation>
+    </message>
+    <message>
+        <source>Log Viewer</source>
+        <translation type="obsolete">Visualizador de Log</translation>
+    </message>
+    <message>
+        <source>&amp;Refresh</source>
+        <translation type="obsolete">Atualiza&amp;r</translation>
+    </message>
+    <message>
+        <source>&amp;Save...</source>
+        <translation type="obsolete">&amp;Salvar...</translation>
+    </message>
+    <message>
+        <source>Guest</source>
+        <translation type="obsolete">Convidado</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="obsolete">Configurações</translation>
+    </message>
+    <message>
+        <source>Log</source>
+        <translation type="obsolete">Log</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="obsolete">Apagar</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation type="obsolete">Atualizar</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation type="obsolete">Renomear</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="obsolete">Copiar</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="obsolete">Importar</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation type="obsolete">Exportar</translation>
+    </message>
+    <message>
+        <source>&amp;Move...</source>
+        <translation type="obsolete">&amp;Mover...</translation>
+    </message>
+    <message>
+        <source>&amp;Take...</source>
+        <translation type="obsolete">&amp;Criar...</translation>
+    </message>
+    <message>
+        <source>Take Snapshot (%1)</source>
+        <translation type="obsolete">Criar Snapshot (%1)</translation>
+    </message>
+    <message>
+        <source>Delete selected snapshot of the virtual machine</source>
+        <translation type="obsolete">Apaga o snapshot selecionado para a máquina virtual</translation>
+    </message>
+    <message>
+        <source>Delete Snapshot (%1)</source>
+        <translation type="obsolete">Apagar Snapshot (%1)</translation>
+    </message>
+    <message>
+        <source>Restore selected snapshot of the virtual machine</source>
+        <translation type="obsolete">Restaura o snapshot selecionado para a máquina virtual</translation>
+    </message>
+    <message>
+        <source>Restore Snapshot (%1)</source>
+        <translation type="obsolete">Restaurar Snapshot (%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with the selected snapshot properties</source>
+        <translation type="obsolete">Abre o painel com as propriedades do snapshot selecionado</translation>
+    </message>
+    <message>
+        <source>Open Snapshot Properties (%1)</source>
+        <translation type="obsolete">Abrir Propriedades do Snapshot (%1)</translation>
+    </message>
+    <message>
+        <source>&amp;Clone...</source>
+        <translation type="obsolete">&amp;Clonar...</translation>
+    </message>
+    <message>
+        <source>Clone Virtual Machine (%1)</source>
+        <translation type="obsolete">Clonar Máquina Virtul (%1)</translation>
+    </message>
+    <message>
+        <source>&amp;Medium</source>
+        <translation type="obsolete">&amp;Mídia</translation>
+    </message>
+    <message>
+        <source>&amp;Copy...</source>
+        <translation type="obsolete">&amp;Copiar...</translation>
+    </message>
+    <message>
+        <source>Copy selected disk image file</source>
+        <translation type="obsolete">Copiar o arquivo de imagem de disco selecionado</translation>
+    </message>
+    <message>
+        <source>Copy Disk Image File (%1)</source>
+        <translation type="obsolete">Copiar Arquivo de Imagem de Disco (%1)</translation>
+    </message>
+    <message>
+        <source>Move selected disk image file</source>
+        <translation type="obsolete">Mover o arquivo de imagem de disco selecionado</translation>
+    </message>
+    <message>
+        <source>Move Disk Image File (%1)</source>
+        <translation type="obsolete">Mover Arquivo de Imagem de Disco (%1)</translation>
+    </message>
+    <message>
+        <source>Remove selected disk image file</source>
+        <translation type="obsolete">Remove o arquivo de imagem de disco selecionado</translation>
+    </message>
+    <message>
+        <source>Remove Disk Image File (%1)</source>
+        <translation type="obsolete">Remover Arquivo de Imagem de Disco (%1)</translation>
+    </message>
+    <message>
+        <source>Re&amp;lease...</source>
+        <translation type="obsolete">&amp;Liberar...</translation>
+    </message>
+    <message>
+        <source>Release Disk Image File (%1)</source>
+        <translation type="obsolete">Liberar Arquivo de Imagem de Disco (%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with selected disk image file properties</source>
+        <translation type="obsolete">Abrir painel com as propriedades do arquivo de imagem de disco selecionado</translation>
+    </message>
+    <message>
+        <source>Open Disk Image File Properties (%1)</source>
+        <translation type="obsolete">Abrir Propriedades do Arquivo de Imagem de Disco (%1)</translation>
+    </message>
+    <message>
+        <source>Refresh Disk Image Files (%1)</source>
+        <translation type="obsolete">Atualizar Arquivos de Imagem de Disco (%1)</translation>
+    </message>
+    <message>
+        <source>Create new host-only network</source>
+        <translation type="obsolete">Criar nova rede exclusiva de hospedeiro</translation>
+    </message>
+    <message>
+        <source>Create Host-only Network (%1)</source>
+        <translation type="obsolete">Criar Rede Exclusiva de Hospedeiro (%1)</translation>
+    </message>
+    <message>
+        <source>Remove selected host-only network</source>
+        <translation type="obsolete">Remover rede exclusiva de hospedeiro selecionada</translation>
+    </message>
+    <message>
+        <source>Remove Host-only Network (%1)</source>
+        <translation type="obsolete">Remover Rede Exclusiva de Hospedeiro (%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with selected host-only network properties</source>
+        <translation type="obsolete">Abrir painel com as propriedades da rede exclusiva de hospedeiro selecionada</translation>
+    </message>
+    <message>
+        <source>Open Host-only Network Properties (%1)</source>
+        <translation type="obsolete">Abrir Rede Exclusiva de Hospedeiro (%1)</translation>
+    </message>
+    <message>
+        <source>Refresh the list of host-only networks</source>
+        <translation type="obsolete">Atualizar a lista de redes exclusivas de hospedeiro</translation>
+    </message>
+    <message>
+        <source>Refresh Host-only Networks (%1)</source>
+        <translation type="obsolete">Atualizar Redes Exclusivas de Hospedeiro (%1)</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="obsolete">Acrescentar</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="obsolete">Remover</translation>
+    </message>
+    <message>
+        <source>Help</source>
+        <translation type="obsolete">Ajuda</translation>
+    </message>
 </context>
 <context>
     <name>UIActionPoolRuntime</name>
@@ -2089,6 +2293,94 @@
     </message>
 </context>
 <context>
+    <name>UIChooserItemGroup</name>
+    <message>
+        <source>Virtual Machine group</source>
+        <translation type="obsolete">Grupo de Máquinas virtuais</translation>
+    </message>
+    <message>
+        <source>Enter group</source>
+        <translation type="obsolete">Entrar no grupo</translation>
+    </message>
+    <message>
+        <source>Exit group</source>
+        <translation type="obsolete">Sair do grupo</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;%1&lt;/b&gt;</source>
+        <comment>Group item tool-tip / Group name</comment>
+        <translation type="obsolete">&lt;qt&gt;%1&lt;/qt&gt;</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n group(s)</source>
+        <comment>Group item tool-tip / Group info</comment>
+        <translation type="obsolete">
+            <numerusform>%n grupo</numerusform>
+            <numerusform>%n grupos</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Group info wrapper</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1&lt;/nobr&gt;</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n machine(s)</source>
+        <comment>Group item tool-tip / Machine info</comment>
+        <translation type="obsolete">
+            <numerusform>%n máquina</numerusform>
+            <numerusform>%n máquinas</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>(%n running)</source>
+        <comment>Group item tool-tip / Running machine info</comment>
+        <translation type="obsolete">
+            <numerusform>(%n em execução)</numerusform>
+            <numerusform>(%n em execução)</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Machine info wrapper</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1 %2&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Machine info wrapper, including running</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1&lt;/nobr&gt; {1 %2&lt;?}</translation>
+    </message>
+    <message>
+        <source>Collapse group</source>
+        <translation type="obsolete">Fechar grupo</translation>
+    </message>
+    <message>
+        <source>Expand group</source>
+        <translation type="obsolete">Expandir grupo</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserItemMachine</name>
+    <message>
+        <source>Virtual Machine</source>
+        <translation type="obsolete">Máquina Virtual</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserModel</name>
+    <message>
+        <source>New group</source>
+        <translation type="obsolete">Novo grupo</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserView</name>
+    <message>
+        <source>Contains a tree of Virtual Machines and their groups</source>
+        <translation type="obsolete">Contém uma árvore de Máquinas Virtuais e seus grupos</translation>
+    </message>
+</context>
+<context>
     <name>UICloneVMWizard</name>
     <message>
         <source>Clone a virtual machine</source>
@@ -2223,6 +2515,59 @@
     </message>
 </context>
 <context>
+    <name>UICloudProfileDetailsWidget</name>
+    <message>
+        <source>Add</source>
+        <translation type="obsolete">Acrescentar</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="obsolete">Aplicar</translation>
+    </message>
+    <message>
+        <source>Apply Changes (%1)</source>
+        <translation type="obsolete">Aplicar Mudanças (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UICloudProfileManager</name>
+    <message>
+        <source>Apply</source>
+        <translation type="obsolete">Aplicar</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Fechar</translation>
+    </message>
+    <message>
+        <source>Close dialog without saving</source>
+        <translation type="obsolete">Fecha o diálogo sem salvar</translation>
+    </message>
+    <message>
+        <source>Apply Changes (%1)</source>
+        <translation type="obsolete">Aplicar Mudanças (%1)</translation>
+    </message>
+    <message>
+        <source>Close Window (%1)</source>
+        <translation type="obsolete">Fechar Janela (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UICustomFileSystemModel</name>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nome</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">Tamanho</translation>
+    </message>
+    <message>
+        <source>Path</source>
+        <translation type="obsolete">Caminho</translation>
+    </message>
+</context>
+<context>
     <name>UIDescriptionPagePrivate</name>
     <message>
         <source>No description. Press the Edit button below to add it.</source>
@@ -2235,6 +2580,278 @@
     <message>
         <source>Edit (Ctrl+E)</source>
         <translation type="obsolete">Editar (Ctrl+E)</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetails</name>
+    <message>
+        <source>Name</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">Nome</translation>
+    </message>
+    <message>
+        <source>Operating System</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">Sistema Operacional</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">Grupos</translation>
+    </message>
+    <message>
+        <source>Information Inaccessible</source>
+        <comment>details</comment>
+        <translation type="obsolete">Informação Inacessível</translation>
+    </message>
+    <message>
+        <source>Base Memory</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Memória Principal</translation>
+    </message>
+    <message>
+        <source>%1 MB</source>
+        <comment>details</comment>
+        <translation type="obsolete">%1 MB</translation>
+    </message>
+    <message>
+        <source>Processors</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Processadores</translation>
+    </message>
+    <message>
+        <source>%1%</source>
+        <comment>details</comment>
+        <translation type="obsolete">%1%</translation>
+    </message>
+    <message>
+        <source>Boot Order</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Ordem de Boot</translation>
+    </message>
+    <message>
+        <source>Chipset Type</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Tipo de Chipset</translation>
+    </message>
+    <message>
+        <source>EFI</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">EFI</translation>
+    </message>
+    <message>
+        <source>VT-x/AMD-V</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">VT-x/AMD-V</translation>
+    </message>
+    <message>
+        <source>Nested Paging</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Paginação Aninhada</translation>
+    </message>
+    <message>
+        <source>PAE/NX</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">PAE/NX</translation>
+    </message>
+    <message>
+        <source>Minimal Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Paravirtualização Mínima</translation>
+    </message>
+    <message>
+        <source>Hyper-V Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Paravirtualização Hyper-V</translation>
+    </message>
+    <message>
+        <source>KVM Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Paravirtualização KVM</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Aceleração</translation>
+    </message>
+    <message>
+        <source>Video Memory</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Memória de Vídeo</translation>
+    </message>
+    <message>
+        <source>Screens</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Telas</translation>
+    </message>
+    <message>
+        <source>Scale-factor</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Fator de Escala</translation>
+    </message>
+    <message>
+        <source>2D Video</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Vídeo 2D</translation>
+    </message>
+    <message>
+        <source>3D</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">3D</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Aceleração</translation>
+    </message>
+    <message>
+        <source>Remote Desktop Server</source>
+        <comment>details (display/vrde)</comment>
+        <translation type="obsolete">Servidor de Desktop Remoto</translation>
+    </message>
+    <message>
+        <source>Video Capture File</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">Arquivo de Captura de Vídeo</translation>
+    </message>
+    <message>
+        <source>Video Capture Attributes</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">Atributos de Captura de Vídeo</translation>
+    </message>
+    <message>
+        <source>Frame Size: %1x%2, Frame Rate: %3fps, Bit Rate: %4kbps</source>
+        <translation type="obsolete">Tamanho do Frame: %1x%2, Frame Rate: %3fps, Bit Rate: %4kbps</translation>
+    </message>
+    <message>
+        <source>Video Capture</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">Captura de Vídeo</translation>
+    </message>
+    <message>
+        <source>[Optical Drive]</source>
+        <comment>details (storage)</comment>
+        <translation type="obsolete">[Discos Óptico]</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <comment>details (storage)</comment>
+        <translation type="obsolete">Não Conectado</translation>
+    </message>
+    <message>
+        <source>Host Driver</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">Driver do Hospedeiro </translation>
+    </message>
+    <message>
+        <source>Controller</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">Controladora</translation>
+    </message>
+    <message>
+        <source>Audio Output</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">Saída de Áudio</translation>
+    </message>
+    <message>
+        <source>Audio Input</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">Entrada de Áudio</translation>
+    </message>
+    <message>
+        <source>Bridged Adapter, %1</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Placa em modo Bridge, %1</translation>
+    </message>
+    <message>
+        <source>Internal Network, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Rede interna, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Host-only Adapter, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Placa de rede exclusiva de hospedeiro (host-only), &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Generic Driver, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Driver genérico, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Generic Driver, &apos;%1&apos; { %2 }</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Driver genérico, &apos;%1&apos; { %2 }</translation>
+    </message>
+    <message>
+        <source>NAT Network, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Rede NAT, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Adapter %1</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Adaptador %1</translation>
+    </message>
+    <message>
+        <source>Port %1</source>
+        <comment>details (serial)</comment>
+        <translation type="obsolete">Porta %1</translation>
+    </message>
+    <message>
+        <source>USB Controller</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">Controladora USB</translation>
+    </message>
+    <message>
+        <source>Device Filters</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">Filtros de Dispositivo</translation>
+    </message>
+    <message>
+        <source>%1 (%2 active)</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">%1 (%2 ativos)</translation>
+    </message>
+    <message>
+        <source>USB Controller Inaccessible</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">Controladora USB inacessível</translation>
+    </message>
+    <message>
+        <source>Shared Folders</source>
+        <comment>details (shared folders)</comment>
+        <translation type="obsolete">Pastas Compartilhadas</translation>
+    </message>
+    <message>
+        <source>Menu-bar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">Barra de Menu</translation>
+    </message>
+    <message>
+        <source>Status-bar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">Barra de Status</translation>
+    </message>
+    <message>
+        <source>Mini-toolbar Position</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">Posição da Minibarra de Ferramentas</translation>
+    </message>
+    <message>
+        <source>Top</source>
+        <comment>details (user interface/mini-toolbar position)</comment>
+        <translation type="obsolete">Superior</translation>
+    </message>
+    <message>
+        <source>Bottom</source>
+        <comment>details (user interface/mini-toolbar position)</comment>
+        <translation type="obsolete">Inferior</translation>
+    </message>
+    <message>
+        <source>Mini-toolbar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">Minibarra de Ferramentas</translation>
     </message>
 </context>
 <context>
@@ -2467,6 +3084,14 @@
         <source>None</source>
         <comment>details report (description)</comment>
         <translation type="obsolete">Nenhum</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetailsElement</name>
+    <message>
+        <source>%1 details</source>
+        <comment>like &apos;General details&apos; or &apos;Storage details&apos;</comment>
+        <translation type="obsolete">Detalhes de %1</translation>
     </message>
 </context>
 <context>
@@ -2766,6 +3391,20 @@
     </message>
 </context>
 <context>
+    <name>UIDetailsSet</name>
+    <message>
+        <source>Contains the details of virtual machine &apos;%1&apos;</source>
+        <translation type="obsolete">Contém os detalhes da máquina virtual &apos;%1&apos;</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetailsView</name>
+    <message>
+        <source>Contains a list of Virtual Machine details</source>
+        <translation type="obsolete">Contém uma lista de detalhes de máquinas virtuais</translation>
+    </message>
+</context>
+<context>
     <name>UIDnDDrag</name>
     <message>
         <source>Retrieving data ...</source>
@@ -2935,6 +3574,13 @@
             <numerusform>&lt;nobr&gt;Usado pelo(s) seguinte(s) %n disco(s) rígido(s):&lt;/nobr&gt;&lt;br&gt;%1</numerusform>
             <numerusform></numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>UIErrorPane</name>
+    <message>
+        <source>The selected virtual machine is &lt;i&gt;inaccessible&lt;/i&gt;. Please inspect the error message shown below and press the &lt;b&gt;Refresh&lt;/b&gt; button if you want to repeat the accessibility check:</source>
+        <translation type="obsolete">A máquina virtual selecionada está &lt;i&gt;inacessível&lt;/i&gt;. Por favor verifique a mensagem de erro mostrada abaixo e pressione o botão &lt;b&gt;Atualizar&lt;/b&gt; se desejar repetir o teste de acessibilidade:</translation>
     </message>
 </context>
 <context>
@@ -3319,6 +3965,56 @@ p, li { white-space: pre-wrap; }
         <source>%1, %2: %3</source>
         <comment>col.2 text, col.3 name: col.3 text</comment>
         <translation>%1, %2: %3</translation>
+    </message>
+</context>
+<context>
+    <name>UIFDCreationDialog</name>
+    <message>
+        <source>Size:</source>
+        <translation type="obsolete">Tamanho:</translation>
+    </message>
+    <message>
+        <source>1.44M</source>
+        <translation type="obsolete">1.44M</translation>
+    </message>
+    <message>
+        <source>1.2M</source>
+        <translation type="obsolete">1.2M</translation>
+    </message>
+    <message>
+        <source>720K</source>
+        <translation type="obsolete">720K</translation>
+    </message>
+    <message>
+        <source>360K</source>
+        <translation type="obsolete">360K</translation>
+    </message>
+</context>
+<context>
+    <name>UIFileManager</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Fechar</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">Cancelar</translation>
+    </message>
+    <message>
+        <source>Paused</source>
+        <translation type="obsolete">Pausada</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">Senha</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nome</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">Tamanho</translation>
     </message>
 </context>
 <context>
@@ -4577,6 +5273,14 @@ p, li { white-space: pre-wrap; }
         <source>When checked, machine windows will be raised when the mouse pointer moves over them.</source>
         <translation>Quando selecionado, as janelas relativas a esta máquina terão o foco quando o ponteiro do mouse passar por cima delas.</translation>
     </message>
+    <message>
+        <source>Scale Factor:</source>
+        <translation type="obsolete">Fator de E&amp;scalonamento:</translation>
+    </message>
+    <message>
+        <source>Controls the guest screen scale factor.</source>
+        <translation type="obsolete">Determina o fator de escala para a tela do convidado.</translation>
+    </message>
 </context>
 <context>
     <name>UIGlobalSettingsExtension</name>
@@ -5627,6 +6331,40 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIGuestControlFileManager</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Fechar</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">Senha</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nome</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">Tamanho</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">Cancelar</translation>
+    </message>
+    <message>
+        <source>Paused</source>
+        <translation type="obsolete">Pausada</translation>
+    </message>
+</context>
+<context>
+    <name>UIGuestProcessControlWidget</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Fechar</translation>
+    </message>
+</context>
+<context>
     <name>UIHelpButton</name>
     <message>
         <source>&amp;Help</source>
@@ -6062,6 +6800,14 @@ p, li { white-space: pre-wrap; }
         <source>Close Window (%1)</source>
         <translation>Fechar Janela (%1)</translation>
     </message>
+    <message>
+        <source>Adding network...</source>
+        <translation type="obsolete">Adicionando rede...</translation>
+    </message>
+    <message>
+        <source>Removing network...</source>
+        <translation type="obsolete">Removendo rede...</translation>
+    </message>
 </context>
 <context>
     <name>UIHostNetworkManagerWidget</name>
@@ -6278,6 +7024,11 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Shortcut</source>
         <translation>Atalho</translation>
+    </message>
+    <message>
+        <source>%1: %2</source>
+        <comment>scope: description</comment>
+        <translation type="obsolete">%1 %2</translation>
     </message>
 </context>
 <context>
@@ -6954,7 +7705,7 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Remote Desktop Server Port</source>
         <comment>details report (VRDE Server)</comment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -7153,6 +7904,56 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIItemHostNetwork</name>
+    <message>
+        <source>Enable</source>
+        <comment>DHCP Server</comment>
+        <translation type="obsolete">Habilitar</translation>
+    </message>
+    <message>
+        <source>Automatically configured</source>
+        <comment>interface</comment>
+        <translation type="obsolete">Configurada automaticamente</translation>
+    </message>
+    <message>
+        <source>Manually configured</source>
+        <comment>interface</comment>
+        <translation type="obsolete">Configurada manualmente</translation>
+    </message>
+    <message>
+        <source>IPv4 Address</source>
+        <translation type="obsolete">Endereço IPv4</translation>
+    </message>
+    <message>
+        <source>IPv4 Network Mask</source>
+        <translation type="obsolete">Máscara de Rede IPv4</translation>
+    </message>
+    <message>
+        <source>IPv6 Address</source>
+        <translation type="obsolete">Endereço IPv6</translation>
+    </message>
+    <message>
+        <source>DHCP Server</source>
+        <translation type="obsolete">Servidor DHCP</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation type="obsolete">Endereço</translation>
+    </message>
+    <message>
+        <source>Network Mask</source>
+        <translation type="obsolete">Máscara de Rede</translation>
+    </message>
+    <message>
+        <source>Lower Bound</source>
+        <translation type="obsolete">Faixa Inferior</translation>
+    </message>
+    <message>
+        <source>Upper Bound</source>
+        <translation type="obsolete">Faixa Superior</translation>
+    </message>
+</context>
+<context>
     <name>UIItemNetworkNAT</name>
     <message>
         <source>%1, %2</source>
@@ -7163,6 +7964,93 @@ p, li { white-space: pre-wrap; }
         <source>%1</source>
         <comment>col.2 text</comment>
         <translation>%1</translation>
+    </message>
+    <message>
+        <source>Network Name</source>
+        <translation type="obsolete">Nome da Rede</translation>
+    </message>
+    <message>
+        <source>[empty]</source>
+        <translation type="obsolete">[vazio]</translation>
+    </message>
+    <message>
+        <source>%1 (renamed from %2)</source>
+        <translation type="obsolete">%1 (renomeada de %2)</translation>
+    </message>
+    <message>
+        <source>Old Network Name</source>
+        <translation type="obsolete">Nome Antigo da Rede</translation>
+    </message>
+    <message>
+        <source>New Network Name</source>
+        <translation type="obsolete">Nome Novo da Rede</translation>
+    </message>
+    <message>
+        <source>Network CIDR</source>
+        <translation type="obsolete">CIDR da Rede</translation>
+    </message>
+    <message>
+        <source>Supports DHCP</source>
+        <translation type="obsolete">Suporta DHCP</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation type="obsolete">sim</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation type="obsolete">não</translation>
+    </message>
+    <message>
+        <source>Supports IPv6</source>
+        <translation type="obsolete">Suporta IPv6</translation>
+    </message>
+    <message>
+        <source>Default IPv6 route</source>
+        <translation type="obsolete">Rota IPv6 padrão</translation>
+    </message>
+    <message>
+        <source>No new name specified for the NAT network previously called &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">Nenhum nome especificado para a rede NAT previamente conhecida como &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>No CIDR specified for the NAT network &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">Nenhum CIDR especificado para a rede NAT &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>No CIDR specified for the NAT network previously called &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">Nenhum CIDR especificado para a rede NAT previamente chamada de &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Invalid CIDR specified (&lt;i&gt;%1&lt;/i&gt;) for the NAT network &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation type="obsolete">CIDR inválido (&lt;i&gt;%1&lt;/i&gt;) especificado para a rede NAT &lt;b&gt;%2&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Invalid CIDR specified (&lt;i&gt;%1&lt;/i&gt;) for the NAT network previously called &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation type="obsolete">CIDR inválido (&lt;i&gt;%1&lt;/i&gt;) especificado para a rede NAT previamente chamada &lt;b&gt;%2&lt;/b&gt;.</translation>
+    </message>
+</context>
+<context>
+    <name>UILanguageItem</name>
+    <message>
+        <source> (built-in)</source>
+        <comment>Language</comment>
+        <translation type="obsolete"> (embutido)</translation>
+    </message>
+    <message>
+        <source>&lt;unavailable&gt;</source>
+        <comment>Language</comment>
+        <translation type="obsolete">&lt;indisponível&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;unknown&gt;</source>
+        <comment>Author(s)</comment>
+        <translation type="obsolete">&lt;desconhecido&gt;</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <comment>Language</comment>
+        <translation type="obsolete">Padrão</translation>
     </message>
 </context>
 <context>
@@ -7249,6 +8137,33 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Connect Network Adapter %1</source>
         <translation type="obsolete">Conectar Placa de Rede %1</translation>
+    </message>
+</context>
+<context>
+    <name>UIMachinePreview</name>
+    <message>
+        <source>No preview</source>
+        <translation type="obsolete">Sem pré-visualização</translation>
+    </message>
+    <message>
+        <source>Update disabled</source>
+        <translation type="obsolete">Atualizações desabilitadas</translation>
+    </message>
+    <message>
+        <source>Every 0.5 s</source>
+        <translation type="obsolete">A cada 0.5 s</translation>
+    </message>
+    <message>
+        <source>Every 1 s</source>
+        <translation type="obsolete">A cada 1 s</translation>
+    </message>
+    <message>
+        <source>Every 2 s</source>
+        <translation type="obsolete">A cada 2 s</translation>
+    </message>
+    <message>
+        <source>Every 5 s</source>
+        <translation type="obsolete">Every 10 s {5 ?}</translation>
     </message>
 </context>
 <context>
@@ -10393,6 +11308,58 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIMediumItem</name>
+    <message>
+        <source>Current extension (*.%1)</source>
+        <translation type="obsolete">Extensão atual (*.%1)</translation>
+    </message>
+    <message>
+        <source>Choose the location of this medium</source>
+        <translation type="obsolete">Escolha a localização desta mídia</translation>
+    </message>
+    <message>
+        <source>Moving medium...</source>
+        <translation type="obsolete">Movendo mídia...</translation>
+    </message>
+    <message>
+        <source>%1, %2: %3, %4: %5</source>
+        <comment>col.1 text, col.2 name: col.2 text, col.3 name: col.3 text</comment>
+        <translation type="obsolete">%1, %2: %3, %4: %5</translation>
+    </message>
+    <message>
+        <source>Format:</source>
+        <translation type="obsolete">Formato:</translation>
+    </message>
+    <message>
+        <source>Storage details:</source>
+        <translation type="obsolete">Detalhes de armazenamento:</translation>
+    </message>
+    <message>
+        <source>Attached to:</source>
+        <translation type="obsolete">Conectado a:</translation>
+    </message>
+    <message>
+        <source>Encrypted with key:</source>
+        <translation type="obsolete">Criptografado com a chave:</translation>
+    </message>
+    <message>
+        <source>UUID:</source>
+        <translation type="obsolete">UUID:</translation>
+    </message>
+    <message>
+        <source>&lt;i&gt;Not&amp;nbsp;Attached&lt;/i&gt;</source>
+        <translation type="obsolete">&lt;i&gt;Não&amp;nbsp;Conectado&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;i&gt;Not&amp;nbsp;Encrypted&lt;/i&gt;</source>
+        <translation type="obsolete">&lt;i&gt;Não&amp;nbsp;Criptografado&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>Removing medium...</source>
+        <translation type="obsolete">Removendo mídia...</translation>
+    </message>
+</context>
+<context>
     <name>UIMediumManager</name>
     <message>
         <source>&amp;Hard drives</source>
@@ -10608,6 +11575,30 @@ p, li { white-space: pre-wrap; }
         <source>Move selected disk image file</source>
         <translation>Mover o arquivo de imagem de disco selecionado</translation>
     </message>
+    <message>
+        <source>Size:</source>
+        <translation type="obsolete">Tamanho:</translation>
+    </message>
+    <message>
+        <source>1.44M</source>
+        <translation type="obsolete">1.44M</translation>
+    </message>
+    <message>
+        <source>1.2M</source>
+        <translation type="obsolete">1.2M</translation>
+    </message>
+    <message>
+        <source>720K</source>
+        <translation type="obsolete">720K</translation>
+    </message>
+    <message>
+        <source>360K</source>
+        <translation type="obsolete">360K</translation>
+    </message>
+    <message>
+        <source>&amp;Create</source>
+        <translation type="obsolete">&amp;Criar</translation>
+    </message>
 </context>
 <context>
     <name>UIMediumManagerWidget</name>
@@ -10630,6 +11621,33 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Refresh Disk Image Files (%1)</source>
         <translation type="vanished">Atualizar Arquivos de Imagem de Disco (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UIMediumSelector</name>
+    <message>
+        <source>&amp;Add...</source>
+        <translation type="obsolete">&amp;Acrescentar...</translation>
+    </message>
+    <message>
+        <source>&amp;Refresh</source>
+        <translation type="obsolete">Atualiza&amp;r</translation>
+    </message>
+    <message>
+        <source>Refresh Disk Image Files (%1)</source>
+        <translation type="obsolete">Atualizar Arquivos de Imagem de Disco (%1)</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nome</translation>
+    </message>
+    <message>
+        <source>Virtual Size</source>
+        <translation type="obsolete">Tamanho Virtual</translation>
+    </message>
+    <message>
+        <source>Actual Size</source>
+        <translation type="obsolete">Tamanho Real</translation>
     </message>
 </context>
 <context>
@@ -12850,6 +13868,10 @@ p, li { white-space: pre-wrap; }
         <source>&lt;p&gt;The changes you requested require this disk to be released from the machines it is attached to.&lt;/p&gt;&lt;p&gt;Are you sure you want to release the disk image file &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;?&lt;/p&gt;&lt;p&gt;This will detach it from the following virtual machine(s): &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;</source>
         <translation>&lt;p&gt;As mudanças que você solicitou exigem que este disco seja liberado das máquinas às quais estão conectadas.&lt;/p&gt;&lt;p&gt;Você tem certeza de que quer liberar o arquivo de imagem de disco &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;?&lt;/p&gt;&lt;p&gt;Isto fará com que o disco seja desconectado das seguintes máquinas virtuais: &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;</translation>
     </message>
+    <message>
+        <source>Import</source>
+        <translation type="obsolete">Importar</translation>
+    </message>
 </context>
 <context>
     <name>UIMiniProcessWidgetAdditions</name>
@@ -14228,6 +15250,13 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
+    <name>UIScaleFactorEditor</name>
+    <message>
+        <source>Controls the guest screen scale factor.</source>
+        <translation type="obsolete">Determina o fator de escala para a tela do convidado.</translation>
+    </message>
+</context>
+<context>
     <name>UIScreenshotViewer</name>
     <message>
         <source>Screenshot of %1 (%2)</source>
@@ -14561,6 +15590,57 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
+    <name>UISnapshotItem</name>
+    <message>
+        <source>Current State (changed)</source>
+        <comment>Current State (Modified)</comment>
+        <translation type="obsolete">Estado Atual (modificado)</translation>
+    </message>
+    <message>
+        <source>The current state differs from the state stored in the current snapshot</source>
+        <translation type="obsolete">O estado atual difere do estado armazenado no snapshot atual</translation>
+    </message>
+    <message>
+        <source>The current state is identical to the state stored in the current snapshot</source>
+        <translation type="obsolete">O estado atual é idêntico ao estado armazenado no snapshot atual</translation>
+    </message>
+    <message>
+        <source>%1 (%2 ago)</source>
+        <comment>date time (how long ago)</comment>
+        <translation type="obsolete">%1 (%2 atrás)</translation>
+    </message>
+    <message>
+        <source>%1 since %2</source>
+        <comment>Current State (time or date + time)</comment>
+        <translation type="obsolete">%1 desde %2</translation>
+    </message>
+    <message>
+        <source>current</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">atual</translation>
+    </message>
+    <message>
+        <source>online</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">online</translation>
+    </message>
+    <message>
+        <source>offline</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">offline</translation>
+    </message>
+    <message>
+        <source>Taken at %1</source>
+        <comment>Snapshot (time)</comment>
+        <translation type="obsolete">Criado em %1</translation>
+    </message>
+    <message>
+        <source>Taken on %1</source>
+        <comment>Snapshot (date + time)</comment>
+        <translation type="obsolete">Criado em %1</translation>
+    </message>
+</context>
+<context>
     <name>UISnapshotPane</name>
     <message>
         <source>Current State (changed)</source>
@@ -14767,6 +15847,21 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Network</source>
+        <translation type="obsolete">Rede</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="obsolete">Detalhes</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="obsolete">Snapshots</translation>
+    </message>
+</context>
+<context>
     <name>UIToolsPaneGlobal</name>
     <message>
         <source>&lt;h3&gt;Welcome to VirtualBox!&lt;/h3&gt;&lt;p&gt;This window represents a set of global tools which are currently opened (or can be opened). They are not related to any particular machine but to the complete VM collection. For a list of currently available tools check the corresponding menu at the right side of the main tool bar located at the top of the window. This list will be extended with new tools in future releases.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;%1&lt;/b&gt; key to get instant help, or visit &lt;a href=https://www.virtualbox.org&gt;www.virtualbox.org&lt;/a&gt; for more information and latest news.&lt;/p&gt;</source>
@@ -14811,6 +15906,46 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
         <source>%1</source>
         <comment>col.1 text</comment>
         <translation>%1</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Vendor ID: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Vendor ID: %1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Product ID: %2&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Product ID: %2&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Revision: %3&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Revisão: %3&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Product: %4&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Produto: %4&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Manufacturer: %5&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Fabricante: %5&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Serial No.: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Número de Série.: %1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Port: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Porta: %1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;State: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Estado: %1&lt;/nobr&gt;</translation>
     </message>
 </context>
 <context>
@@ -15388,6 +16523,37 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
     </message>
 </context>
 <context>
+    <name>UIVMLogViewerWidget</name>
+    <message>
+        <source>Log Viewer</source>
+        <translation type="obsolete">Visualizador de Log</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Fechar</translation>
+    </message>
+    <message>
+        <source>Enter a search string here</source>
+        <translation type="obsolete">Entre o termo de busca aqui</translation>
+    </message>
+    <message>
+        <source>C&amp;ase Sensitive</source>
+        <translation type="obsolete">Sensível à C&amp;aixa</translation>
+    </message>
+    <message>
+        <source>String not found</source>
+        <translation type="obsolete">Frase não encontrada</translation>
+    </message>
+    <message>
+        <source>Save VirtualBox Log As</source>
+        <translation type="obsolete">Salvar Log do VirtualBox Como</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;No log files found. Press the &lt;b&gt;Refresh&lt;/b&gt; button to rescan the log folder &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;.&lt;/p&gt;</source>
+        <translation type="obsolete">&lt;p&gt;Nenhum arquivo de log encontrado. Pressione o botão &lt;b&gt;Atualizar&lt;/b&gt; para ler novamente a pasta de logs em &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;.&lt;/p&gt;</translation>
+    </message>
+</context>
+<context>
     <name>UIVMPreviewWindow</name>
     <message>
         <source>Update Disabled</source>
@@ -15416,6 +16582,44 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
     <message>
         <source>No Preview</source>
         <translation type="obsolete">Sem Pré-Visualização</translation>
+    </message>
+</context>
+<context>
+    <name>UIVirtualBoxManager</name>
+    <message>
+        <source>Manager</source>
+        <comment>Note: main window title which is prepended by the product name.</comment>
+        <translation type="obsolete">Gerenciador</translation>
+    </message>
+    <message>
+        <source>Select a virtual machine file</source>
+        <translation type="obsolete">Selecione um arquivo de máquina virtual</translation>
+    </message>
+    <message>
+        <source>Virtual machine files (%1)</source>
+        <translation type="obsolete">Arquivos de máquina virtual (%1)</translation>
+    </message>
+    <message>
+        <source>Show Toolbar Text</source>
+        <translation type="obsolete">Exibir Texto da Barra de Ferramentas</translation>
+    </message>
+</context>
+<context>
+    <name>UIVirtualBoxManagerWidget</name>
+    <message>
+        <source>Show Toolbar Text</source>
+        <translation type="obsolete">Exibir Texto da Barra de Ferramentas</translation>
+    </message>
+</context>
+<context>
+    <name>UIVisoCreator</name>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nome</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">Tamanho</translation>
     </message>
 </context>
 <context>
@@ -15982,6 +17186,10 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
     <message>
         <source>Write in Oracle Public Cloud 1.0 format.</source>
         <translation>Grava no formato Oracle Public Cloud 1.0.</translation>
+    </message>
+    <message>
+        <source>Choose a file to export the virtual appliance to...</source>
+        <translation type="obsolete">Escolha um arquivo para exportar o appliance virtual...</translation>
     </message>
 </context>
 <context>
@@ -19923,6 +21131,118 @@ Versão %1</translation>
         <source>Audio</source>
         <comment>IndicatorType</comment>
         <translation>Áudio</translation>
+    </message>
+    <message>
+        <source>Processors</source>
+        <comment>details report</comment>
+        <translation type="obsolete">Processadores</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nome</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation type="obsolete">Localização</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="obsolete">Grupos</translation>
+    </message>
+    <message>
+        <source>RAM</source>
+        <translation type="obsolete">Memória RAM</translation>
+    </message>
+    <message>
+        <source>Boot Order</source>
+        <translation type="obsolete">Ordem de Boot</translation>
+    </message>
+    <message>
+        <source>Chipset Type</source>
+        <translation type="obsolete">Tipo de Chipset</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <translation type="obsolete">Aceleração</translation>
+    </message>
+    <message>
+        <source>Hard Disks</source>
+        <translation type="obsolete">Discos Rígidos</translation>
+    </message>
+    <message>
+        <source>Controller</source>
+        <translation type="obsolete">Controladora</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <translation type="obsolete">Não Conectado</translation>
+    </message>
+    <message>
+        <source>NAT</source>
+        <translation type="obsolete">NAT</translation>
+    </message>
+    <message>
+        <source>Internal Network</source>
+        <translation type="obsolete">Rede Interna</translation>
+    </message>
+    <message>
+        <source>Generic Driver</source>
+        <translation type="obsolete">Driver Genérico</translation>
+    </message>
+    <message>
+        <source>Host Pipe</source>
+        <translation type="obsolete">Pipe no Hospedeiro</translation>
+    </message>
+    <message>
+        <source>Host Device</source>
+        <translation type="obsolete">Dispositivo no Hospedeiro</translation>
+    </message>
+    <message>
+        <source>Raw File</source>
+        <translation type="obsolete">Arquivo de Saída</translation>
+    </message>
+    <message>
+        <source>TCP</source>
+        <translation type="obsolete">TCP</translation>
+    </message>
+    <message>
+        <source>Device Filters</source>
+        <translation type="obsolete">Filtros de Dispositivo</translation>
+    </message>
+    <message>
+        <source>VDI (VirtualBox Disk Image)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VDI (VirtualBox Disk Image)</translation>
+    </message>
+    <message>
+        <source>VMDK (Virtual Machine Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VMDK (Virtual Machine Disk)</translation>
+    </message>
+    <message>
+        <source>VHD (Virtual Hard Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VHD (Virtual Hard Disk)</translation>
+    </message>
+    <message>
+        <source>HDD (Parallels Hard Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">HDD (Disco Rígido do Parallels)</translation>
+    </message>
+    <message>
+        <source>QED (QEMU enhanced disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">QED (Disco do QEMU)</translation>
+    </message>
+    <message>
+        <source>QCOW (QEMU Copy-On-Write)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">QCOW (QEMU Copy-On-Write)</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <comment>network adapter</comment>
+        <translation type="obsolete">Não Conectado</translation>
     </message>
 </context>
 <context>

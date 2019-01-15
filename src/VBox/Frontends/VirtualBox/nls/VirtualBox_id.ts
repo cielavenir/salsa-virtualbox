@@ -11,7 +11,7 @@
     <message>
         <source>--</source>
         <comment>Native language country name (empty if this language is for all countries)</comment>
-        <translation></translation>
+        <translation type="unfinished">--</translation>
     </message>
     <message>
         <source>English</source>
@@ -21,7 +21,7 @@
     <message>
         <source>--</source>
         <comment>Language country name, in English (empty if native country name is empty)</comment>
-        <translation></translation>
+        <translation type="unfinished">--</translation>
     </message>
     <message>
         <source>Oracle Corporation</source>
@@ -326,6 +326,18 @@
         <source>%1, %2: %3, %4: %5, %6: %7</source>
         <comment>col.1 text, col.2 name: col.2 text, col.3 name: col.3 text, col.4 name: col.4 text</comment>
         <translation>%1, %2: %3, %4: %5, %6: %7</translation>
+    </message>
+    <message>
+        <source>Full</source>
+        <translation type="obsolete">Penuh</translation>
+    </message>
+    <message>
+        <source>Read-only</source>
+        <translation type="obsolete">Baca saja</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="obsolete">Ya</translation>
     </message>
 </context>
 <context>
@@ -1562,6 +1574,182 @@
         <source>Enable audio input</source>
         <translation>Memfungsikan masukan audio</translation>
     </message>
+    <message>
+        <source>Log Viewer</source>
+        <translation type="obsolete">Viewer Log</translation>
+    </message>
+    <message>
+        <source>&amp;Save...</source>
+        <translation type="obsolete">&amp;Simpan...</translation>
+    </message>
+    <message>
+        <source>Guest</source>
+        <translation type="obsolete">Guest</translation>
+    </message>
+    <message>
+        <source>Log</source>
+        <translation type="obsolete">Log</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="obsolete">Hapus</translation>
+    </message>
+    <message>
+        <source>Refresh</source>
+        <translation type="obsolete">Refresh</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation type="obsolete">Ubah nama</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="obsolete">Salin</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="obsolete">Impor</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation type="obsolete">Ekspor</translation>
+    </message>
+    <message>
+        <source>&amp;Move...</source>
+        <translation type="obsolete">Pi&amp;ndah...</translation>
+    </message>
+    <message>
+        <source>&amp;Take...</source>
+        <translation type="obsolete">&amp;Ambil...</translation>
+    </message>
+    <message>
+        <source>Take a snapshot of the current virtual machine state</source>
+        <translation type="obsolete">Ambil snapshot keadaan mesin virtual saat ini</translation>
+    </message>
+    <message>
+        <source>Take Snapshot (%1)</source>
+        <translation type="obsolete">Ambil Snapshot (%1)</translation>
+    </message>
+    <message>
+        <source>Delete Snapshot (%1)</source>
+        <translation type="obsolete">Hapus Snapshot (%1)</translation>
+    </message>
+    <message>
+        <source>Restore Snapshot (%1)</source>
+        <translation type="obsolete">Pulihkan Snapshot (%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with the selected snapshot properties</source>
+        <translation type="obsolete">Buka panel dengan properti snapshot yang dipilih</translation>
+    </message>
+    <message>
+        <source>Open Snapshot Properties (%1)</source>
+        <translation type="obsolete">Buka Properti Snapshot (%1)</translation>
+    </message>
+    <message>
+        <source>&amp;Clone...</source>
+        <translation type="obsolete">&amp;Klon...</translation>
+    </message>
+    <message>
+        <source>Clone Virtual Machine (%1)</source>
+        <translation type="obsolete">Klon Mesin Virtual (%1)</translation>
+    </message>
+    <message>
+        <source>&amp;Medium</source>
+        <translation type="obsolete">&amp;Medium</translation>
+    </message>
+    <message>
+        <source>&amp;Copy...</source>
+        <translation type="obsolete">&amp;Salin...</translation>
+    </message>
+    <message>
+        <source>Copy selected disk image file</source>
+        <translation type="obsolete">Salin berkas image disk yang dipilih</translation>
+    </message>
+    <message>
+        <source>Copy Disk Image File (%1)</source>
+        <translation type="obsolete">Salin Berkas Image Disk (%1)</translation>
+    </message>
+    <message>
+        <source>Move selected disk image file</source>
+        <translation type="obsolete">Pindahkan berkas image disk yang dipilih</translation>
+    </message>
+    <message>
+        <source>Move Disk Image File (%1)</source>
+        <translation type="obsolete">Pindahkan Berkas Image Disk (%1)</translation>
+    </message>
+    <message>
+        <source>Remove selected disk image file</source>
+        <translation type="obsolete">Hapus berkas image disk yang dipilih</translation>
+    </message>
+    <message>
+        <source>Remove Disk Image File (%1)</source>
+        <translation type="obsolete">Hapus Berkas Image Disk (%1)</translation>
+    </message>
+    <message>
+        <source>Re&amp;lease...</source>
+        <translation type="obsolete">&amp;Lepas...</translation>
+    </message>
+    <message>
+        <source>Release Disk Image File (%1)</source>
+        <translation type="obsolete">Lepas Berkas Image Disk (%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with selected disk image file properties</source>
+        <translation type="obsolete">Buka panel dengan properti berkas image disk yang dipilih</translation>
+    </message>
+    <message>
+        <source>Open Disk Image File Properties (%1)</source>
+        <translation type="obsolete">Buka Properti Berkas Image Disk (%1)</translation>
+    </message>
+    <message>
+        <source>Refresh Disk Image Files (%1)</source>
+        <translation type="obsolete">Segarkan Berkas Image Disk (%1)</translation>
+    </message>
+    <message>
+        <source>Create new host-only network</source>
+        <translation type="obsolete">Menciptakan jaringan hanya-host</translation>
+    </message>
+    <message>
+        <source>Create Host-only Network (%1)</source>
+        <translation type="obsolete">Ciptakan Jaringan Hanya-host (%1)</translation>
+    </message>
+    <message>
+        <source>Remove selected host-only network</source>
+        <translation type="obsolete">Menghapus jaringan hanya-host yang dipilih</translation>
+    </message>
+    <message>
+        <source>Remove Host-only Network (%1)</source>
+        <translation type="obsolete">Hapus Jaringan Hanya-host (%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with selected host-only network properties</source>
+        <translation type="obsolete">Buka panel dengan properti jaringan hanya-host yang dipilih</translation>
+    </message>
+    <message>
+        <source>Open Host-only Network Properties (%1)</source>
+        <translation type="obsolete">Buka Properti Jaringan Hanya-host (%1)</translation>
+    </message>
+    <message>
+        <source>Refresh the list of host-only networks</source>
+        <translation type="obsolete">Segarkan daftar jaringan hanya-host</translation>
+    </message>
+    <message>
+        <source>Refresh Host-only Networks (%1)</source>
+        <translation type="obsolete">Segarkan Jaringan Hanya-host (%1)</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="obsolete">Tambah</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="obsolete">Hapus</translation>
+    </message>
+    <message>
+        <source>Help</source>
+        <translation type="obsolete">Bantuan</translation>
+    </message>
 </context>
 <context>
     <name>UIAddDiskEncryptionPasswordDialog</name>
@@ -1841,6 +2029,91 @@
     </message>
 </context>
 <context>
+    <name>UIChooserItemGroup</name>
+    <message>
+        <source>Virtual Machine group</source>
+        <translation type="obsolete">Grup Mesin Virtual</translation>
+    </message>
+    <message>
+        <source>Enter group</source>
+        <translation type="obsolete">Masuk grup</translation>
+    </message>
+    <message>
+        <source>Exit group</source>
+        <translation type="obsolete">Keluar grup</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;%1&lt;/b&gt;</source>
+        <comment>Group item tool-tip / Group name</comment>
+        <translation type="obsolete">&lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n group(s)</source>
+        <comment>Group item tool-tip / Group info</comment>
+        <translation type="obsolete">
+            <numerusform>%n grup</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Group info wrapper</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1&lt;/nobr&gt;</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n machine(s)</source>
+        <comment>Group item tool-tip / Machine info</comment>
+        <translation type="obsolete">
+            <numerusform>%n mesin</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>(%n running)</source>
+        <comment>Group item tool-tip / Running machine info</comment>
+        <translation type="obsolete">
+            <numerusform>(%n berjalan)</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Machine info wrapper</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1 %2&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Machine info wrapper, including running</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1 %2&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>Collapse group</source>
+        <translation type="obsolete">Runtuhkan grup</translation>
+    </message>
+    <message>
+        <source>Expand group</source>
+        <translation type="obsolete">Kembangkan grup</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserItemMachine</name>
+    <message>
+        <source>Virtual Machine</source>
+        <translation type="obsolete">Mesin Virtual</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserModel</name>
+    <message>
+        <source>New group</source>
+        <translation type="obsolete">Grup baru</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserView</name>
+    <message>
+        <source>Contains a tree of Virtual Machines and their groups</source>
+        <translation type="obsolete">Memuat sebuah pohon Mesin Virtual dan grupnya</translation>
+    </message>
+</context>
+<context>
     <name>UICloneVMWizard</name>
     <message>
         <source>Clone a virtual machine</source>
@@ -1941,6 +2214,75 @@
     </message>
 </context>
 <context>
+    <name>UICloudProfileDetailsWidget</name>
+    <message>
+        <source>Reset</source>
+        <translation type="obsolete">Reset</translation>
+    </message>
+    <message>
+        <source>Reset Changes (%1)</source>
+        <translation type="obsolete">Reset Perubahan (%1)</translation>
+    </message>
+    <message>
+        <source>Add</source>
+        <translation type="obsolete">Tambah</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="obsolete">Terapkan</translation>
+    </message>
+    <message>
+        <source>Apply Changes (%1)</source>
+        <translation type="obsolete">Terapkan Perubahan (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UICloudProfileManager</name>
+    <message>
+        <source>Reset</source>
+        <translation type="obsolete">Reset</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="obsolete">Terapkan</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Tutup</translation>
+    </message>
+    <message>
+        <source>Close dialog without saving</source>
+        <translation type="obsolete">Tutup dialog tanpa menyimpan</translation>
+    </message>
+    <message>
+        <source>Reset Changes (%1)</source>
+        <translation type="obsolete">Reset Perubahan (%1)</translation>
+    </message>
+    <message>
+        <source>Apply Changes (%1)</source>
+        <translation type="obsolete">Terapkan Perubahan (%1)</translation>
+    </message>
+    <message>
+        <source>Close Window (%1)</source>
+        <translation type="obsolete">Tutup Jendela (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UICustomFileSystemModel</name>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nama</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">Ukuran</translation>
+    </message>
+    <message>
+        <source>Path</source>
+        <translation type="obsolete">Path</translation>
+    </message>
+</context>
+<context>
     <name>UIDescriptionPagePrivate</name>
     <message>
         <source>No description. Press the Edit button below to add it.</source>
@@ -1953,6 +2295,278 @@
     <message>
         <source>Edit (Ctrl+E)</source>
         <translation type="obsolete">Edit (Ctrl+E)</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetails</name>
+    <message>
+        <source>Name</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">Nama</translation>
+    </message>
+    <message>
+        <source>Operating System</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">Sistem Operasi</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">Grup</translation>
+    </message>
+    <message>
+        <source>Information Inaccessible</source>
+        <comment>details</comment>
+        <translation type="obsolete">Informasi Tidak Bisa Diakses</translation>
+    </message>
+    <message>
+        <source>Base Memory</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Memori Dasar</translation>
+    </message>
+    <message>
+        <source>%1 MB</source>
+        <comment>details</comment>
+        <translation type="obsolete">%1 MB</translation>
+    </message>
+    <message>
+        <source>Processors</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Prosesor</translation>
+    </message>
+    <message>
+        <source>%1%</source>
+        <comment>details</comment>
+        <translation type="obsolete">%1%</translation>
+    </message>
+    <message>
+        <source>Boot Order</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Urutan Boot</translation>
+    </message>
+    <message>
+        <source>Chipset Type</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Tipe Chipset</translation>
+    </message>
+    <message>
+        <source>EFI</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">EFI</translation>
+    </message>
+    <message>
+        <source>VT-x/AMD-V</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">VT-x/AMD-V</translation>
+    </message>
+    <message>
+        <source>Nested Paging</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Paging Bertingkat</translation>
+    </message>
+    <message>
+        <source>PAE/NX</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">PAE/NX</translation>
+    </message>
+    <message>
+        <source>Minimal Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Paravirtualisasi Minimum</translation>
+    </message>
+    <message>
+        <source>Hyper-V Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Paravirtualisasi Hyper-V</translation>
+    </message>
+    <message>
+        <source>KVM Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Paravirtualisasi KVM</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Akselerasi</translation>
+    </message>
+    <message>
+        <source>Video Memory</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Memori Video</translation>
+    </message>
+    <message>
+        <source>Screens</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Layar</translation>
+    </message>
+    <message>
+        <source>Scale-factor</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Faktor skala</translation>
+    </message>
+    <message>
+        <source>2D Video</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Video 2D</translation>
+    </message>
+    <message>
+        <source>3D</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">3D</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">Akselerasi</translation>
+    </message>
+    <message>
+        <source>Remote Desktop Server Port</source>
+        <comment>details (display/vrde)</comment>
+        <translation type="obsolete">Port Server Remote Desktop</translation>
+    </message>
+    <message>
+        <source>Remote Desktop Server</source>
+        <comment>details (display/vrde)</comment>
+        <translation type="obsolete">Server Remote Desktop</translation>
+    </message>
+    <message>
+        <source>Video Capture File</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">Berkas Tangkapan Video</translation>
+    </message>
+    <message>
+        <source>Video Capture Attributes</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">Atribut Tangkapan Video</translation>
+    </message>
+    <message>
+        <source>Frame Size: %1x%2, Frame Rate: %3fps, Bit Rate: %4kbps</source>
+        <translation type="obsolete">Ukuran Frame: %1x%2, Laju Frame: %3fps, Laju Bit: %4kbps</translation>
+    </message>
+    <message>
+        <source>Video Capture</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">Tangkapan Video</translation>
+    </message>
+    <message>
+        <source>[Optical Drive]</source>
+        <comment>details (storage)</comment>
+        <translation type="obsolete">[Drive Optik]</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <comment>details (storage)</comment>
+        <translation type="obsolete">Tidak Terpasang</translation>
+    </message>
+    <message>
+        <source>Host Driver</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">Driver Host</translation>
+    </message>
+    <message>
+        <source>Controller</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">Pengendali</translation>
+    </message>
+    <message>
+        <source>Audio Output</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">Keluaran Audio</translation>
+    </message>
+    <message>
+        <source>Audio Input</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">Masukan Audio</translation>
+    </message>
+    <message>
+        <source>Bridged Adapter, %1</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Adaptor Ter-bridge, %1</translation>
+    </message>
+    <message>
+        <source>Internal Network, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Jaringan Internal, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Host-only Adapter, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Adaptor Hanya-host, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Generic Driver, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Driver Generik, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Generic Driver, &apos;%1&apos; { %2 }</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Driver Generik, &apos;%1&quot; { %2 }</translation>
+    </message>
+    <message>
+        <source>NAT Network, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">Jaringan NAT, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Port %1</source>
+        <comment>details (serial)</comment>
+        <translation type="obsolete">Port %1</translation>
+    </message>
+    <message>
+        <source>USB Controller</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">Pengendali USB</translation>
+    </message>
+    <message>
+        <source>%1 (%2 active)</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">%1 (%2 aktif)</translation>
+    </message>
+    <message>
+        <source>USB Controller Inaccessible</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">Pengendali USB Tidak Bisa Diakses</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <comment>details (shared folders)</comment>
+        <translation type="obsolete">Tidak Ada</translation>
+    </message>
+    <message>
+        <source>Menu-bar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">Bilah menu</translation>
+    </message>
+    <message>
+        <source>Status-bar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">Bilah status</translation>
+    </message>
+    <message>
+        <source>Mini-toolbar Position</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">Posisi Bilah Alat Mini</translation>
+    </message>
+    <message>
+        <source>Top</source>
+        <comment>details (user interface/mini-toolbar position)</comment>
+        <translation type="obsolete">Puncak</translation>
+    </message>
+    <message>
+        <source>Bottom</source>
+        <comment>details (user interface/mini-toolbar position)</comment>
+        <translation type="obsolete">Dasar</translation>
+    </message>
+    <message>
+        <source>Mini-toolbar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">Bilah Alat Mini</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <comment>details (description)</comment>
+        <translation type="obsolete">Tidak Ada</translation>
     </message>
 </context>
 <context>
@@ -2131,6 +2745,14 @@
         <source>None</source>
         <comment>details report (description)</comment>
         <translation type="obsolete">Tidak Ada</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetailsElement</name>
+    <message>
+        <source>%1 details</source>
+        <comment>like &apos;General details&apos; or &apos;Storage details&apos;</comment>
+        <translation type="obsolete">Rincian %1</translation>
     </message>
 </context>
 <context>
@@ -2422,6 +3044,20 @@
         <source>Generic driver, &apos;%1&apos; {&amp;nbsp;%2&amp;nbsp;}</source>
         <comment>details report (network)</comment>
         <translation type="obsolete">Driver generik, &apos;%1&apos; {&amp;nbsp;%2&amp;nbsp;}</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetailsSet</name>
+    <message>
+        <source>Contains the details of virtual machine &apos;%1&apos;</source>
+        <translation type="obsolete">Berisi rincian dari mesin virtual &apos;%1&apos;</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetailsView</name>
+    <message>
+        <source>Contains a list of Virtual Machine details</source>
+        <translation type="obsolete">Berisi daftar rincian Mesin Virtual</translation>
     </message>
 </context>
 <context>
@@ -2731,6 +3367,56 @@
         <source>%1, %2: %3</source>
         <comment>col.2 text, col.3 name: col.3 text</comment>
         <translation>%1, %2: %3</translation>
+    </message>
+</context>
+<context>
+    <name>UIFDCreationDialog</name>
+    <message>
+        <source>Size:</source>
+        <translation type="obsolete">Ukuran:</translation>
+    </message>
+    <message>
+        <source>1.44M</source>
+        <translation type="obsolete">1.44M</translation>
+    </message>
+    <message>
+        <source>1.2M</source>
+        <translation type="obsolete">1.2M</translation>
+    </message>
+    <message>
+        <source>720K</source>
+        <translation type="obsolete">720K</translation>
+    </message>
+    <message>
+        <source>360K</source>
+        <translation type="obsolete">360K</translation>
+    </message>
+</context>
+<context>
+    <name>UIFileManager</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Tutup</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">Batal</translation>
+    </message>
+    <message>
+        <source>Paused</source>
+        <translation type="obsolete">Diistirahatkan</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">Password</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nama</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">Ukuran</translation>
     </message>
 </context>
 <context>
@@ -3805,6 +4491,14 @@
         <source>When checked, machine windows will be raised when the mouse pointer moves over them.</source>
         <translation>Saat dicentang, jendela mesin akan diapungkan ketika penunjuk mouse bergerak di atas mereka.</translation>
     </message>
+    <message>
+        <source>Scale Factor:</source>
+        <translation type="obsolete">Faktor Skala:</translation>
+    </message>
+    <message>
+        <source>Controls the guest screen scale factor.</source>
+        <translation type="obsolete">Mengendalikan faktor skala layar guest.</translation>
+    </message>
 </context>
 <context>
     <name>UIGlobalSettingsExtension</name>
@@ -4833,6 +5527,40 @@
     </message>
 </context>
 <context>
+    <name>UIGuestControlFileManager</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Tutup</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">Password</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nama</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">Ukuran</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">Batal</translation>
+    </message>
+    <message>
+        <source>Paused</source>
+        <translation type="obsolete">Diistirahatkan</translation>
+    </message>
+</context>
+<context>
+    <name>UIGuestProcessControlWidget</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Tutup</translation>
+    </message>
+</context>
+<context>
     <name>UIHelpButton</name>
     <message>
         <source>&amp;Help</source>
@@ -5268,6 +5996,14 @@
         <source>Close Window (%1)</source>
         <translation>Tutup Jendela (%1)</translation>
     </message>
+    <message>
+        <source>Adding network...</source>
+        <translation type="obsolete">Menambah jaringan...</translation>
+    </message>
+    <message>
+        <source>Removing network...</source>
+        <translation type="obsolete">Menghapus jaringan...</translation>
+    </message>
 </context>
 <context>
     <name>UIHostNetworkManagerWidget</name>
@@ -5484,6 +6220,11 @@
     <message>
         <source>Shortcut</source>
         <translation>Pintasan</translation>
+    </message>
+    <message>
+        <source>%1: %2</source>
+        <comment>scope: description</comment>
+        <translation type="obsolete">%1: %2</translation>
     </message>
 </context>
 <context>
@@ -6296,6 +7037,75 @@
     </message>
 </context>
 <context>
+    <name>UIItemHostNetwork</name>
+    <message>
+        <source>Automatically configured</source>
+        <comment>interface</comment>
+        <translation type="obsolete">Otomatis dikonfigurasi</translation>
+    </message>
+    <message>
+        <source>Manually configured</source>
+        <comment>interface</comment>
+        <translation type="obsolete">Dikonfigurasi secara manual</translation>
+    </message>
+    <message>
+        <source>IPv4 Address</source>
+        <translation type="obsolete">Alamat IPv4</translation>
+    </message>
+    <message>
+        <source>Not set</source>
+        <comment>address</comment>
+        <translation type="obsolete">Tak ditata</translation>
+    </message>
+    <message>
+        <source>IPv4 Network Mask</source>
+        <translation type="obsolete">Mask Jaringan IPv4</translation>
+    </message>
+    <message>
+        <source>Not set</source>
+        <comment>mask</comment>
+        <translation type="obsolete">Tak ditata</translation>
+    </message>
+    <message>
+        <source>IPv6 Address</source>
+        <translation type="obsolete">Alamat IPv6</translation>
+    </message>
+    <message>
+        <source>IPv6 Prefix Length</source>
+        <translation type="obsolete">Panjang Prefiks IPv6</translation>
+    </message>
+    <message>
+        <source>Not set</source>
+        <comment>length</comment>
+        <translation type="obsolete">Tak ditata</translation>
+    </message>
+    <message>
+        <source>DHCP Server</source>
+        <translation type="obsolete">Server DHCP</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation type="obsolete">Alamat</translation>
+    </message>
+    <message>
+        <source>Network Mask</source>
+        <translation type="obsolete">Mask Jaringan</translation>
+    </message>
+    <message>
+        <source>Lower Bound</source>
+        <translation type="obsolete">Batas Bawah</translation>
+    </message>
+    <message>
+        <source>Not set</source>
+        <comment>bound</comment>
+        <translation type="obsolete">Tak ditata</translation>
+    </message>
+    <message>
+        <source>Upper Bound</source>
+        <translation type="obsolete">Batas Atas</translation>
+    </message>
+</context>
+<context>
     <name>UIItemNetworkNAT</name>
     <message>
         <source>%1, %2</source>
@@ -6306,6 +7116,83 @@
         <source>%1</source>
         <comment>col.2 text</comment>
         <translation>%1</translation>
+    </message>
+    <message>
+        <source>Network Name</source>
+        <translation type="obsolete">Nama Jaringan</translation>
+    </message>
+    <message>
+        <source>[empty]</source>
+        <translation type="obsolete">[kosong]</translation>
+    </message>
+    <message>
+        <source>%1 (renamed from %2)</source>
+        <translation type="obsolete">%1 (ganti nama dari %2)</translation>
+    </message>
+    <message>
+        <source>Old Network Name</source>
+        <translation type="obsolete">Nama Jaringan Lama</translation>
+    </message>
+    <message>
+        <source>New Network Name</source>
+        <translation type="obsolete">Nama Jaringan Baru</translation>
+    </message>
+    <message>
+        <source>Network CIDR</source>
+        <translation type="obsolete">CIDR Jaringan</translation>
+    </message>
+    <message>
+        <source>Supports DHCP</source>
+        <translation type="obsolete">Mendukung DHCP</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation type="obsolete">ya</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation type="obsolete">tidak</translation>
+    </message>
+    <message>
+        <source>Supports IPv6</source>
+        <translation type="obsolete">Mendukung IPv6</translation>
+    </message>
+    <message>
+        <source>Default IPv6 route</source>
+        <translation type="obsolete">Rute IPv6 baku</translation>
+    </message>
+    <message>
+        <source>No new name specified for the NAT network previously called &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">Tidak ada nama baru yang dinyatakan bagi jaringan NAT yang sebelumnya bernama &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>No CIDR specified for the NAT network &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">Tidak ada CIDR yang dinyatakan bagi jaringan NAT &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>No CIDR specified for the NAT network previously called &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">Tidak ada CIDR yang dinyatakan bagi jaringan NAT yang sebelumnya bernama &lt;b&gt;%1&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Invalid CIDR specified (&lt;i&gt;%1&lt;/i&gt;) for the NAT network &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation type="obsolete">CIDR yang tidak valid (&lt;i&gt;%1&lt;/i&gt;) dinyatakan bagi jaringan NAT &lt;b&gt;%2&lt;/b&gt;.</translation>
+    </message>
+    <message>
+        <source>Invalid CIDR specified (&lt;i&gt;%1&lt;/i&gt;) for the NAT network previously called &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation type="obsolete">CIDR yang tidak valid (&lt;i&gt;%1&lt;/i&gt;) dinyatakan bagi jaringan NAT yang sebelumnya bernama &lt;b&gt;%2&lt;/b&gt;.</translation>
+    </message>
+</context>
+<context>
+    <name>UILanguageItem</name>
+    <message>
+        <source>&lt;unavailable&gt;</source>
+        <comment>Language</comment>
+        <translation type="obsolete">&lt;tidak tersedia&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;unknown&gt;</source>
+        <comment>Author(s)</comment>
+        <translation type="obsolete">&lt;tidak diketahui&gt;</translation>
     </message>
 </context>
 <context>
@@ -6368,6 +7255,37 @@
     <message>
         <source>No supported webcams connected to the host PC</source>
         <translation type="obsolete">Tidak ada webcam yang didukung yang terhubung ke PC host</translation>
+    </message>
+</context>
+<context>
+    <name>UIMachinePreview</name>
+    <message>
+        <source>No preview</source>
+        <translation type="obsolete">Tidak ada pratinjau</translation>
+    </message>
+    <message>
+        <source>Update disabled</source>
+        <translation type="obsolete">Pemutakhiran dinonaktifkan</translation>
+    </message>
+    <message>
+        <source>Every 0.5 s</source>
+        <translation type="obsolete">Setiap 0,5 d</translation>
+    </message>
+    <message>
+        <source>Every 1 s</source>
+        <translation type="obsolete">Setiap 1 d</translation>
+    </message>
+    <message>
+        <source>Every 2 s</source>
+        <translation type="obsolete">Setiap 2 d</translation>
+    </message>
+    <message>
+        <source>Every 5 s</source>
+        <translation type="obsolete">Setiap 5 d</translation>
+    </message>
+    <message>
+        <source>Every 10 s</source>
+        <translation type="obsolete">Setiap 10 d</translation>
     </message>
 </context>
 <context>
@@ -9053,6 +9971,59 @@
     </message>
 </context>
 <context>
+    <name>UIMediumItem</name>
+    <message>
+        <source>Current extension (*.%1)</source>
+        <translation type="obsolete">Ekstensi saat ini (*.%1)</translation>
+    </message>
+    <message>
+        <source>Choose the location of this medium</source>
+        <translation type="obsolete">Pilih lokasi medium ini</translation>
+    </message>
+    <message>
+        <source>Moving medium...</source>
+        <translation type="obsolete">Memindah medium...</translation>
+    </message>
+    <message>
+        <source>%1, %2: %3, %4: %5</source>
+        <comment>col.1 text, col.2 name: col.2 text, col.3 name: col.3 text</comment>
+        <translation type="obsolete">%1, %2: %3, %4: %5</translation>
+    </message>
+    <message>
+        <source>Format:</source>
+        <translation type="obsolete">Format:</translation>
+    </message>
+    <message>
+        <source>Storage details:</source>
+        <translation type="obsolete">Rincian penyimpanan:</translation>
+    </message>
+    <message>
+        <source>Encrypted with key:</source>
+        <translation type="obsolete">Terenkripsi dengan kunci:</translation>
+    </message>
+    <message>
+        <source>UUID:</source>
+        <translation type="obsolete">UUID:</translation>
+    </message>
+    <message>
+        <source>&lt;i&gt;Not&amp;nbsp;Attached&lt;/i&gt;</source>
+        <translation type="obsolete">&lt;i&gt;Tidak&amp;nbsp;Terpasang&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;i&gt;Not&amp;nbsp;Encrypted&lt;/i&gt;</source>
+        <translation type="obsolete">&lt;i&gt;Tidak&amp;nbsp;Terenkripsi&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>--</source>
+        <comment>no info</comment>
+        <translation type="obsolete">--</translation>
+    </message>
+    <message>
+        <source>Removing medium...</source>
+        <translation type="obsolete">Mencabut medium...</translation>
+    </message>
+</context>
+<context>
     <name>UIMediumManager</name>
     <message>
         <source>&amp;Hard drives</source>
@@ -9268,6 +10239,30 @@
         <source>Move selected disk image file</source>
         <translation>Pindahkan berkas image disk yang dipilih</translation>
     </message>
+    <message>
+        <source>Size:</source>
+        <translation type="obsolete">Ukuran:</translation>
+    </message>
+    <message>
+        <source>1.44M</source>
+        <translation type="obsolete">1.44M</translation>
+    </message>
+    <message>
+        <source>1.2M</source>
+        <translation type="obsolete">1.2M</translation>
+    </message>
+    <message>
+        <source>720K</source>
+        <translation type="obsolete">720K</translation>
+    </message>
+    <message>
+        <source>360K</source>
+        <translation type="obsolete">360K</translation>
+    </message>
+    <message>
+        <source>&amp;Create</source>
+        <translation type="obsolete">&amp;Ciptakan</translation>
+    </message>
 </context>
 <context>
     <name>UIMediumManagerWidget</name>
@@ -9290,6 +10285,29 @@
     <message>
         <source>Refresh Disk Image Files (%1)</source>
         <translation type="vanished">Segarkan Berkas Image Disk (%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UIMediumSelector</name>
+    <message>
+        <source>&amp;Add...</source>
+        <translation type="obsolete">T&amp;ambah...</translation>
+    </message>
+    <message>
+        <source>Refresh Disk Image Files (%1)</source>
+        <translation type="obsolete">Segarkan Berkas Image Disk (%1)</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nama</translation>
+    </message>
+    <message>
+        <source>Virtual Size</source>
+        <translation type="obsolete">Ukuran Virtual</translation>
+    </message>
+    <message>
+        <source>Actual Size</source>
+        <translation type="obsolete">Ukuran Aktual</translation>
     </message>
 </context>
 <context>
@@ -10233,8 +11251,7 @@
     </message>
     <message>
         <source>Restore</source>
-        <translatorcomment>Kembalikan</translatorcomment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>&lt;p&gt;Deleting the snapshot will cause the state information saved in it to be lost, and disk data spread over several image files that VirtualBox has created together with the snapshot will be merged into one file. This can be a lengthy process, and the information in the snapshot cannot be recovered.&lt;/p&gt;&lt;/p&gt;Are you sure you want to delete the selected snapshot &lt;b&gt;%1&lt;/b&gt;?&lt;/p&gt;</source>
@@ -11305,6 +12322,10 @@
         <source>&lt;p&gt;The changes you requested require this disk to be released from the machines it is attached to.&lt;/p&gt;&lt;p&gt;Are you sure you want to release the disk image file &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;?&lt;/p&gt;&lt;p&gt;This will detach it from the following virtual machine(s): &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;</source>
         <translation>&lt;p&gt;Perubahan yang Anda minta memerlukan disk ini dilepas dari mesin-mesin tempat itu dicantolkan.&lt;/p&gt;&lt;p&gt;Anda yakin hendak melepas berkas image disk &lt;nobr&gt;&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;?&lt;/p&gt;&lt;p&gt;Ini akan melepasnya dari mesin-mesin virtual berikut: &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;</translation>
     </message>
+    <message>
+        <source>Import</source>
+        <translation type="obsolete">Impor</translation>
+    </message>
 </context>
 <context>
     <name>UIMiniProcessWidgetAdditions</name>
@@ -12374,6 +13395,13 @@ langkah ini dan memasang hard disk pada waktu lain menggunakan dialog Setting Me
     </message>
 </context>
 <context>
+    <name>UIScaleFactorEditor</name>
+    <message>
+        <source>Controls the guest screen scale factor.</source>
+        <translation type="obsolete">Mengendalikan faktor skala layar guest.</translation>
+    </message>
+</context>
+<context>
     <name>UIScreenshotViewer</name>
     <message>
         <source>Screenshot of %1 (%2)</source>
@@ -12679,6 +13707,62 @@ langkah ini dan memasang hard disk pada waktu lain menggunakan dialog Setting Me
     </message>
 </context>
 <context>
+    <name>UISnapshotItem</name>
+    <message>
+        <source>Current State (changed)</source>
+        <comment>Current State (Modified)</comment>
+        <translation type="obsolete">Keadaan Saat Ini (berubah)</translation>
+    </message>
+    <message>
+        <source>Current State</source>
+        <comment>Current State (Unmodified)</comment>
+        <translation type="obsolete">Keadaan Saat Ini</translation>
+    </message>
+    <message>
+        <source>The current state differs from the state stored in the current snapshot</source>
+        <translation type="obsolete">Keadaan saat ini berbeda dengan keadaan tersimpan dalam snapshot saat ini</translation>
+    </message>
+    <message>
+        <source>The current state is identical to the state stored in the current snapshot</source>
+        <translation type="obsolete">Keadaan saat ini identik dengan keadaan tersimpan dalam snapshot saat ini</translation>
+    </message>
+    <message>
+        <source>%1 (%2 ago)</source>
+        <comment>date time (how long ago)</comment>
+        <translation type="obsolete">%1 (%2 yang lalu)</translation>
+    </message>
+    <message>
+        <source>%1 since %2</source>
+        <comment>Current State (time or date + time)</comment>
+        <translation type="obsolete">%1 sejak %2</translation>
+    </message>
+    <message>
+        <source>current</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">saat ini</translation>
+    </message>
+    <message>
+        <source>online</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">daring</translation>
+    </message>
+    <message>
+        <source>offline</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">luring</translation>
+    </message>
+    <message>
+        <source>Taken at %1</source>
+        <comment>Snapshot (time)</comment>
+        <translation type="obsolete">Diambil pada %1</translation>
+    </message>
+    <message>
+        <source>Taken on %1</source>
+        <comment>Snapshot (date + time)</comment>
+        <translation type="obsolete">Diambil pada %1</translation>
+    </message>
+</context>
+<context>
     <name>UISnapshotPane</name>
     <message>
         <source>Current State (changed)</source>
@@ -12876,6 +13960,21 @@ langkah ini dan memasang hard disk pada waktu lain menggunakan dialog Setting Me
     </message>
 </context>
 <context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Network</source>
+        <translation type="obsolete">Jaringan</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="obsolete">Rincian</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="obsolete">Snapshot</translation>
+    </message>
+</context>
+<context>
     <name>UIToolsPaneGlobal</name>
     <message>
         <source>&lt;h3&gt;Welcome to VirtualBox!&lt;/h3&gt;&lt;p&gt;This window represents a set of global tools which are currently opened (or can be opened). They are not related to any particular machine but to the complete VM collection. For a list of currently available tools check the corresponding menu at the right side of the main tool bar located at the top of the window. This list will be extended with new tools in future releases.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;%1&lt;/b&gt; key to get instant help, or visit &lt;a href=https://www.virtualbox.org&gt;www.virtualbox.org&lt;/a&gt; for more information and latest news.&lt;/p&gt;</source>
@@ -12920,6 +14019,41 @@ langkah ini dan memasang hard disk pada waktu lain menggunakan dialog Setting Me
         <source>%1</source>
         <comment>col.1 text</comment>
         <translation>%1</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Vendor ID: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;ID Vendor: %1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Product ID: %2&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;ID Produk: %2&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Revision: %3&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Revisi: %3&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Product: %4&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Produk: %4&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Manufacturer: %5&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Pabrikan: %5&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Port: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Port: %1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;State: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;Keadaan: %1&lt;/nobr&gt;</translation>
     </message>
 </context>
 <context>
@@ -13300,6 +14434,25 @@ langkah ini dan memasang hard disk pada waktu lain menggunakan dialog Setting Me
     </message>
 </context>
 <context>
+    <name>UIVMLogViewerWidget</name>
+    <message>
+        <source>Log Viewer</source>
+        <translation type="obsolete">Viewer Log</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">Tutup</translation>
+    </message>
+    <message>
+        <source>String not found</source>
+        <translation type="obsolete">String tidak ditemukan</translation>
+    </message>
+    <message>
+        <source>Save VirtualBox Log As</source>
+        <translation type="obsolete">Simpan Log VirtualBox Sebagai</translation>
+    </message>
+</context>
+<context>
     <name>UIVMPreviewWindow</name>
     <message>
         <source>Update Disabled</source>
@@ -13328,6 +14481,31 @@ langkah ini dan memasang hard disk pada waktu lain menggunakan dialog Setting Me
     <message>
         <source>No Preview</source>
         <translation type="obsolete">Tiada Pratinjau</translation>
+    </message>
+</context>
+<context>
+    <name>UIVirtualBoxManager</name>
+    <message>
+        <source>Show Toolbar Text</source>
+        <translation type="obsolete">Tampilkan Teks Bilah Alat</translation>
+    </message>
+</context>
+<context>
+    <name>UIVirtualBoxManagerWidget</name>
+    <message>
+        <source>Show Toolbar Text</source>
+        <translation type="obsolete">Tampilkan Teks Bilah Alat</translation>
+    </message>
+</context>
+<context>
+    <name>UIVisoCreator</name>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nama</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">Ukuran</translation>
     </message>
 </context>
 <context>
@@ -17042,7 +18220,7 @@ Versi %1</translation>
     <message>
         <source>Inactive</source>
         <comment>details report (VT-x/AMD-V)</comment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Active</source>
@@ -17052,7 +18230,7 @@ Versi %1</translation>
     <message>
         <source>Inactive</source>
         <comment>details report (Nested Paging)</comment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Active</source>
@@ -17062,22 +18240,22 @@ Versi %1</translation>
     <message>
         <source>Inactive</source>
         <comment>details report (Unrestricted Execution)</comment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Paravirtualization Interface</source>
         <comment>details report</comment>
-        <translation></translation>
+        <translation type="unfinished">Antarmuka Paravirtualisasi</translation>
     </message>
     <message>
         <source>Taking Snapshot</source>
         <comment>MachineState</comment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Taking Online Snapshot</source>
         <comment>MachineState</comment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>None</source>
@@ -17339,6 +18517,128 @@ Versi %1</translation>
         <source>Audio</source>
         <comment>IndicatorType</comment>
         <translation>Audio</translation>
+    </message>
+    <message>
+        <source>Processors</source>
+        <comment>details report</comment>
+        <translation type="obsolete">Prosesor</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">Nama</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation type="obsolete">Lokasi</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="obsolete">Grup</translation>
+    </message>
+    <message>
+        <source>RAM</source>
+        <translation type="obsolete">RAM</translation>
+    </message>
+    <message>
+        <source>Boot Order</source>
+        <translation type="obsolete">Urutan Boot</translation>
+    </message>
+    <message>
+        <source>Chipset Type</source>
+        <translation type="obsolete">Tipe Chipset</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <translation type="obsolete">Akselerasi</translation>
+    </message>
+    <message>
+        <source>Hard Disks</source>
+        <translation type="obsolete">Hard Disk</translation>
+    </message>
+    <message>
+        <source>Controller</source>
+        <translation type="obsolete">Pengendali</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <translation type="obsolete">Tidak Terpasang</translation>
+    </message>
+    <message>
+        <source>NAT</source>
+        <translation type="obsolete">NAT</translation>
+    </message>
+    <message>
+        <source>Internal Network</source>
+        <translation type="obsolete">Jaringan Internal</translation>
+    </message>
+    <message>
+        <source>Generic Driver</source>
+        <translation type="obsolete">Driver Generik</translation>
+    </message>
+    <message>
+        <source>Disconnected</source>
+        <translation type="obsolete">Terputus</translation>
+    </message>
+    <message>
+        <source>Host Pipe</source>
+        <translation type="obsolete">Pipa Host</translation>
+    </message>
+    <message>
+        <source>Host Device</source>
+        <translation type="obsolete">Peranti Host</translation>
+    </message>
+    <message>
+        <source>Raw File</source>
+        <translation type="obsolete">Berkas Mentah</translation>
+    </message>
+    <message>
+        <source>TCP</source>
+        <translation type="obsolete">TCP</translation>
+    </message>
+    <message>
+        <source>VDI (VirtualBox Disk Image)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VDI (VirtualBox Disk Image)</translation>
+    </message>
+    <message>
+        <source>VMDK (Virtual Machine Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VMDK (Virtual Machine Disk)</translation>
+    </message>
+    <message>
+        <source>VHD (Virtual Hard Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VHD (Virtual Hard Disk)</translation>
+    </message>
+    <message>
+        <source>HDD (Parallels Hard Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">HDD (Parallels Hard Disk)</translation>
+    </message>
+    <message>
+        <source>QED (QEMU enhanced disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">QED (QEMU enhanced disk)</translation>
+    </message>
+    <message>
+        <source>QCOW (QEMU Copy-On-Write)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">QCOW (QEMU Copy-On-Write)</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <comment>GraphicsControllerType</comment>
+        <translation type="obsolete">Tidak Ada</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <comment>network adapter</comment>
+        <translation type="obsolete">Tidak Terpasang</translation>
+    </message>
+    <message>
+        <source>Disconnected</source>
+        <comment>serial port</comment>
+        <translation type="obsolete">Terputus</translation>
     </message>
 </context>
 <context>

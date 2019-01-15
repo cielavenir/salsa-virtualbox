@@ -990,7 +990,7 @@ static int usbLibMonDevicesUpdate(PVBOXUSBGLOBALSTATE pGlobal, PUSBDEVICE pDevs,
                     || MonInfo.enmState == USBDEVICESTATE_HELD_BY_PROXY
                     || MonInfo.enmState == USBDEVICESTATE_USED_BY_GUEST);
             pDevs->enmState = MonInfo.enmState;
-            if (pDevs->bcdUSB == 0x300)
+            if (pDevs->bcdUSB >= 0x300)
                 /* USB3 spec guarantees this (9.6.1). */
                 pDevs->enmSpeed = USBDEVICESPEED_SUPER;
             else

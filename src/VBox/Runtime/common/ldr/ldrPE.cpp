@@ -2520,6 +2520,9 @@ static int rtldrPE_VerifySignatureDecode(PRTLDRMODPE pModPe, PRTLDRPESIGNATURE p
                                    "Unknown pSignedData.ContentInfo.ContentType.szObjId value: %s (expected %s)",
                                    pSignature->pSignedData->ContentInfo.ContentType.szObjId, RTCRSPCINDIRECTDATACONTENT_OID);
         }
+        else
+            rc = RTErrInfoSetF(pErrInfo, VERR_LDRVI_EXPECTED_INDIRECT_DATA_CONTENT_OID, /** @todo error code*/
+                               "PKCS#7 is not 'signedData': %s", pSignature->ContentInfo.ContentType.szObjId);
     }
     return rc;
 }
@@ -2771,8 +2774,8 @@ static int rtldrPE_VerifySignatureValidateHash(PRTLDRMODPE pModPe, PRTLDRPESIGNA
              * Compare the page hashes if present.
              *
              * Seems the difference between V1 and V2 page hash attributes is
-             * that v1 uses SHA-1 while v2 uses SHA-256. The data structures to
-             * be identical otherwise.  Initially we assumed the digest
+             * that v1 uses SHA-1 while v2 uses SHA-256. The data structures
+             * seems to be identical otherwise.  Initially we assumed the digest
              * algorithm was supposed to be RTCRSPCINDIRECTDATACONTENT::DigestInfo,
              * i.e. the same as for the whole image hash.  The initial approach
              * worked just fine, but this makes more sense.
@@ -2827,6 +2830,7 @@ static DECLCALLBACK(int) rtldrPE_VerifySignature(PRTLDRMODINTERNAL pMod, PFNRTLD
             {
                 rc = pfnCallback(&pModPe->Core, RTLDRSIGNATURETYPE_PKCS7_SIGNED_DATA,
                                  &pSignature->ContentInfo, sizeof(pSignature->ContentInfo),
+                                 NULL /*pvExternalData*/, 0 /*cbExternalData*/,
                                  pErrInfo, pvUser);
             }
             rtldrPE_VerifySignatureDestroy(pModPe, pSignature);
@@ -3883,8 +3887,8 @@ static int rtldrPEValidateDirectoriesAndRememberStuff(PRTLDRMODPE pModPe, const 
  * @param   phLdrMod    Where to store the handle.
  * @param   pErrInfo    Where to return extended error information. Optional.
  */
-int rtldrPEOpen(PRTLDRREADER pReader, uint32_t fFlags, RTLDRARCH enmArch, RTFOFF offNtHdrs,
-                PRTLDRMOD phLdrMod, PRTERRINFO pErrInfo)
+DECLHIDDEN(int) rtldrPEOpen(PRTLDRREADER pReader, uint32_t fFlags, RTLDRARCH enmArch, RTFOFF offNtHdrs,
+                            PRTLDRMOD phLdrMod, PRTERRINFO pErrInfo)
 {
     /*
      * Read and validate the file header.

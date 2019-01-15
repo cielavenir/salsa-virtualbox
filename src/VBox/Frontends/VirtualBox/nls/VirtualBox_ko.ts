@@ -11,7 +11,7 @@
     <message>
         <source>--</source>
         <comment>Native language country name (empty if this language is for all countries)</comment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>English</source>
@@ -21,7 +21,7 @@
     <message>
         <source>--</source>
         <comment>Language country name, in English (empty if native country name is empty)</comment>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Oracle Corporation</source>
@@ -297,6 +297,18 @@
         <source>%1, %2: %3, %4: %5, %6: %7</source>
         <comment>col.1 text, col.2 name: col.2 text, col.3 name: col.3 text, col.4 name: col.4 text</comment>
         <translation>%1, %2: %3, %4: %5, %6: %7</translation>
+    </message>
+    <message>
+        <source>Full</source>
+        <translation type="obsolete">모두</translation>
+    </message>
+    <message>
+        <source>Read-only</source>
+        <translation type="obsolete">읽기 전용</translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="obsolete">예</translation>
     </message>
 </context>
 <context>
@@ -1639,6 +1651,178 @@
         <source>Enable audio input</source>
         <translation>오디오 입력 사용하기</translation>
     </message>
+    <message>
+        <source>&amp;Find</source>
+        <translation type="obsolete">찾기(&amp;F)</translation>
+    </message>
+    <message>
+        <source>Log Viewer</source>
+        <translation type="obsolete">로그 뷰어</translation>
+    </message>
+    <message>
+        <source>&amp;Refresh</source>
+        <translation type="obsolete">새로 고침(&amp;R)</translation>
+    </message>
+    <message>
+        <source>&amp;Save...</source>
+        <translation type="obsolete">저장(&amp;S)...</translation>
+    </message>
+    <message>
+        <source>Guest</source>
+        <translation type="obsolete">게스트</translation>
+    </message>
+    <message>
+        <source>Settings</source>
+        <translation type="obsolete">설정</translation>
+    </message>
+    <message>
+        <source>Log</source>
+        <translation type="obsolete">로그</translation>
+    </message>
+    <message>
+        <source>Delete</source>
+        <translation type="obsolete">삭제</translation>
+    </message>
+    <message>
+        <source>Rename</source>
+        <translation type="obsolete">이름 바꾸기</translation>
+    </message>
+    <message>
+        <source>Copy</source>
+        <translation type="obsolete">복사</translation>
+    </message>
+    <message>
+        <source>Import</source>
+        <translation type="obsolete">가져오기</translation>
+    </message>
+    <message>
+        <source>Export</source>
+        <translation type="obsolete">내보내기</translation>
+    </message>
+    <message>
+        <source>&amp;Take...</source>
+        <translation type="obsolete">찍기(&amp;T)...</translation>
+    </message>
+    <message>
+        <source>Take a snapshot of the current virtual machine state</source>
+        <translation type="obsolete">현재 가상 머신 상태의 스냅샷을 찍습니다</translation>
+    </message>
+    <message>
+        <source>Take Snapshot (%1)</source>
+        <translation type="obsolete">스냅샷 찍기(%1)</translation>
+    </message>
+    <message>
+        <source>Delete selected snapshot of the virtual machine</source>
+        <translation type="obsolete">가상 머신의 선택한 스냅샷을 삭제합니다</translation>
+    </message>
+    <message>
+        <source>Delete Snapshot (%1)</source>
+        <translation type="obsolete">스냅샷 삭제(%1)</translation>
+    </message>
+    <message>
+        <source>Restore selected snapshot of the virtual machine</source>
+        <translation type="obsolete">선택한 스냅샷으로 가상 머신을 복원합니다</translation>
+    </message>
+    <message>
+        <source>Restore Snapshot (%1)</source>
+        <translation type="obsolete">스냅샷 복원(%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with the selected snapshot properties</source>
+        <translation type="obsolete">선택한 스냅샷 속성 패널 열기</translation>
+    </message>
+    <message>
+        <source>Open Snapshot Properties (%1)</source>
+        <translation type="obsolete">스냅샷 속성 열기(%1)</translation>
+    </message>
+    <message>
+        <source>&amp;Clone...</source>
+        <translation type="obsolete">복제(&amp;C)...</translation>
+    </message>
+    <message>
+        <source>Clone Virtual Machine (%1)</source>
+        <translation type="obsolete">가상 머신 복제(%1)</translation>
+    </message>
+    <message>
+        <source>&amp;Medium</source>
+        <translation type="obsolete">미디어(&amp;M)</translation>
+    </message>
+    <message>
+        <source>&amp;Copy...</source>
+        <translation type="obsolete">복사(&amp;C)...</translation>
+    </message>
+    <message>
+        <source>Copy selected disk image file</source>
+        <translation type="obsolete">선택한 디스크 이미지 파일 복사</translation>
+    </message>
+    <message>
+        <source>Copy Disk Image File (%1)</source>
+        <translation type="obsolete">디스크 이미지 파일 복사(%1)</translation>
+    </message>
+    <message>
+        <source>Remove selected disk image file</source>
+        <translation type="obsolete">선택한 디스크 이미지 파일 삭제</translation>
+    </message>
+    <message>
+        <source>Remove Disk Image File (%1)</source>
+        <translation type="obsolete">디스크 이미지 파일 삭제(%1)</translation>
+    </message>
+    <message>
+        <source>Re&amp;lease...</source>
+        <translation type="obsolete">등록 해제(&amp;L)...</translation>
+    </message>
+    <message>
+        <source>Release Disk Image File (%1)</source>
+        <translation type="obsolete">디스크 이미지 파일 등록 해제(%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with selected disk image file properties</source>
+        <translation type="obsolete">선택한 디스크 이미지 속성 패널 열기</translation>
+    </message>
+    <message>
+        <source>Open Disk Image File Properties (%1)</source>
+        <translation type="obsolete">디스크 이미지 파일 속성 열기(%1)</translation>
+    </message>
+    <message>
+        <source>Refresh Disk Image Files (%1)</source>
+        <translation type="obsolete">디스크 이미지 파일 새로 고침(%1)</translation>
+    </message>
+    <message>
+        <source>Create new host-only network</source>
+        <translation type="obsolete">새 호스트 전용 네트워크를 만듭니다</translation>
+    </message>
+    <message>
+        <source>Create Host-only Network (%1)</source>
+        <translation type="obsolete">호스트 전용 네트워크 만들기(%1)</translation>
+    </message>
+    <message>
+        <source>Remove selected host-only network</source>
+        <translation type="obsolete">선택한 호스트 전용 네트워크를 삭제합니다</translation>
+    </message>
+    <message>
+        <source>Remove Host-only Network (%1)</source>
+        <translation type="obsolete">호스트 전용 네트워크 삭제(%1)</translation>
+    </message>
+    <message>
+        <source>Open pane with selected host-only network properties</source>
+        <translation type="obsolete">선택한 호스트 전용 네트워크 속성 패널 열기</translation>
+    </message>
+    <message>
+        <source>Open Host-only Network Properties (%1)</source>
+        <translation type="obsolete">호스트 전용 네트워크 속성 열기(%1)</translation>
+    </message>
+    <message>
+        <source>Refresh the list of host-only networks</source>
+        <translation type="obsolete">호스트 전용 네트워크의 목록을 새로 고칩니다</translation>
+    </message>
+    <message>
+        <source>Refresh Host-only Networks (%1)</source>
+        <translation type="obsolete">호스트 전용 네트워크 새로 고침(%1)</translation>
+    </message>
+    <message>
+        <source>Remove</source>
+        <translation type="obsolete">삭제</translation>
+    </message>
 </context>
 <context>
     <name>UIActionPoolRuntime</name>
@@ -1948,6 +2132,91 @@
     </message>
 </context>
 <context>
+    <name>UIChooserItemGroup</name>
+    <message>
+        <source>Virtual Machine group</source>
+        <translation type="obsolete">가상 머신 그룹</translation>
+    </message>
+    <message>
+        <source>Enter group</source>
+        <translation type="obsolete">그룹 들어가기</translation>
+    </message>
+    <message>
+        <source>Exit group</source>
+        <translation type="obsolete">그룹 나가기</translation>
+    </message>
+    <message>
+        <source>&lt;b&gt;%1&lt;/b&gt;</source>
+        <comment>Group item tool-tip / Group name</comment>
+        <translation type="obsolete">&lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n group(s)</source>
+        <comment>Group item tool-tip / Group info</comment>
+        <translation type="obsolete">
+            <numerusform>그룹 %n개</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Group info wrapper</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1&lt;/nobr&gt;</translation>
+    </message>
+    <message numerus="yes">
+        <source>%n machine(s)</source>
+        <comment>Group item tool-tip / Machine info</comment>
+        <translation type="obsolete">
+            <numerusform>머신 %n개</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <source>(%n running)</source>
+        <comment>Group item tool-tip / Running machine info</comment>
+        <translation type="obsolete">
+            <numerusform>(%n개 실행 중)</numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Machine info wrapper</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;%1 %2&lt;/nobr&gt;</source>
+        <comment>Group item tool-tip / Machine info wrapper, including running</comment>
+        <translation type="obsolete">&lt;nobr&gt;%1 %2&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>Collapse group</source>
+        <translation type="obsolete">그룹 접기</translation>
+    </message>
+    <message>
+        <source>Expand group</source>
+        <translation type="obsolete">그룹 펴기</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserItemMachine</name>
+    <message>
+        <source>Virtual Machine</source>
+        <translation type="obsolete">가상 머신</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserModel</name>
+    <message>
+        <source>New group</source>
+        <translation type="obsolete">새 그룹</translation>
+    </message>
+</context>
+<context>
+    <name>UIChooserView</name>
+    <message>
+        <source>Contains a tree of Virtual Machines and their groups</source>
+        <translation type="obsolete">가상 머신과 그룹 트리를 표시합니다</translation>
+    </message>
+</context>
+<context>
     <name>UICloneVMWizard</name>
     <message>
         <source>Clone a virtual machine</source>
@@ -2056,6 +2325,71 @@
     </message>
 </context>
 <context>
+    <name>UICloudProfileDetailsWidget</name>
+    <message>
+        <source>Reset</source>
+        <translation type="obsolete">초기화</translation>
+    </message>
+    <message>
+        <source>Reset Changes (%1)</source>
+        <translation type="obsolete">변경 사항 초기화(%1)</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="obsolete">적용</translation>
+    </message>
+    <message>
+        <source>Apply Changes (%1)</source>
+        <translation type="obsolete">변경 사항 적용(%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UICloudProfileManager</name>
+    <message>
+        <source>Reset</source>
+        <translation type="obsolete">초기화</translation>
+    </message>
+    <message>
+        <source>Apply</source>
+        <translation type="obsolete">적용</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">닫기</translation>
+    </message>
+    <message>
+        <source>Close dialog without saving</source>
+        <translation type="obsolete">저장하지 않고 대화 상자 닫기</translation>
+    </message>
+    <message>
+        <source>Reset Changes (%1)</source>
+        <translation type="obsolete">변경 사항 초기화(%1)</translation>
+    </message>
+    <message>
+        <source>Apply Changes (%1)</source>
+        <translation type="obsolete">변경 사항 적용(%1)</translation>
+    </message>
+    <message>
+        <source>Close Window (%1)</source>
+        <translation type="obsolete">창 닫기(%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UICustomFileSystemModel</name>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">이름</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">크기</translation>
+    </message>
+    <message>
+        <source>Path</source>
+        <translation type="obsolete">경로</translation>
+    </message>
+</context>
+<context>
     <name>UIDescriptionPagePrivate</name>
     <message>
         <source>No description. Press the Edit button below to add it.</source>
@@ -2068,6 +2402,383 @@
     <message>
         <source>Edit (Ctrl+E)</source>
         <translation type="obsolete">편집 (Ctrl+E)</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetails</name>
+    <message>
+        <source>Name</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">이름</translation>
+    </message>
+    <message>
+        <source>Operating System</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">운영 체제</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <comment>details (general)</comment>
+        <translation type="obsolete">그룹</translation>
+    </message>
+    <message>
+        <source>Information Inaccessible</source>
+        <comment>details</comment>
+        <translation type="obsolete">알 수 없음</translation>
+    </message>
+    <message>
+        <source>Base Memory</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">기본 메모리</translation>
+    </message>
+    <message>
+        <source>Processors</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">프로세서</translation>
+    </message>
+    <message>
+        <source>Execution Cap</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">실행 제한</translation>
+    </message>
+    <message>
+        <source>%1%</source>
+        <comment>details</comment>
+        <translation type="obsolete">%1%</translation>
+    </message>
+    <message>
+        <source>Boot Order</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">부팅 순서</translation>
+    </message>
+    <message>
+        <source>Chipset Type</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">칩셋 종류</translation>
+    </message>
+    <message>
+        <source>EFI</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">EFI</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <comment>details (system/EFI)</comment>
+        <translation type="obsolete">사용함</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (system/EFI)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>VT-x/AMD-V</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">VT-X/AMD-V</translation>
+    </message>
+    <message>
+        <source>Nested Paging</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">네스티드 페이징</translation>
+    </message>
+    <message>
+        <source>PAE/NX</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">PAE/NX</translation>
+    </message>
+    <message>
+        <source>Minimal Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">최소 반가상화</translation>
+    </message>
+    <message>
+        <source>Hyper-V Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">Hyper-V 반가상화</translation>
+    </message>
+    <message>
+        <source>KVM Paravirtualization</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">KVM 반가상화</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <comment>details (system)</comment>
+        <translation type="obsolete">가속</translation>
+    </message>
+    <message>
+        <source>Video Memory</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">비디오 메모리</translation>
+    </message>
+    <message>
+        <source>Screens</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">화면</translation>
+    </message>
+    <message>
+        <source>Scale-factor</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">크기 조정 비율</translation>
+    </message>
+    <message>
+        <source>2D Video</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">2D 비디오</translation>
+    </message>
+    <message>
+        <source>3D</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">3D</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <comment>details (display)</comment>
+        <translation type="obsolete">가속</translation>
+    </message>
+    <message>
+        <source>Remote Desktop Server Port</source>
+        <comment>details (display/vrde)</comment>
+        <translation type="obsolete">원격 데스크톱 서버 포트</translation>
+    </message>
+    <message>
+        <source>Remote Desktop Server</source>
+        <comment>details (display/vrde)</comment>
+        <translation type="obsolete">원격 데스크톱 서버</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (display/vrde/VRDE server)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>Video Capture File</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">비디오 캡처 파일</translation>
+    </message>
+    <message>
+        <source>Video Capture Attributes</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">비디오 캡처 속성</translation>
+    </message>
+    <message>
+        <source>Frame Size: %1x%2, Frame Rate: %3fps, Bit Rate: %4kbps</source>
+        <translation type="obsolete">프레임 크기: %1x%2, 프레임 레이트: %3fps, 비트 전송률: %4kbps</translation>
+    </message>
+    <message>
+        <source>Video Capture</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">비디오 캡처</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (display/video capture)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>[Optical Drive]</source>
+        <comment>details (storage)</comment>
+        <translation type="obsolete">[광학 드라이브]</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <comment>details (storage)</comment>
+        <translation type="obsolete">연결되지 않음</translation>
+    </message>
+    <message>
+        <source>Host Driver</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">호스트 드라이버</translation>
+    </message>
+    <message>
+        <source>Controller</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">컨트롤러</translation>
+    </message>
+    <message>
+        <source>Audio Output</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">오디오 출력</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <comment>details (audio/output)</comment>
+        <translation type="obsolete">사용함</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (audio/output)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>Audio Input</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">오디오 입력</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <comment>details (audio/input)</comment>
+        <translation type="obsolete">사용함</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (audio/input)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (audio)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>Bridged Adapter, %1</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">어댑터에 브리지, %1</translation>
+    </message>
+    <message>
+        <source>Internal Network, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">내부 네트워크, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Host-only Adapter, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">호스트 전용 어댑터, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Generic Driver, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">일반 드라이버, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Generic Driver, &apos;%1&apos; { %2 }</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">일반 드라이버, &apos;%1&apos; { %2 }</translation>
+    </message>
+    <message>
+        <source>NAT Network, &apos;%1&apos;</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">NAT 네트워크, &apos;%1&apos;</translation>
+    </message>
+    <message>
+        <source>Adapter %1</source>
+        <comment>details (network)</comment>
+        <translation type="obsolete">어댑터 %1</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (network/adapter)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>Port %1</source>
+        <comment>details (serial)</comment>
+        <translation type="obsolete">포트 %1</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (serial)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>USB Controller</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">USB 컨트롤러</translation>
+    </message>
+    <message>
+        <source>Device Filters</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">장치 필터</translation>
+    </message>
+    <message>
+        <source>%1 (%2 active)</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">%1 (%2개 활성화됨)</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>USB Controller Inaccessible</source>
+        <comment>details (usb)</comment>
+        <translation type="obsolete">USB 컨트롤러를 사용할 수 없음</translation>
+    </message>
+    <message>
+        <source>Shared Folders</source>
+        <comment>details (shared folders)</comment>
+        <translation type="obsolete">공유 폴더</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <comment>details (shared folders)</comment>
+        <translation type="obsolete">없음</translation>
+    </message>
+    <message>
+        <source>Menu-bar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">메뉴 표시줄</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <comment>details (user interface/menu-bar)</comment>
+        <translation type="obsolete">사용함</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (user interface/menu-bar)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>Status-bar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">상태 표시줄</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <comment>details (user interface/status-bar)</comment>
+        <translation type="obsolete">사용함</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (user interface/status-bar)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>Mini-toolbar Position</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">작은 도구 모음 위치</translation>
+    </message>
+    <message>
+        <source>Top</source>
+        <comment>details (user interface/mini-toolbar position)</comment>
+        <translation type="obsolete">위</translation>
+    </message>
+    <message>
+        <source>Bottom</source>
+        <comment>details (user interface/mini-toolbar position)</comment>
+        <translation type="obsolete">아래</translation>
+    </message>
+    <message>
+        <source>Mini-toolbar</source>
+        <comment>details (user interface)</comment>
+        <translation type="obsolete">작은 도구 모음</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (user interface/mini-toolbar)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <comment>details (description)</comment>
+        <translation type="obsolete">없음</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (display/recording)</comment>
+        <translation type="obsolete">사용 안함</translation>
     </message>
 </context>
 <context>
@@ -2300,6 +3011,14 @@
         <source>None</source>
         <comment>details report (description)</comment>
         <translation type="obsolete">없음</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetailsElement</name>
+    <message>
+        <source>%1 details</source>
+        <comment>like &apos;General details&apos; or &apos;Storage details&apos;</comment>
+        <translation type="obsolete">%1 정보</translation>
     </message>
 </context>
 <context>
@@ -2594,6 +3313,20 @@
     </message>
 </context>
 <context>
+    <name>UIDetailsSet</name>
+    <message>
+        <source>Contains the details of virtual machine &apos;%1&apos;</source>
+        <translation type="obsolete">가상 머신 &apos;%1&apos;의 자세한 정보를 표시합니다</translation>
+    </message>
+</context>
+<context>
+    <name>UIDetailsView</name>
+    <message>
+        <source>Contains a list of Virtual Machine details</source>
+        <translation type="obsolete">가상 머신의 자세한 정보 목록을 표시합니다</translation>
+    </message>
+</context>
+<context>
     <name>UIDnDDrag</name>
     <message>
         <source>Retrieving data ...</source>
@@ -2720,6 +3453,13 @@
         <translation type="obsolete">
             <numerusform>&lt;nobr&gt;다음 하드 드라이브 %n개에 사용됨:&lt;/nobr&gt;&lt;br&gt;%1</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>UIErrorPane</name>
+    <message>
+        <source>The selected virtual machine is &lt;i&gt;inaccessible&lt;/i&gt;. Please inspect the error message shown below and press the &lt;b&gt;Refresh&lt;/b&gt; button if you want to repeat the accessibility check:</source>
+        <translation type="obsolete">선택한 가상 머신에 접근할 수 &lt;b&gt;없습니다&lt;/b&gt;. 아래의 오류 메시지를 참고하시고 &lt;b&gt;새로 고침&lt;/b&gt; 단추를 눌러서 다시 사용 가능성 검사를 할 수 있습니다:</translation>
     </message>
 </context>
 <context>
@@ -3104,6 +3844,56 @@ p, li { white-space: pre-wrap; }
         <source>%1, %2: %3</source>
         <comment>col.2 text, col.3 name: col.3 text</comment>
         <translation>%1, %2: %3</translation>
+    </message>
+</context>
+<context>
+    <name>UIFDCreationDialog</name>
+    <message>
+        <source>Size:</source>
+        <translation type="obsolete">크기:</translation>
+    </message>
+    <message>
+        <source>1.44M</source>
+        <translation type="obsolete">200% {1.44M?}</translation>
+    </message>
+    <message>
+        <source>1.2M</source>
+        <translation type="obsolete">200% {1.2M?}</translation>
+    </message>
+    <message>
+        <source>720K</source>
+        <translation type="obsolete">200% {720K?}</translation>
+    </message>
+    <message>
+        <source>360K</source>
+        <translation type="obsolete">200% {360K?}</translation>
+    </message>
+</context>
+<context>
+    <name>UIFileManager</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">닫기</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">취소</translation>
+    </message>
+    <message>
+        <source>Paused</source>
+        <translation type="obsolete">일시 정지됨</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">암호</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">이름</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">크기</translation>
     </message>
 </context>
 <context>
@@ -3903,6 +4693,11 @@ p, li { white-space: pre-wrap; }
         <comment>details (audio/input)</comment>
         <translation>사용 안함</translation>
     </message>
+    <message>
+        <source>Disabled</source>
+        <comment>details (display/recording)</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
 </context>
 <context>
     <name>UIGDetailsElement</name>
@@ -4245,6 +5040,14 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>When checked, machine windows will be raised when the mouse pointer moves over them.</source>
         <translation>선택하면 마우스 포인터가 머신 창 위로 지나갈 때 머신 창이 위로 올라옵니다.</translation>
+    </message>
+    <message>
+        <source>Scale Factor:</source>
+        <translation type="obsolete">크기 조정 비율:</translation>
+    </message>
+    <message>
+        <source>Controls the guest screen scale factor.</source>
+        <translation type="obsolete">이 설정은 게스트 크기 조정 비율을 결정합니다.</translation>
     </message>
 </context>
 <context>
@@ -5308,6 +6111,40 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIGuestControlFileManager</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">닫기</translation>
+    </message>
+    <message>
+        <source>Password</source>
+        <translation type="obsolete">암호</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">이름</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">크기</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation type="obsolete">취소</translation>
+    </message>
+    <message>
+        <source>Paused</source>
+        <translation type="obsolete">일시 정지됨</translation>
+    </message>
+</context>
+<context>
+    <name>UIGuestProcessControlWidget</name>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">닫기</translation>
+    </message>
+</context>
+<context>
     <name>UIHelpButton</name>
     <message>
         <source>&amp;Help</source>
@@ -5959,6 +6796,11 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Shortcut</source>
         <translation>단축키</translation>
+    </message>
+    <message>
+        <source>%1: %2</source>
+        <comment>scope: description</comment>
+        <translation type="obsolete">%1: %2</translation>
     </message>
 </context>
 <context>
@@ -6838,6 +7680,90 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIItemHostNetwork</name>
+    <message>
+        <source>Enable</source>
+        <comment>DHCP Server</comment>
+        <translation type="obsolete">사용함</translation>
+    </message>
+    <message>
+        <source>Adapter</source>
+        <translation type="obsolete">어댑터</translation>
+    </message>
+    <message>
+        <source>Automatically configured</source>
+        <comment>interface</comment>
+        <translation type="obsolete">자동 설정됨</translation>
+    </message>
+    <message>
+        <source>Manually configured</source>
+        <comment>interface</comment>
+        <translation type="obsolete">수동 설정됨</translation>
+    </message>
+    <message>
+        <source>IPv4 Address</source>
+        <translation type="obsolete">IPv4 주소</translation>
+    </message>
+    <message>
+        <source>Not set</source>
+        <comment>address</comment>
+        <translation type="obsolete">설정되지 않음</translation>
+    </message>
+    <message>
+        <source>IPv4 Network Mask</source>
+        <translation type="obsolete">IPv4 서브넷 마스크</translation>
+    </message>
+    <message>
+        <source>Not set</source>
+        <comment>mask</comment>
+        <translation type="obsolete">설정되지 않음</translation>
+    </message>
+    <message>
+        <source>IPv6 Address</source>
+        <translation type="obsolete">IPv6 주소</translation>
+    </message>
+    <message>
+        <source>Not set</source>
+        <comment>length</comment>
+        <translation type="obsolete">설정되지 않음</translation>
+    </message>
+    <message>
+        <source>DHCP Server</source>
+        <translation type="obsolete">DHCP 서버</translation>
+    </message>
+    <message>
+        <source>Enabled</source>
+        <comment>server</comment>
+        <translation type="obsolete">사용함</translation>
+    </message>
+    <message>
+        <source>Disabled</source>
+        <comment>server</comment>
+        <translation type="obsolete">사용 안함</translation>
+    </message>
+    <message>
+        <source>Address</source>
+        <translation type="obsolete">주소</translation>
+    </message>
+    <message>
+        <source>Network Mask</source>
+        <translation type="obsolete">서브넷 마스크</translation>
+    </message>
+    <message>
+        <source>Lower Bound</source>
+        <translation type="obsolete">최저 주소</translation>
+    </message>
+    <message>
+        <source>Not set</source>
+        <comment>bound</comment>
+        <translation type="obsolete">설정되지 않음</translation>
+    </message>
+    <message>
+        <source>Upper Bound</source>
+        <translation type="obsolete">최고 주소</translation>
+    </message>
+</context>
+<context>
     <name>UIItemNetworkNAT</name>
     <message>
         <source>%1, %2</source>
@@ -6848,6 +7774,93 @@ p, li { white-space: pre-wrap; }
         <source>%1</source>
         <comment>col.2 text</comment>
         <translation>%1</translation>
+    </message>
+    <message>
+        <source>Network Name</source>
+        <translation type="obsolete">네트워크 이름</translation>
+    </message>
+    <message>
+        <source>[empty]</source>
+        <translation type="obsolete">[비어 있음]</translation>
+    </message>
+    <message>
+        <source>%1 (renamed from %2)</source>
+        <translation type="obsolete">%1 (%2에서 이름 변경됨)</translation>
+    </message>
+    <message>
+        <source>Old Network Name</source>
+        <translation type="obsolete">이전 네트워크 이름</translation>
+    </message>
+    <message>
+        <source>New Network Name</source>
+        <translation type="obsolete">새 네트워크 이름</translation>
+    </message>
+    <message>
+        <source>Network CIDR</source>
+        <translation type="obsolete">네트워크 CIDR</translation>
+    </message>
+    <message>
+        <source>Supports DHCP</source>
+        <translation type="obsolete">DHCP 지원</translation>
+    </message>
+    <message>
+        <source>yes</source>
+        <translation type="obsolete">예</translation>
+    </message>
+    <message>
+        <source>no</source>
+        <translation type="obsolete">아니요</translation>
+    </message>
+    <message>
+        <source>Supports IPv6</source>
+        <translation type="obsolete">IPv6 지원</translation>
+    </message>
+    <message>
+        <source>Default IPv6 route</source>
+        <translation type="obsolete">기본 IPv6 경로</translation>
+    </message>
+    <message>
+        <source>No new name specified for the NAT network previously called &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">이전 이름이 &lt;b&gt;%1&lt;/b&gt;인 NAT 네트워크의 새로운 이름을 입력하지 않았습니다.</translation>
+    </message>
+    <message>
+        <source>No CIDR specified for the NAT network &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">NAT 네트워크 &lt;b&gt;%1&lt;/b&gt;의 CIDR이 지정되지 않았습니다.</translation>
+    </message>
+    <message>
+        <source>No CIDR specified for the NAT network previously called &lt;b&gt;%1&lt;/b&gt;.</source>
+        <translation type="obsolete">이전 이름이 &lt;b&gt;%1&lt;/b&gt;인 NAT 네트워크의 CIDR이 지정되지 않았습니다.</translation>
+    </message>
+    <message>
+        <source>Invalid CIDR specified (&lt;i&gt;%1&lt;/i&gt;) for the NAT network &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation type="obsolete">NAT 네트워크 &lt;b&gt;%2&lt;/b&gt;에 잘못된 CIDR(&lt;i&gt;%1&lt;/i&gt;)을 지정했습니다.</translation>
+    </message>
+    <message>
+        <source>Invalid CIDR specified (&lt;i&gt;%1&lt;/i&gt;) for the NAT network previously called &lt;b&gt;%2&lt;/b&gt;.</source>
+        <translation type="obsolete">이전 이름이 &lt;b&gt;%2&lt;/b&gt;인 NAT 네트워크에 잘못된 CIDR(&lt;i&gt;%1&lt;/i&gt;)을 지정했습니다.</translation>
+    </message>
+</context>
+<context>
+    <name>UILanguageItem</name>
+    <message>
+        <source> (built-in)</source>
+        <comment>Language</comment>
+        <translation type="obsolete"> (내장됨)</translation>
+    </message>
+    <message>
+        <source>&lt;unavailable&gt;</source>
+        <comment>Language</comment>
+        <translation type="obsolete">&lt;사용할 수 없음&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;unknown&gt;</source>
+        <comment>Author(s)</comment>
+        <translation type="obsolete">&lt;알 수 없음&gt;</translation>
+    </message>
+    <message>
+        <source>Default</source>
+        <comment>Language</comment>
+        <translation type="obsolete">기본값</translation>
     </message>
 </context>
 <context>
@@ -6930,6 +7943,37 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Connect Network Adapter %1</source>
         <translation type="obsolete">네트워크 어댑터 %1 연결</translation>
+    </message>
+</context>
+<context>
+    <name>UIMachinePreview</name>
+    <message>
+        <source>No preview</source>
+        <translation type="obsolete">미리 보기 없음</translation>
+    </message>
+    <message>
+        <source>Update disabled</source>
+        <translation type="obsolete">업데이트 비활성화됨</translation>
+    </message>
+    <message>
+        <source>Every 0.5 s</source>
+        <translation type="obsolete">0.5초마다</translation>
+    </message>
+    <message>
+        <source>Every 1 s</source>
+        <translation type="obsolete">1초마다</translation>
+    </message>
+    <message>
+        <source>Every 2 s</source>
+        <translation type="obsolete">2초마다</translation>
+    </message>
+    <message>
+        <source>Every 5 s</source>
+        <translation type="obsolete">5초마다</translation>
+    </message>
+    <message>
+        <source>Every 10 s</source>
+        <translation type="obsolete">10초마다</translation>
     </message>
 </context>
 <context>
@@ -9990,6 +11034,50 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIMediumItem</name>
+    <message>
+        <source>Moving medium...</source>
+        <translation type="obsolete">미디어 이동 중...</translation>
+    </message>
+    <message>
+        <source>%1, %2: %3, %4: %5</source>
+        <comment>col.1 text, col.2 name: col.2 text, col.3 name: col.3 text</comment>
+        <translation type="obsolete">%1, %2: %3, %4: %5</translation>
+    </message>
+    <message>
+        <source>Format:</source>
+        <translation type="obsolete">형식:</translation>
+    </message>
+    <message>
+        <source>Storage details:</source>
+        <translation type="obsolete">저장소 정보:</translation>
+    </message>
+    <message>
+        <source>Attached to:</source>
+        <translation type="obsolete">다음에 연결됨:</translation>
+    </message>
+    <message>
+        <source>Encrypted with key:</source>
+        <translation type="obsolete">다음 키로 암호화됨:</translation>
+    </message>
+    <message>
+        <source>UUID:</source>
+        <translation type="obsolete">UUID:</translation>
+    </message>
+    <message>
+        <source>&lt;i&gt;Not&amp;nbsp;Attached&lt;/i&gt;</source>
+        <translation type="obsolete">&lt;i&gt;연결되지&amp;nbsp;않음&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;i&gt;Not&amp;nbsp;Encrypted&lt;/i&gt;</source>
+        <translation type="obsolete">&lt;i&gt;암호화되지&amp;nbsp;않음&lt;/i&gt;</translation>
+    </message>
+    <message>
+        <source>Removing medium...</source>
+        <translation type="obsolete">미디어 제거 중...</translation>
+    </message>
+</context>
+<context>
     <name>UIMediumManager</name>
     <message>
         <source>&amp;Hard drives</source>
@@ -10205,6 +11293,30 @@ p, li { white-space: pre-wrap; }
         <source>Move selected disk image file</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Size:</source>
+        <translation type="obsolete">크기:</translation>
+    </message>
+    <message>
+        <source>1.44M</source>
+        <translation type="obsolete">200% {1.44M?}</translation>
+    </message>
+    <message>
+        <source>1.2M</source>
+        <translation type="obsolete">200% {1.2M?}</translation>
+    </message>
+    <message>
+        <source>720K</source>
+        <translation type="obsolete">200% {720K?}</translation>
+    </message>
+    <message>
+        <source>360K</source>
+        <translation type="obsolete">200% {360K?}</translation>
+    </message>
+    <message>
+        <source>&amp;Create</source>
+        <translation type="obsolete">만들기(&amp;C)</translation>
+    </message>
 </context>
 <context>
     <name>UIMediumManagerWidget</name>
@@ -10227,6 +11339,33 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Refresh Disk Image Files (%1)</source>
         <translation type="vanished">디스크 이미지 파일 새로 고침(%1)</translation>
+    </message>
+</context>
+<context>
+    <name>UIMediumSelector</name>
+    <message>
+        <source>&amp;Add...</source>
+        <translation type="obsolete">추가(&amp;A)...</translation>
+    </message>
+    <message>
+        <source>&amp;Refresh</source>
+        <translation type="obsolete">새로 고침(&amp;R)</translation>
+    </message>
+    <message>
+        <source>Refresh Disk Image Files (%1)</source>
+        <translation type="obsolete">디스크 이미지 파일 새로 고침(%1)</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">이름</translation>
+    </message>
+    <message>
+        <source>Virtual Size</source>
+        <translation type="obsolete">가상 크기</translation>
+    </message>
+    <message>
+        <source>Actual Size</source>
+        <translation type="obsolete">실제 크기</translation>
     </message>
 </context>
 <context>
@@ -12248,6 +13387,10 @@ p, li { white-space: pre-wrap; }
         <source>&lt;p&gt;The changes you requested require this disk to be released from the machines it is attached to.&lt;/p&gt;&lt;p&gt;Are you sure you want to release the disk image file &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;?&lt;/p&gt;&lt;p&gt;This will detach it from the following virtual machine(s): &lt;b&gt;%2&lt;/b&gt;.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Import</source>
+        <translation type="obsolete">가져오기</translation>
+    </message>
 </context>
 <context>
     <name>UIMiniProcessWidgetAdditions</name>
@@ -13278,6 +14421,13 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIScaleFactorEditor</name>
+    <message>
+        <source>Controls the guest screen scale factor.</source>
+        <translation type="obsolete">이 설정은 게스트 크기 조정 비율을 결정합니다.</translation>
+    </message>
+</context>
+<context>
     <name>UIScreenshotViewer</name>
     <message>
         <source>Screenshot of %1 (%2)</source>
@@ -13611,6 +14761,57 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UISnapshotItem</name>
+    <message>
+        <source>Current State</source>
+        <comment>Current State (Unmodified)</comment>
+        <translation type="obsolete">현재 상태</translation>
+    </message>
+    <message>
+        <source>The current state differs from the state stored in the current snapshot</source>
+        <translation type="obsolete">현재 상태는 스냅샷에 저장되어 있는 상태와 다릅니다</translation>
+    </message>
+    <message>
+        <source>The current state is identical to the state stored in the current snapshot</source>
+        <translation type="obsolete">현재 상태는 스냅샷에 저장되어 있는 상태와 같습니다</translation>
+    </message>
+    <message>
+        <source>%1 (%2 ago)</source>
+        <comment>date time (how long ago)</comment>
+        <translation type="obsolete">%1(%2 전)</translation>
+    </message>
+    <message>
+        <source>%1 since %2</source>
+        <comment>Current State (time or date + time)</comment>
+        <translation type="obsolete">%2부터 %1</translation>
+    </message>
+    <message>
+        <source>current</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">현재</translation>
+    </message>
+    <message>
+        <source>online</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">온라인</translation>
+    </message>
+    <message>
+        <source>offline</source>
+        <comment>snapshot</comment>
+        <translation type="obsolete">오프라인</translation>
+    </message>
+    <message>
+        <source>Taken at %1</source>
+        <comment>Snapshot (time)</comment>
+        <translation type="obsolete">%1에 생성됨</translation>
+    </message>
+    <message>
+        <source>Taken on %1</source>
+        <comment>Snapshot (date + time)</comment>
+        <translation type="obsolete">%1에 생성됨</translation>
+    </message>
+</context>
+<context>
     <name>UISnapshotPane</name>
     <message>
         <source>Current State (changed)</source>
@@ -13815,6 +15016,21 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Network</source>
+        <translation type="obsolete">네트워크</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="obsolete">정보</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="obsolete">스냅샷</translation>
+    </message>
+</context>
+<context>
     <name>UIToolsPaneGlobal</name>
     <message>
         <source>&lt;h3&gt;Welcome to VirtualBox!&lt;/h3&gt;&lt;p&gt;This window represents a set of global tools which are currently opened (or can be opened). They are not related to any particular machine but to the complete VM collection. For a list of currently available tools check the corresponding menu at the right side of the main tool bar located at the top of the window. This list will be extended with new tools in future releases.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;%1&lt;/b&gt; key to get instant help, or visit &lt;a href=https://www.virtualbox.org&gt;www.virtualbox.org&lt;/a&gt; for more information and latest news.&lt;/p&gt;</source>
@@ -13859,6 +15075,46 @@ p, li { white-space: pre-wrap; }
         <source>%1</source>
         <comment>col.1 text</comment>
         <translation>%1</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Vendor ID: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;벤더 ID: %1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Product ID: %2&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;제품 ID: %2&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Revision: %3&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;리비전: %3&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Product: %4&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;제품: %4&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Manufacturer: %5&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;제조사: %5&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Serial No.: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;시리얼 번호: %1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;Port: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;포트: %1&lt;/nobr&gt;</translation>
+    </message>
+    <message>
+        <source>&lt;nobr&gt;State: %1&lt;/nobr&gt;</source>
+        <comment>USB filter tooltip</comment>
+        <translation type="obsolete">&lt;nobr&gt;상태: %1&lt;/nobr&gt;</translation>
     </message>
 </context>
 <context>
@@ -14324,6 +15580,37 @@ p, li { white-space: pre-wrap; }
     </message>
 </context>
 <context>
+    <name>UIVMLogViewerWidget</name>
+    <message>
+        <source>Log Viewer</source>
+        <translation type="obsolete">로그 뷰어</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation type="obsolete">닫기</translation>
+    </message>
+    <message>
+        <source>Enter a search string here</source>
+        <translation type="obsolete">찾을 문자열을 입력하십시오</translation>
+    </message>
+    <message>
+        <source>C&amp;ase Sensitive</source>
+        <translation type="obsolete">대소문자 구분(&amp;A)</translation>
+    </message>
+    <message>
+        <source>String not found</source>
+        <translation type="obsolete">문자열 찾을 수 없음</translation>
+    </message>
+    <message>
+        <source>Save VirtualBox Log As</source>
+        <translation type="obsolete">로그를 다른 이름으로 저장</translation>
+    </message>
+    <message>
+        <source>&lt;p&gt;No log files found. Press the &lt;b&gt;Refresh&lt;/b&gt; button to rescan the log folder &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;.&lt;/p&gt;</source>
+        <translation type="obsolete">&lt;p&gt;로그 파일을 찾을 수 없습니다. &lt;b&gt;새로 고침&lt;/b&gt; 단추를 눌러서 로그 폴더 &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/nobr&gt;을(를) 다시 검사하십시오.&lt;/p&gt;</translation>
+    </message>
+</context>
+<context>
     <name>UIVMPreviewWindow</name>
     <message>
         <source>Update Disabled</source>
@@ -14352,6 +15639,44 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>No Preview</source>
         <translation type="obsolete">미리 보지 않음</translation>
+    </message>
+</context>
+<context>
+    <name>UIVirtualBoxManager</name>
+    <message>
+        <source>Manager</source>
+        <comment>Note: main window title which is prepended by the product name.</comment>
+        <translation type="obsolete">관리자</translation>
+    </message>
+    <message>
+        <source>Select a virtual machine file</source>
+        <translation type="obsolete">가상 머신 파일 선택</translation>
+    </message>
+    <message>
+        <source>Virtual machine files (%1)</source>
+        <translation type="obsolete">가상 머신 파일 (%1)</translation>
+    </message>
+    <message>
+        <source>Show Toolbar Text</source>
+        <translation type="obsolete">도구 모음 텍스트 보이기</translation>
+    </message>
+</context>
+<context>
+    <name>UIVirtualBoxManagerWidget</name>
+    <message>
+        <source>Show Toolbar Text</source>
+        <translation type="obsolete">도구 모음 텍스트 보이기</translation>
+    </message>
+</context>
+<context>
+    <name>UIVisoCreator</name>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">이름</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="obsolete">크기</translation>
     </message>
 </context>
 <context>
@@ -14918,6 +16243,10 @@ p, li { white-space: pre-wrap; }
     <message>
         <source>Write in Oracle Public Cloud 1.0 format.</source>
         <translation>Oracle Public Cloud Format 1.0 형식으로 저장합니다.</translation>
+    </message>
+    <message>
+        <source>Choose a file to export the virtual appliance to...</source>
+        <translation type="obsolete">가상 시스템을 내보낼 파일을 선택하십시오...</translation>
     </message>
 </context>
 <context>
@@ -18171,6 +19500,132 @@ p, li { white-space: pre-wrap; }
         <source>Audio</source>
         <comment>IndicatorType</comment>
         <translation>오디오</translation>
+    </message>
+    <message>
+        <source>Processors</source>
+        <comment>details report</comment>
+        <translation type="obsolete">프로세서</translation>
+    </message>
+    <message>
+        <source>Name</source>
+        <translation type="obsolete">이름</translation>
+    </message>
+    <message>
+        <source>Location</source>
+        <translation type="obsolete">위치</translation>
+    </message>
+    <message>
+        <source>Groups</source>
+        <translation type="obsolete">그룹</translation>
+    </message>
+    <message>
+        <source>RAM</source>
+        <translation type="obsolete">RAM</translation>
+    </message>
+    <message>
+        <source>Boot Order</source>
+        <translation type="obsolete">부팅 순서</translation>
+    </message>
+    <message>
+        <source>Chipset Type</source>
+        <translation type="obsolete">칩셋 종류</translation>
+    </message>
+    <message>
+        <source>Acceleration</source>
+        <translation type="obsolete">가속</translation>
+    </message>
+    <message>
+        <source>Hard Disks</source>
+        <translation type="obsolete">하드 디스크</translation>
+    </message>
+    <message>
+        <source>Controller</source>
+        <translation type="obsolete">컨트롤러</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <translation type="obsolete">연결되지 않음</translation>
+    </message>
+    <message>
+        <source>NAT</source>
+        <translation type="obsolete">NAT</translation>
+    </message>
+    <message>
+        <source>Internal Network</source>
+        <translation type="obsolete">내부 네트워크</translation>
+    </message>
+    <message>
+        <source>Generic Driver</source>
+        <translation type="obsolete">일반 드라이버</translation>
+    </message>
+    <message>
+        <source>Disconnected</source>
+        <translation type="obsolete">연결되지 않음</translation>
+    </message>
+    <message>
+        <source>Host Pipe</source>
+        <translation type="obsolete">호스트 파이프</translation>
+    </message>
+    <message>
+        <source>Host Device</source>
+        <translation type="obsolete">호스트 장치</translation>
+    </message>
+    <message>
+        <source>Raw File</source>
+        <translation type="obsolete">생(RAW) 파일</translation>
+    </message>
+    <message>
+        <source>TCP</source>
+        <translation type="obsolete">TCP</translation>
+    </message>
+    <message>
+        <source>Device Filters</source>
+        <translation type="obsolete">장치 필터</translation>
+    </message>
+    <message>
+        <source>VDI (VirtualBox Disk Image)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VDI (VirtualBox 디스크 이미지)</translation>
+    </message>
+    <message>
+        <source>VMDK (Virtual Machine Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VMDK (가상 머신 디스크)</translation>
+    </message>
+    <message>
+        <source>VHD (Virtual Hard Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">VHD (가상 하드 디스크)</translation>
+    </message>
+    <message>
+        <source>HDD (Parallels Hard Disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">HDD (Parallels 하드 디스크)</translation>
+    </message>
+    <message>
+        <source>QED (QEMU enhanced disk)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">QED (QEMU 확장 디스크)</translation>
+    </message>
+    <message>
+        <source>QCOW (QEMU Copy-On-Write)</source>
+        <comment>UIMediumFormat</comment>
+        <translation type="obsolete">QCOW (QEMU Copy-On-Write)</translation>
+    </message>
+    <message>
+        <source>None</source>
+        <comment>GraphicsControllerType</comment>
+        <translation type="obsolete">없음</translation>
+    </message>
+    <message>
+        <source>Not Attached</source>
+        <comment>network adapter</comment>
+        <translation type="obsolete">연결되지 않음</translation>
+    </message>
+    <message>
+        <source>Disconnected</source>
+        <comment>serial port</comment>
+        <translation type="obsolete">연결되지 않음</translation>
     </message>
 </context>
 <context>
