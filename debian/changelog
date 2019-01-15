@@ -16,6 +16,7 @@ virtualbox (5.2.24-dfsg-1) unstable; urgency=medium
   * Bump more copyright years
   * Patch refresh, drop upstream patches:
     - 18-system-xorg, VBoxVNC.fix (has never been part of unstable)
+  * Conflict with official vbox-5.2 packages
 
  -- Gianfranco Costamagna <locutusofborg@debian.org>  Tue, 15 Jan 2019 22:07:39 +0100
 
