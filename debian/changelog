@@ -1,3 +1,9 @@
+virtualbox (5.2.24-dfsg-4) unstable; urgency=medium
+
+  * Fix typo in previous upload
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Thu, 17 Jan 2019 10:34:43 +0100
+
 virtualbox (5.2.24-dfsg-3) unstable; urgency=medium
 
   * Add suid bit to VBoxNetNat to make it work (LP: #1805651)
