@@ -1,3 +1,9 @@
+virtualbox (5.2.24-dfsg-3) unstable; urgency=medium
+
+  * Add suid bit to VBoxNetNat to make it work (LP: #1805651)
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Thu, 17 Jan 2019 08:58:01 +0100
+
 virtualbox (5.2.24-dfsg-2) unstable; urgency=medium
 
   * Add patch from 6 branch for gcc weirdness about asm inline
