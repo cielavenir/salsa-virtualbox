@@ -1,3 +1,9 @@
+virtualbox (7.0.10-dfsg-2) unstable; urgency=medium
+
+  * Add patch to fix gcc-13 related build failure
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 19 Jul 2023 17:16:24 +0200
+
 virtualbox (7.0.10-dfsg-1) unstable; urgency=medium
 
   * Refresh patches with upstream versions
@@ -5,7 +11,7 @@ virtualbox (7.0.10-dfsg-1) unstable; urgency=medium
   * refresh patches, drop python3.11 and lzma patches,
     now part of upstream codebase
 
- -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 19 Jul 2023 13:52:43 +0200
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 19 Jul 2023 17:16:20 +0200
 
 virtualbox (7.0.8-dfsg-2) unstable; urgency=medium
 
