@@ -1,3 +1,12 @@
+virtualbox (7.0.10-dfsg-3) unstable; urgency=medium
+
+  * {100436,100653,100677,100799,100800}.patch
+    - cherry-pick upstream fixes for kernel 6.5
+  * virtualbox-modules-7.0.10-kernel-6.4.10.patch
+    - cherry-pick gentoo fix for kernel 6.4.10 (Closes: #1050096)
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 25 Aug 2023 10:52:23 +0200
+
 virtualbox (7.0.10-dfsg-2) unstable; urgency=medium
 
   * Add patch to fix gcc-13 related build failure
