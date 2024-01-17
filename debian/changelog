@@ -1,3 +1,13 @@
+virtualbox (7.0.14-dfsg-1) unstable; urgency=medium
+
+  * Bump kbuild dependency to fix an SDL related build failure
+  * Update get-orig-source.sh script
+  * New upstream version 7.0.14-dfsg
+  * Update copyright years
+  * Refresh patches
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Wed, 17 Jan 2024 09:59:13 +0100
+
 virtualbox (7.0.12-dfsg-1) unstable; urgency=medium
 
   * New upstream version 7.0.12-dfsg
