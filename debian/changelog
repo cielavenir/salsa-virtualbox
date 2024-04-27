@@ -1,6 +1,14 @@
+virtualbox (7.0.16-dfsg-4) unstable; urgency=medium
+
+  * Provide hwe package, to let virtualbox-hwe disappear from
+    Ubuntu (and also xorg-lts-transitional)
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Sat, 27 Apr 2024 15:21:15 +0200
+
 virtualbox (7.0.16-dfsg-3) unstable; urgency=medium
 
   * Add patch 162843 to fix an host crash with some network modes.
+    LP: #2063841
 
  -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 26 Apr 2024 12:51:11 +0200
 

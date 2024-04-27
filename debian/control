@@ -181,7 +181,10 @@ Depends: libnotify-bin,
          ${misc:Depends},
          ${shlibs:Depends},
          ${xserver:Depends}
-Provides: xorg-driver-video
+Replaces: virtualbox-guest-x11-hwe
+Provides: xorg-driver-video,
+          virtualbox-guest-x11-hwe
+Conflicts: virtualbox-guest-x11-hwe
 XB-Modaliases: ${modaliases}
 Description: x86 virtualization solution - X11 guest utilities
  VirtualBox is a free x86 virtualization solution allowing a wide range
@@ -202,6 +205,9 @@ Depends: adduser,
 #Provides: time-daemon
 #Replaces: time-daemon
 Suggests: virtualbox-guest-x11 (= ${binary:Version})
+Replaces: virtualbox-guest-utils-hwe
+Provides: virtualbox-guest-utils-hwe
+Conflicts: virtualbox-guest-utils-hwe
 Description: x86 virtualization solution - non-X11 guest utilities
  VirtualBox is a free x86 virtualization solution allowing a wide range
  of x86 operating systems such as Windows, DOS, BSD or Linux to run on a
