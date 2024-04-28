@@ -174,6 +174,8 @@ Description: x86 virtualization solution - kernel module source
 
 Package: virtualbox-guest-x11
 Section: contrib/x11
+Replaces: virtualbox-guest-x11-hwe
+Breaks: virtualbox-guest-x11-hwe
 Architecture: amd64 i386
 Depends: libnotify-bin,
          x11-xserver-utils,
@@ -181,10 +183,7 @@ Depends: libnotify-bin,
          ${misc:Depends},
          ${shlibs:Depends},
          ${xserver:Depends}
-Replaces: virtualbox-guest-x11-hwe
-Provides: xorg-driver-video,
-          virtualbox-guest-x11-hwe
-Conflicts: virtualbox-guest-x11-hwe
+Provides: xorg-driver-video
 XB-Modaliases: ${modaliases}
 Description: x86 virtualization solution - X11 guest utilities
  VirtualBox is a free x86 virtualization solution allowing a wide range
@@ -197,6 +196,8 @@ Description: x86 virtualization solution - X11 guest utilities
 
 Package: virtualbox-guest-utils
 Architecture: amd64 i386
+Replaces: virtualbox-guest-utils-hwe
+Breaks: virtualbox-guest-utils-hwe
 Depends: adduser,
          pciutils,
          ${misc:Depends},
@@ -205,9 +206,6 @@ Depends: adduser,
 #Provides: time-daemon
 #Replaces: time-daemon
 Suggests: virtualbox-guest-x11 (= ${binary:Version})
-Replaces: virtualbox-guest-utils-hwe
-Provides: virtualbox-guest-utils-hwe
-Conflicts: virtualbox-guest-utils-hwe
 Description: x86 virtualization solution - non-X11 guest utilities
  VirtualBox is a free x86 virtualization solution allowing a wide range
  of x86 operating systems such as Windows, DOS, BSD or Linux to run on a
@@ -217,3 +215,21 @@ Description: x86 virtualization solution - non-X11 guest utilities
  utilities are meant to be run inside the virtual machine.
  They provide closer integration and allow to share data through shared folders
  between the host system and the virtual machine.
+
+Package: virtualbox-guest-x11-hwe
+Section: oldlibs
+Priority: optional
+Architecture: amd64 i386
+Depends: virtualbox-guest-x11,
+         ${misc:Depends}
+Description: transitional package
+ This is a transitional package. It can safely be removed
+
+Package: virtualbox-guest-utils-hwe
+Section: oldlibs
+Priority: optional
+Architecture: amd64 i386
+Depends: virtualbox-guest-utils,
+         ${misc:Depends}
+Description: transitional package
+ This is a transitional package. It can safely be removed

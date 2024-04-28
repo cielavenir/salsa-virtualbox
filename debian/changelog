@@ -1,3 +1,9 @@
+virtualbox (7.0.16-dfsg-5) unstable; urgency=medium
+
+  * Add -hwe as transitional packages (To be dropped after 26.04)
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Sun, 28 Apr 2024 08:56:40 +0200
+
 virtualbox (7.0.16-dfsg-4) unstable; urgency=medium
 
   * Provide hwe package, to let virtualbox-hwe disappear from
