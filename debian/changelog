@@ -1,3 +1,17 @@
+virtualbox (7.0.16-dfsg-7) unstable; urgency=medium
+
+  * Drop old lintian override
+  * Drop priority optional, useless. Move package to contrib/oldlibs instead of just oldlibs
+  * Drop X-Python-Version
+  * Drop NEWS file
+  * Fix duplicate long description
+  * Fix duplicate short description
+  * Drop debug symbols migration code.
+  * Bump compat level to 13
+  * Drop trailing whitespace
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 03 May 2024 08:42:58 +0200
+
 virtualbox (7.0.16-dfsg-6) unstable; urgency=medium
 
   * Add versioning to breaks/replaces
