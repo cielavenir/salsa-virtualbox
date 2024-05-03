@@ -217,8 +217,7 @@ Description: x86 virtualization solution - non-X11 guest utilities
  between the host system and the virtual machine.
 
 Package: virtualbox-guest-x11-hwe
-Section: oldlibs
-Priority: optional
+Section: contrib/oldlibs
 Architecture: amd64 i386
 Depends: virtualbox-guest-x11,
          ${misc:Depends}
@@ -226,8 +225,7 @@ Description: transitional package
  This is a transitional package. It can safely be removed
 
 Package: virtualbox-guest-utils-hwe
-Section: oldlibs
-Priority: optional
+Section: contrib/oldlibs
 Architecture: amd64 i386
 Depends: virtualbox-guest-utils,
          ${misc:Depends}
