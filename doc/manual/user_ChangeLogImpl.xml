@@ -73,6 +73,33 @@ Rules for adding a changelog entry to make them look more uniform:
                            So, we use chapter and xpointer="xpointer(/chapter/)" with xi:include. -->
   <sect1>
 
+    <title>Version 7.0.18 (2024-05-07)</title>
+
+    <para>This is a maintenance release. The following items were fixed and/or
+      added:</para>
+
+    <itemizedlist>
+
+      <listitem>
+       <para>Networking: Fixed an issue which caused host system crash
+         when VM was using bridged or host-only network adapter (bug #22045)</para>
+      </listitem>
+
+      <listitem>
+       <para>Linux Guest Additions: Added more fixes to prevent UBSAN
+         warnings (bug #21877)</para>
+      </listitem>
+
+      <listitem>
+       <para>Linux Guest Additions: Fixed issue when time stamps were displayed
+         incorrectly within mounted shared folder (bug #22047)</para>
+      </listitem>
+
+    </itemizedlist>
+  </sect1>
+
+  <sect1>
+
     <title>Version 7.0.16 (2024-04-16)</title>
 
     <para>This is a maintenance release. The following items were fixed and/or
