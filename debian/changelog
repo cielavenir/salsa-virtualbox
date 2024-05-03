@@ -1,3 +1,10 @@
+virtualbox (7.0.16-dfsg-9) unstable; urgency=medium
+
+  * Drop old NEWS file
+  * Update dependency of libgl1-mesa-dev
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 03 May 2024 11:29:23 +0200
+
 virtualbox (7.0.16-dfsg-8) unstable; urgency=medium
 
   * Drop dh_installsystemd.
