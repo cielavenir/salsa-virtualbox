@@ -1,5 +1,6 @@
 virtualbox (7.0.16-dfsg-7) unstable; urgency=medium
 
+  * replace dh_systemd_enable with dh_installsystemd
   * Drop old lintian override
   * Drop priority optional, useless. Move package to contrib/oldlibs instead of just oldlibs
   * Drop X-Python-Version
