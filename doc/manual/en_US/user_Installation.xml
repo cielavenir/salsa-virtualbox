@@ -56,6 +56,50 @@
 
     </sect2>
 
+    <sect2 id="install-win-installdir-req">
+
+      <title>Windows Installation Directory Security Requirements</title>
+
+      <para>
+        The installation directory on Windows hosts must meet certain security requirements, in
+        order to be accepted by the Windows installer.
+      </para>
+
+      <para>
+        This also applies for upgrades of &product-name;.
+      </para>
+      
+      <para>
+        For example, when installing &product-name; into a custom location at
+        X:\Data\MyPrograms\&product-name;, all parent directories of this path
+        (namely X:\Data and X:\Data\MyPrograms) have to meet the following
+        Discretionary Access Control List (DACL):
+        <screen>
+          Users               S-1-5-32-545:(OI)(CI)(RX)
+          Users               S-1-5-32-545:(DE,WD,AD,WEA,WA)
+          Authenticated Users S-1-5-11:(OI)(CI)(RX)
+          Authenticated Users S-1-5-11:(DE,WD,AD,WEA,WA)
+        </screen>
+        Directory inheritance must also be disabled for all parent directories.
+      </para>
+      
+      <para>
+        You can use the <command>icacls</command> Windows command line tool
+        to meet the security requirements. For example:
+        <screen>
+          icacls &lt;Directory&gt; /reset /t /c
+          icacls &lt;Directory&gt; /inheritance:d /t /c
+          icacls &lt;Directory&gt; /grant *S-1-5-32-545:(OI)(CI)(RX)
+          icacls &lt;Directory&gt; /deny  *S-1-5-32-545:(DE,WD,AD,WEA,WA)
+          icacls &lt;Directory&gt; /grant *S-1-5-11:(OI)(CI)(RX)
+          icacls &lt;Directory&gt; /deny  *S-1-5-11:(DE,WD,AD,WEA,WA)
+        </screen>
+        Note that these commands must be repeated for all parent directories
+        (X:\Data and X:\Data\MyPrograms in this example).
+      </para>
+    
+    </sect2>
+
     <sect2 id="install-win-performing">
 
       <title>Performing the Installation</title>

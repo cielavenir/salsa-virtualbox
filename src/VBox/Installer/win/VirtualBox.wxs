@@ -277,8 +277,8 @@
     <CustomAction Id="ca_UninstallBranding" BinaryKey="VBoxInstallHelper" DllEntry="UninstallBranding" Execute="deferred" Return="check" Impersonate="no"/>
     <CustomAction Id="ca_UninstallBrandingArgs" Property="ca_UninstallBranding" Value="[INSTALLDIR]" Execute="immediate"/>
 
-<?if $(env.VBOX_WITH_MSM_INSTALL) = "no" ?>
     <?include VBoxMergeAppCA.wxi ?>
+<?if $(env.VBOX_WITH_MSM_INSTALL) = "no" ?>
     <?if $(env.VBOX_WITH_32_ON_64_MAIN_API) = "yes" ?>
         <?include VBoxMergeCOM32On64CA.wxi ?>
     <?endif ?>
