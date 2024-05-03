@@ -174,8 +174,8 @@ Description: x86 virtualization solution - kernel module source
 
 Package: virtualbox-guest-x11
 Section: contrib/x11
-Replaces: virtualbox-guest-x11-hwe
-Breaks: virtualbox-guest-x11-hwe
+Replaces: virtualbox-guest-x11-hwe (<< 7.0.16-dfsg-5)
+Breaks: virtualbox-guest-x11-hwe (<< 7.0.16-dfsg-5)
 Architecture: amd64 i386
 Depends: libnotify-bin,
          x11-xserver-utils,
@@ -196,8 +196,8 @@ Description: x86 virtualization solution - X11 guest utilities
 
 Package: virtualbox-guest-utils
 Architecture: amd64 i386
-Replaces: virtualbox-guest-utils-hwe
-Breaks: virtualbox-guest-utils-hwe
+Replaces: virtualbox-guest-utils-hwe (<< 7.0.16-dfsg-5)
+Breaks: virtualbox-guest-utils-hwe (<< 7.0.16-dfsg-5)
 Depends: adduser,
          pciutils,
          ${misc:Depends},
