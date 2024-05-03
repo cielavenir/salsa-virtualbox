@@ -2,6 +2,7 @@ virtualbox (7.0.18-dfsg-1) unstable; urgency=medium
 
   * New upstream version 7.0.18-dfsg
   * Fixup link for tarball import
+  * Drop patch 162843, upstream. Refresh vnc patch
 
  -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 03 May 2024 16:44:26 +0200
 
