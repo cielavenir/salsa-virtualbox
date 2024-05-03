@@ -163,9 +163,6 @@ override_dh_installinit:
 	dh_installinit -p$(uxname) --no-start --update-rcd-params="start 45 S ."
 	dh_installinit --remaining-packages --no-start
 
-override_dh_installsystemd:
-	dh_installsystemd -p$(uname) debian/$(uname).service
-
 override_dh_dkms:
 	dh_dkms -V $(VERSION)
 

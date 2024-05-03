@@ -1,3 +1,9 @@
+virtualbox (7.0.16-dfsg-8) unstable; urgency=medium
+
+  * Drop dh_installsystemd.
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Fri, 03 May 2024 09:43:22 +0200
+
 virtualbox (7.0.16-dfsg-7) unstable; urgency=medium
 
   * replace dh_systemd_enable with dh_installsystemd
