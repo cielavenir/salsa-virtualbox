@@ -77,7 +77,6 @@ Build-Depends: bzip2,
                xsltproc,
                yasm,
                zlib1g-dev
-X-Python-Version: >= 2.5
 Standards-Version: 4.6.1
 Rules-Requires-Root: binary-targets
 Homepage: https://www.virtualbox.org
