@@ -220,7 +220,7 @@ Section: contrib/oldlibs
 Architecture: amd64 i386
 Depends: virtualbox-guest-x11,
          ${misc:Depends}
-Description: transitional package
+Description: transitional package for virtualbox-guest-x11
  This is a transitional package for virtualbox-guest-x11.
  It can safely be removed
 
@@ -229,6 +229,6 @@ Section: contrib/oldlibs
 Architecture: amd64 i386
 Depends: virtualbox-guest-utils,
          ${misc:Depends}
-Description: transitional package
+Description: transitional package for virtualbox-guest-utils
  This is a transitional package for virtualbox-guest-utils.
  It can safely be removed
