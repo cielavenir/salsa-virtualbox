@@ -42,7 +42,22 @@ RT_C_DECLS_BEGIN
  */
 
 /** The saved state version. */
-#define GCM_SAVED_STATE_VERSION         1
+#define GCM_SAVED_STATE_VERSION     1
+
+/**
+ * GCM Fixer Identifiers.
+ * @remarks Part of saved state!
+ * @{
+ */
+/** DOS division by zero, the worst. Includes Windows 3.x. */
+#define GCMFIXER_DBZ_DOS            RT_BIT_32(0)
+/** OS/2 (any version) division by zero. */
+#define GCMFIXER_DBZ_OS2            RT_BIT_32(1)
+/** Windows 9x division by zero. */
+#define GCMFIXER_DBZ_WIN9X          RT_BIT_32(2)
+/** Workaround for the Mesa vmsvga driver using a IN/OUT backdoor. */
+#define GCMFIXER_MESA_VMSVGA_DRV    RT_BIT_32(3)
+/** @} */
 
 /**
  * GCM VM Instance data.
@@ -50,10 +65,7 @@ RT_C_DECLS_BEGIN
 typedef struct GCM
 {
     /** The provider that is active for this VM. */
-    int32_t                         enmFixerIds;
-    /** The interface implementation version. */
-    uint32_t                        u32Version;
-
+    uint32_t                        fFixerSet;
 } GCM;
 /** Pointer to GCM VM instance data. */
 typedef GCM *PGCM;

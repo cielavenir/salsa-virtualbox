@@ -721,7 +721,7 @@ static bool vusbMsgSetup(PVUSBPIPE pPipe, const void *pvBuf, uint32_t cbBuf)
                  cbReq, RT_UOFFSETOF_DYN(VUSBCTRLEXTRA, Urb.abData[cbReq])));
             return false;
         }
-        if (pExtra != pNew)
+        if (pExtra != pNew) /* (parfait is wrong about pNew leak here) */
         {
             LogFunc(("Reallocated %u -> %u\n", pExtra->cbMax, cbReq));
             pNew->pMsg = (PVUSBSETUP)pNew->Urb.abData;
@@ -1125,7 +1125,6 @@ int vusbUrbSubmit(PVUSBURB pUrb)
     vusbUrbAssert(pUrb);
     Assert(pUrb->enmState == VUSBURBSTATE_ALLOCATED);
     PVUSBDEV pDev = pUrb->pVUsb->pDev;
-    PVUSBPIPE pPipe = NULL;
     Assert(pDev);
 
     /*
@@ -1160,13 +1159,11 @@ int vusbUrbSubmit(PVUSBURB pUrb)
     {
         case VUSBDIRECTION_IN:
             pEndPtDesc = pDev->aPipes[pUrb->EndPt].in;
-            pPipe = &pDev->aPipes[pUrb->EndPt];
             break;
         case VUSBDIRECTION_SETUP:
         case VUSBDIRECTION_OUT:
         default:
             pEndPtDesc = pDev->aPipes[pUrb->EndPt].out;
-            pPipe = &pDev->aPipes[pUrb->EndPt];
             break;
     }
     if (!pEndPtDesc)

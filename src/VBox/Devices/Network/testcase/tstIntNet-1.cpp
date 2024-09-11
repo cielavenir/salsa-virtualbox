@@ -818,7 +818,7 @@ extern "C" DECLEXPORT(int) TrustedMain(int argc, char **argv, char **envp)
                 return 1;
 
             case 'V':
-                RTPrintf("$Revision: 155244 $\n");
+                RTPrintf("$Revision: 161758 $\n");
                 return 0;
 
             default:
@@ -838,15 +838,15 @@ extern "C" DECLEXPORT(int) TrustedMain(int argc, char **argv, char **envp)
         return 1;
     }
 
-    char szPath[RTPATH_MAX];
-    rc = RTPathExecDir(szPath, sizeof(szPath) - sizeof("/../VMMR0.r0"));
+    static const char s_szVmmR0[] = "/../VMMR0.r0";
+    char              szPath[RTPATH_MAX];
+    rc = RTPathExecDir(szPath, sizeof(szPath) - sizeof(s_szVmmR0));
     if (RT_FAILURE(rc))
     {
         RTPrintf("tstIntNet-1: RTPathExecDir -> %Rrc\n", rc);
         return 1;
     }
-
-    strcat(szPath, "/../VMMR0.r0");
+    memcpy(strchr(szPath, '\0'), s_szVmmR0, sizeof(s_szVmmR0));
 
     char szAbsPath[RTPATH_MAX];
     rc = RTPathAbs(szPath, szAbsPath, sizeof(szAbsPath));

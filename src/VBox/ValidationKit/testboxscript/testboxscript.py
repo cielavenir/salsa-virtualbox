@@ -42,7 +42,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 155955 $"
 
 import platform;
 import subprocess;
@@ -91,7 +91,7 @@ class TestBoxScriptWrapper(object): # pylint: disable=too-few-public-methods
 
         # Figure out where we live first.
         try:
-            __file__
+            __file__                        # pylint: disable=used-before-assignment
         except:
             __file__ = sys.argv[0];
         sTestBoxScriptDir = os.path.dirname(os.path.abspath(__file__));
@@ -112,7 +112,7 @@ class TestBoxScriptWrapper(object): # pylint: disable=too-few-public-methods
             if asArgs[i] == '--':
                 break;
         if sPidFile:
-            with open(sPidFile, 'w') as oPidFile:
+            with open(sPidFile, 'w') as oPidFile:   # pylint: disable=unspecified-encoding
                 oPidFile.write(str(os.getpid()));
 
         # Execute the testbox script almost forever in a relaxed loop.

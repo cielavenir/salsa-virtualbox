@@ -30,7 +30,7 @@
 ]>
 <refentry id="vboxmanage-showvminfo" lang="en">
   <refentryinfo>
-    <pubdate>$Date: 2023-01-18 00:40:56 +0100 (Wed, 18 Jan 2023) $</pubdate>
+    <pubdate>$Date: 2024-02-29 21:47:25 +0100 (Thu, 29 Feb 2024) $</pubdate>
     <title>VBoxManage showvminfo</title>
   </refentryinfo>
 
@@ -67,7 +67,7 @@
     </cmdsynopsis>
   </refsynopsisdiv>
 
-  <refsect1>
+  <refsect1 id="vboxmanage-showvminfo-description">
     <title>Описание</title>
     <para>
       Команда <command>VBoxManage showvminfo</command> выводит
@@ -128,7 +128,7 @@
     </refsect2>
   </refsect1>
 
-  <refsect1>
+  <refsect1 id="vboxmanage-showvminfo-examples">
     <title>Примеры</title>
     <remark role="help-scope" condition="GLOBAL"/>
     <para>
@@ -177,7 +177,7 @@ UUID="1bf3464d-57c6-4d49-92a9-a5cc3816b7e7"
 ...</screen>
   </refsect1>
 
-  <refsect1>
+  <refsect1 id="vboxmanage-showvminfo-see-also">
     <title>Смотрите также</title>
     <para>
       <xref linkend="vboxmanage-list" />

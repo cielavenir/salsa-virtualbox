@@ -38,9 +38,10 @@
 #include "UILibraryDefs.h"
 
 /* COM includes: */
-#include "COMEnums.h"
 #include "CMedium.h"
 #include "CMediumAttachment.h"
+#include "KMachineState.h"
+#include "KSessionState.h"
 
 /* Forward declarations: */
 class UIVirtualBoxEventHandlerProxy;
@@ -97,6 +98,12 @@ signals:
       * @param  enmMediumType  Brings corresponding medium type.
       * @param  fRegistered    Brings whether medium is registered or unregistered. */
     void sigMediumRegistered(const QUuid &uMediumId, KDeviceType enmMediumType, bool fRegistered);
+    /** Notifies extension pack. install.
+     *  @param  strName      Passes extension pack name. */
+    void sigExtensionPackInstalled(const QString &strName);
+    /** Notifies extension pack. uninstall.
+     *  @param  strName      Passes extension pack name. */
+    void sigExtensionPackUninstalled(const QString &strName);
 
 public:
 

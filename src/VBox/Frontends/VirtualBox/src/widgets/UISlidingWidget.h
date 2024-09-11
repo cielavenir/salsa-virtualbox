@@ -35,7 +35,7 @@
 #include <QWidget>
 
 /* Other VBox includes: */
-#include <iprt/cdefs.h>
+#include <iprt/cdefs.h> // for RT_OVERRIDE stuff
 
 /* Forward declarations: */
 class QBoxLayout;
@@ -76,7 +76,7 @@ public:
     UISlidingWidget(Qt::Orientation enmOrientation, QWidget *pParent = 0);
 
     /** Holds the minimum widget size. */
-    virtual QSize minimumSizeHint() const /* pverride */;
+    virtual QSize minimumSizeHint() const RT_OVERRIDE;
 
     /** Defines @a pWidget1 and @a pWidget2. */
     void setWidgets(QWidget *pWidget1, QWidget *pWidget2);

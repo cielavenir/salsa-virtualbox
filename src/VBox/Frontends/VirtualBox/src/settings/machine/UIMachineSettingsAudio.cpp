@@ -188,7 +188,7 @@ void UIMachineSettingsAudio::saveFromCacheTo(QVariant &data)
     UISettingsPageMachine::uploadData(data);
 }
 
-void UIMachineSettingsAudio::retranslateUi()
+void UIMachineSettingsAudio::sltRetranslateUI()
 {
 }
 
@@ -215,7 +215,7 @@ void UIMachineSettingsAudio::prepare()
     prepareConnections();
 
     /* Apply language settings: */
-    retranslateUi();
+    sltRetranslateUI();
 }
 
 void UIMachineSettingsAudio::prepareWidgets()
@@ -227,7 +227,10 @@ void UIMachineSettingsAudio::prepareWidgets()
         /* Prepare settings editor: */
         m_pEditorAudioSettings = new UIAudioSettingsEditor(this);
         if (m_pEditorAudioSettings)
+        {
+            addEditor(m_pEditorAudioSettings);
             pLayout->addWidget(m_pEditorAudioSettings);
+        }
 
         pLayout->addStretch();
     }

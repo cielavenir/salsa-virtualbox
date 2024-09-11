@@ -63,14 +63,14 @@ private slots:
     void sltMACAddressClonePolicyChanged(MACAddressClonePolicy enmMACAddressClonePolicy);
     void sltKeepDiskNamesToggled(bool fKeepDiskNames);
     void sltKeepHardwareUUIDsToggled(bool fKeepHardwareUUIDs);
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
-    void retranslateUi();
-    void initializePage();
+    void initializePage() RT_OVERRIDE;
     void prepare(const QString &strDefaultClonePath);
     /** Validation stuff */
-    bool isComplete() const;
+    bool isComplete() const RT_OVERRIDE;
 
     QIRichTextLabel *m_pMainLabel;
     UICloneVMNamePathEditor *m_pNamePathEditor;

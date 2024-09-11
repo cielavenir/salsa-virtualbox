@@ -38,7 +38,7 @@
 #include "UINativeWizardPage.h"
 
 /* COM includes: */
-#include "COMEnums.h"
+#include "KCloneMode.h"
 
 /* Forward declaration: */
 class QIRichTextLabel;
@@ -57,18 +57,17 @@ public:
 private slots:
 
     void sltCloneModeChanged(KCloneMode enmCloneMode);
+    /** Translation stuff. */
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
-    /** Translation stuff. */
-    void retranslateUi();
-
     /** Prepare stuff. */
-    void initializePage();
+    void initializePage() RT_OVERRIDE;
     void prepare();
 
     /** Validation stuff. */
-    bool validatePage();
+    bool validatePage() RT_OVERRIDE;
 
     /** Widgets. */
     QIRichTextLabel *m_pLabel;

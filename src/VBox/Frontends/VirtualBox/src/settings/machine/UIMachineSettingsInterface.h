@@ -75,11 +75,16 @@ protected:
       * @note  This task WILL be performed in other than the GUI thread, no widget interactions! */
     virtual void saveFromCacheTo(QVariant &data) RT_OVERRIDE;
 
-    /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
+    /** Handles filter change. */
+    virtual void handleFilterChange() RT_OVERRIDE;
 
     /** Performs final page polishing. */
     virtual void polishPage() RT_OVERRIDE;
+
+private slots:
+
+    /** Handles translation event. */
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
@@ -102,6 +107,9 @@ private:
     bool saveMiniToolbarData();
     /** Saves existing 'Visual State' data from cache. */
     bool saveVisualStateData();
+
+    /** Updates minimum layout hint. */
+    void updateMinimumLayoutHint();
 
     /** Holds the machine ID copy. */
     const QUuid   m_uMachineId;

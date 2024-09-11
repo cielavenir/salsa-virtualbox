@@ -37,7 +37,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 155955 $"
 
 
 # Standard Python imports.
@@ -46,7 +46,7 @@ import sys
 
 
 # Only the main script needs to modify the path.
-try:    __file__
+try:    __file__                            # pylint: disable=used-before-assignment
 except: __file__ = sys.argv[0]
 g_ksValidationKitDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(g_ksValidationKitDir)
@@ -311,7 +311,7 @@ class tdGuestOsInstTest1(vbox.TestDriver):
         Extend standard options set
         """
 
-        if False is True:
+        if False is True: # placeholder.    pylint: disable=comparison-of-constants
             pass;
         elif asArgs[iArg] == '--ioapic':
             for oTestVm in self.oTestVmSet.aoTestVms:

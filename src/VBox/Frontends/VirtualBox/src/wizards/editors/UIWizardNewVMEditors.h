@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2006-2023 Oracle and/or its affiliates.
+ * Copyright (C) 2006-2024 Oracle and/or its affiliates.
  *
  * This file is part of VirtualBox base platform packages, as
  * available from https://www.virtualbox.org.
@@ -35,14 +35,10 @@
 #include <QIcon>
 #include <QGroupBox>
 
-/* Local includes: */
-#include "QIWithRetranslateUI.h"
-
 /* Forward declarations: */
 class QCheckBox;
 class QGridLayout;
 class QLabel;
-class QIComboBox;
 class QILineEdit;
 class UIBaseMemoryEditor;
 class UIFilePathSelector;
@@ -51,7 +47,7 @@ class UIPasswordLineEdit;
 class UIUserNamePasswordEditor;
 class UIVirtualCPUEditor;
 
-class UIUserNamePasswordGroupBox : public QIWithRetranslateUI<QGroupBox>
+class UIUserNamePasswordGroupBox : public QGroupBox
 {
     Q_OBJECT;
 
@@ -75,16 +71,19 @@ public:
         void setLabelsVisible(bool fVisible);
     /** @} */
 
+private slots:
+
+    void sltRetranslateUI();
+
 private:
 
     void prepare();
-    virtual void retranslateUi() /* override final */;
 
     UIUserNamePasswordEditor *m_pUserNamePasswordEditor;
 };
 
 
-class UIGAInstallationGroupBox : public QIWithRetranslateUI<QGroupBox>
+class UIGAInstallationGroupBox : public QGroupBox
 {
     Q_OBJECT;
 
@@ -107,17 +106,17 @@ public:
 private slots:
 
     void sltToggleWidgetsEnabled(bool fEnabled);
+    void sltRetranslateUI();
 
 private:
 
-    virtual void retranslateUi() /* override final */;
     void prepare();
 
     QLabel *m_pGAISOPathLabel;
     UIFilePathSelector *m_pGAISOFilePathSelector;
 };
 
-class UIAdditionalUnattendedOptions : public QIWithRetranslateUI<QGroupBox>
+class UIAdditionalUnattendedOptions : public QGroupBox
 {
     Q_OBJECT;
 
@@ -144,10 +143,13 @@ public:
         void disableEnableProductKeyWidgets(bool fEnabled);
     /** @} */
 
+private slots:
+
+    void sltRetranslateUI();
+
 private:
 
     void prepare();
-    virtual void retranslateUi() /* override final */;
 
     QLabel *m_pProductKeyLabel;
     QILineEdit *m_pProductKeyLineEdit;
@@ -157,7 +159,7 @@ private:
 };
 
 
-class UINewVMHardwareContainer : public QIWithRetranslateUI<QWidget>
+class UINewVMHardwareContainer : public QWidget
 {
     Q_OBJECT;
 
@@ -178,10 +180,16 @@ public:
         void setEFIEnabled(bool fEnabled);
     /** @} */
 
+private slots:
+
+    void sltRetranslateUI();
+
 private:
 
     void prepare();
-    virtual void retranslateUi() /* override final */;
+
+    /** Updates minimum layout hint. */
+    void updateMinimumLayoutHint();
 
     UIBaseMemoryEditor *m_pBaseMemoryEditor;
     UIVirtualCPUEditor *m_pVirtualCPUEditor;

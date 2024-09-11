@@ -37,7 +37,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 158992 $"
 
 
 # Standard Python imports.
@@ -46,7 +46,7 @@ import sys
 
 
 # Only the main script needs to modify the path.
-try:    __file__
+try:    __file__                            # pylint: disable=used-before-assignment
 except: __file__ = sys.argv[0]
 g_ksValidationKitDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(g_ksValidationKitDir)
@@ -190,16 +190,16 @@ class tdGuestOsInstOs2(vbox.TestDriver):
         fRc = fRc and oSession.setBootOrder(2, vboxcon.DeviceType_Floppy)
 
         # Enable HW virt
-        fRc = fRc and oSession.enableVirtEx(True)
+        fRc = fRc and oSession.enableVirtExX86(True)
 
         # Enable I/O APIC
         fRc = fRc and oSession.enableIoApic(self.fEnableIOAPIC)
 
         # Enable Nested Paging
-        fRc = fRc and oSession.enableNestedPaging(self.fEnableNestedPaging)
+        fRc = fRc and oSession.enableNestedPagingX86(self.fEnableNestedPaging)
 
         # Enable PAE
-        fRc = fRc and oSession.enablePae(self.fEnablePAE)
+        fRc = fRc and oSession.enablePaeX86(self.fEnablePAE)
 
         # Remote desktop
         oSession.setupVrdp(True)

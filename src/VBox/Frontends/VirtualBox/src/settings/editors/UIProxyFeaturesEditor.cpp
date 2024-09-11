@@ -38,7 +38,7 @@
 
 
 UIProxyFeaturesEditor::UIProxyFeaturesEditor(QWidget *pParent /* = 0 */)
-    : QIWithRetranslateUI<QWidget>(pParent)
+    : UIEditor(pParent)
     , m_enmProxyMode(KProxyMode_Max)
     , m_pButtonGroup(0)
     , m_pRadioButtonProxyAuto(0)
@@ -109,7 +109,7 @@ QString UIProxyFeaturesEditor::proxyHost() const
     return m_pEditorHost ? m_pEditorHost->text() : m_strProxyHost;
 }
 
-void UIProxyFeaturesEditor::retranslateUi()
+void UIProxyFeaturesEditor::sltRetranslateUI()
 {
     /* Translate proxy mode editor: */
     if (m_pRadioButtonProxyAuto)
@@ -226,11 +226,11 @@ void UIProxyFeaturesEditor::prepare()
     }
 
     /* Prepare connections: */
-    connect(m_pButtonGroup, static_cast<void(QButtonGroup::*)(QAbstractButton*)>(&QButtonGroup::buttonClicked),
+    connect(m_pButtonGroup, &QButtonGroup::buttonClicked,
             this, &UIProxyFeaturesEditor::sltHandleProxyModeChanged);
     connect(m_pEditorHost, &QILineEdit::textEdited,
             this, &UIProxyFeaturesEditor::sigProxyHostChanged);
 
     /* Apply language settings: */
-    retranslateUi();
+    sltRetranslateUI();
 }

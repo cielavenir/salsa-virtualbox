@@ -30,7 +30,7 @@
 ]>
 <refentry id="vboxmanage-signova" lang="en">
   <refentryinfo>
-    <pubdate>$Date: 2023-01-17 15:15:46 +0100 (Tue, 17 Jan 2023) $</pubdate>
+    <pubdate>$Date: 2024-02-29 21:47:25 +0100 (Thu, 29 Feb 2024) $</pubdate>
     <title>VBoxManage signova</title>
   </refentryinfo>
 
@@ -69,7 +69,7 @@
     </cmdsynopsis>
   </refsynopsisdiv>
 
-  <refsect1>
+  <refsect1 id="vboxmanage-signova-description">
     <title>Описание</title>
     <para>
       Команда <command>VBoxManage signova</command> добавляет цифровую

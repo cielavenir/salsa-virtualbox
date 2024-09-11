@@ -37,7 +37,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 159771 $"
 
 
 # Standard Python imports.
@@ -45,7 +45,7 @@ import os;
 import sys;
 
 # Only the main script needs to modify the path.
-try:    __file__
+try:    __file__                            # pylint: disable=used-before-assignment
 except: __file__ = sys.argv[0];
 g_ksValidationKitDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))));
 sys.path.append(g_ksValidationKitDir);
@@ -137,7 +137,13 @@ class tdBenchmark2(vbox.TestDriver):
         # Large pages only work with nested paging.
         afLargePages = [False, ];
         try:
-            if oVM.getHWVirtExProperty(vboxcon.HWVirtExPropertyType_NestedPaging):
+            fNestedPaging = False;
+            if self.fpApiVer >= 7.1:
+                fNestedPaging = oVM.platform.x86.getHWVirtExProperty(vboxcon.HWVirtExPropertyType_NestedPaging);
+            else:
+                fNestedPaging = oVM.getHWVirtExProperty(vboxcon.HWVirtExPropertyType_NestedPaging);
+
+            if fNestedPaging:
                 afLargePages = [True, False];
         except:
             return reporter.errorXcpt("Failed to get HWVirtExPropertyType_NestedPaging");
@@ -155,7 +161,7 @@ class tdBenchmark2(vbox.TestDriver):
                 oSession = self.openSession(oVM);
                 if oSession:
                     fRc = oSession.setRamSize(cMbRam);
-                    fRc = oSession.setLargePages(fLargePages) and fRc;
+                    fRc = oSession.setLargePagesX86(fLargePages) and fRc;
                     if fRc:
                         fRc = oSession.saveSettings();
                     if not fRc:

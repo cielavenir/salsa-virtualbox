@@ -348,6 +348,8 @@ typedef PDMDRVREG const *PCPDMDRVREG;
 #define PDM_DRVREG_CLASS_SCSI           RT_BIT(15)
 /** Generic raw PCI device driver. */
 #define PDM_DRVREG_CLASS_PCIRAW         RT_BIT(16)
+/** GPIO driver. */
+#define PDM_DRVREG_CLASS_GPIO           RT_BIT(17)
 /** @} */
 
 
@@ -1823,6 +1825,22 @@ DECLINLINE(int) PDMDrvHlpSSMRegisterLoadDone(PPDMDRVINS pDrvIns, PFNSSMDRVLOADDO
                                               NULL /*pfnLivePrep*/, NULL /*pfnLiveExec*/, NULL /*pfnLiveVote*/,
                                               NULL /*pfnSavePrep*/, NULL /*pfnSaveExec*/, NULL /*pfnSaveDone*/,
                                               NULL /*pfnLoadPrep*/, NULL /*pfnLoadExec*/, pfnLoadDone);
+}
+
+/**
+ * Get the status of an saved state operation.
+ *
+ * This can sometimes be useful in FNSSMDRVLOADDONE implementations to determine
+ * whether the load succeeded or not.
+ *
+ * @returns VBox status.
+ * @param   pDrvIns         Driver instance.
+ * @param   pSSM            The saved state handle.
+ * @sa      SSMR3HandleGetStatus
+ */
+DECLINLINE(int) PDMDrvHlpSSMHandleGetStatus(PPDMDRVINS pDrvIns, PSSMHANDLE pSSM)
+{
+    return pDrvIns->pHlpR3->pfnSSMHandleGetStatus(pSSM);
 }
 
 /**

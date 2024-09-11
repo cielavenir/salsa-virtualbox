@@ -37,7 +37,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 155955 $"
 
 
 # Standard Python imports.
@@ -141,7 +141,7 @@ def processExists(uPid):
             return False;
         reporter.logXcpt('uPid=%s oXcpt=%s' % (uPid, oXcpt));
     except Exception as oXcpt:
-        reporter.logXcpt('uPid=%s' % (uPid,));
+        reporter.logXcpt('uPid=%s oXcpt=%s' % (uPid, oXcpt));
         return False;
     else:
         hProcess.Close(); #win32api.CloseHandle(hProcess)

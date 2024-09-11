@@ -34,8 +34,6 @@
 #include <QVBoxLayout>
 
 /* GUI includes: */
-#include "UICommon.h"
-#include "UICursor.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIPopupStack.h"
 #include "UIPopupStackViewport.h"
@@ -258,21 +256,18 @@ void UIPopupStack::prepareContent()
         m_pScrollArea = new QScrollArea;
         {
             /* Configure scroll-area: */
-            UICursor::setCursor(m_pScrollArea, Qt::ArrowCursor);
+            m_pScrollArea->setCursor(Qt::ArrowCursor);
             m_pScrollArea->setWidgetResizable(true);
             m_pScrollArea->setFrameStyle(QFrame::NoFrame | QFrame::Plain);
             m_pScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
             //m_pScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
             QPalette pal = m_pScrollArea->palette();
-#ifndef VBOX_IS_QT6_OR_LATER /** @todo Qt::transparent glitches in qt6? */
-            pal.setColor(QPalette::Window, QColor(Qt::transparent));
-#endif
             m_pScrollArea->setPalette(pal);
             /* Create scroll-viewport: */
             m_pScrollViewport = new UIPopupStackViewport;
             {
                 /* Configure scroll-viewport: */
-                UICursor::setCursor(m_pScrollViewport, Qt::ArrowCursor);
+                m_pScrollViewport->setCursor(Qt::ArrowCursor);
                 /* Connect scroll-viewport: */
                 connect(this, &UIPopupStack::sigProposeStackViewportSize,
                         m_pScrollViewport, &UIPopupStackViewport::sltHandleProposalForSize);

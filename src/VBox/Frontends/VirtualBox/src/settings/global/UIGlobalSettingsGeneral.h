@@ -71,8 +71,16 @@ protected:
       * @note  This task WILL be performed in other than the GUI thread, no widget interactions! */
     virtual void saveFromCacheTo(QVariant &data) RT_OVERRIDE;
 
+    /** Performs validation, updates @a messages list if something is wrong. */
+    virtual bool validate(QList<UIValidationMessage> &messages) RT_OVERRIDE;
+
+    /** Handles filter change. */
+    virtual void handleFilterChange() RT_OVERRIDE;
+
+private slots:
+
     /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
@@ -85,6 +93,9 @@ private:
 
     /** Saves existing data from cache. */
     bool saveData();
+
+    /** Updates minimum layout hint. */
+    void updateMinimumLayoutHint();
 
     /** Holds the page data cache instance. */
     UISettingsCacheGlobalGeneral *m_pCache;

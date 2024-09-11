@@ -30,13 +30,12 @@
 #include <QLabel>
 
 /* GUI includes: */
-#include "UICommon.h"
 #include "UIFilePathSelector.h"
 #include "UISnapshotFolderEditor.h"
 
 
 UISnapshotFolderEditor::UISnapshotFolderEditor(QWidget *pParent /* = 0 */)
-    : QIWithRetranslateUI<QWidget>(pParent)
+    : UIEditor(pParent)
     , m_pLabel(0)
     , m_pSelector(0)
 {
@@ -88,7 +87,7 @@ void UISnapshotFolderEditor::setMinimumLayoutIndent(int iIndent)
         m_pLayout->setColumnMinimumWidth(0, iIndent);
 }
 
-void UISnapshotFolderEditor::retranslateUi()
+void UISnapshotFolderEditor::sltRetranslateUI()
 {
     if (m_pLabel)
         m_pLabel->setText(tr("S&napshot Folder:"));
@@ -125,5 +124,5 @@ void UISnapshotFolderEditor::prepare()
     }
 
     /* Apply language settings: */
-    retranslateUi();
+    sltRetranslateUI();
 }

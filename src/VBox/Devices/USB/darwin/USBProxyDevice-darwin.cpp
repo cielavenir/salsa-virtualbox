@@ -316,7 +316,9 @@ static DECLCALLBACK(int32_t) usbProxyDarwinInitOnce(void *pvUser1)
         RTLdrClose(hMod);
     }
 
-    kern_return_t krc = IOMasterPort(MACH_PORT_NULL, &g_MasterPort);
+    RT_GCC_NO_WARN_DEPRECATED_BEGIN
+    kern_return_t krc = IOMasterPort(MACH_PORT_NULL, &g_MasterPort);  /* Deprecated since 12.0. */
+    RT_GCC_NO_WARN_DEPRECATED_END
     if (krc == KERN_SUCCESS)
     {
        g_pRunLoopMode = CFStringCreateWithCString(kCFAllocatorDefault, "VBoxUsbProxyMode", kCFStringEncodingUTF8);
@@ -835,7 +837,7 @@ static int usbProxyDarwinGetPipeProperties(PUSBPROXYDEVOSX pDevOsX, PUSBPROXYIFO
     }
 
     /** @todo sort or hash these for speedy lookup... */
-    return VINF_SUCCESS;
+    return rc;
 }
 
 
@@ -1348,7 +1350,8 @@ static DECLCALLBACK(int) usbProxyDarwinOpen(PUSBPROXYDEV pProxyDev, const char *
                                     vrc = VERR_NO_MEMORY;
                                 }
                             }
-                            vrc = VERR_VUSB_DEVICE_NOT_ATTACHED;
+                            else
+                                vrc = VERR_VUSB_DEVICE_NOT_ATTACHED;
                         }
                         else
                             vrc = RTErrConvertFromDarwin(irc);
@@ -1434,6 +1437,8 @@ static DECLCALLBACK(void) usbProxyDarwinClose(PUSBPROXYDEV pProxyDev)
     }
 
     IOReturn irc = (*pDevOsX->ppDevI)->ResetDevice(pDevOsX->ppDevI);
+    AssertLogRelMsg(irc == kIOReturnSuccess || irc == kIOReturnNoDevice,
+                    ("USB: ResetDevice -> %#x\n", irc));
 
     irc = (*pDevOsX->ppDevI)->USBDeviceClose(pDevOsX->ppDevI);
     if (irc != kIOReturnSuccess && irc != kIOReturnNoDevice)
@@ -1812,6 +1817,7 @@ static DECLCALLBACK(int) usbProxyDarwinUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB
 
                 /* try again... */
                 irc = (*pIf->ppIfI)->GetBusFrameNumber(pIf->ppIfI, &FrameNo, &FrameTime);
+                AssertMsg(irc == kIOReturnSuccess, ("GetBusFrameNumber -> %#x\n", irc));
                 if (FrameNo <= pPipe->u64NextFrameNo)
                     FrameNo = pPipe->u64NextFrameNo;
                 FrameNo += j;

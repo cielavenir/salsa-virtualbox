@@ -181,6 +181,14 @@
  *   <li> Avoid throwing exceptions, always prefer returning statuses.
  *        Crappy exception handling is rewared by a glass of water in the face.
  *
+ *   <li> Always cast bitfields members to the desired type before using them in
+ *        calculations as Visual C++ and g++/clang++ may use different types.
+ *
+ *        It seems like Visual C++ will use the basetype of the field, while the
+ *        other two will narrow the type down to the number of bits specified
+ *        and then subject it to standard type promotion which typically ends up
+ *        with signed int.
+ *
  * </ul>
  *
  * (1) It is common practice on Unix to have a single symbol namespace for an
@@ -809,7 +817,8 @@
  *        sometimes written 'a' in parts of the source code that does not use
  *        the array prefix.
  *
- *   <li> The 'p' prefix means pointer.  For instance 'pVM' is pointer to VM.
+ *   <li> The 'p' prefix means pointer.  For instance 'pVM' is pointer to VM,
+ *        'pidx' means pointer to an index and 'pv' is a generic void pointer.
  *
  *   <li> The 'r' prefix means that something is passed by reference.
  *

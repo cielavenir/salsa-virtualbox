@@ -49,7 +49,6 @@ BS3_GLOBAL_DATA g_bs3CpuBasic2_ud2_FlatAddr, 4
         dd  _bs3CpuBasic2_ud2 wrt FLAT
 
 
-
 ;
 ; CPU mode agnostic test code snippets.
 ;

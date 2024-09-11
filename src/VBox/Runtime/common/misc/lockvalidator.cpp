@@ -955,7 +955,7 @@ DECLINLINE(void) rtLockValidatorSerializeDetectionEnter(void)
 /**
  * Call after rtLockValidatorSerializeDetectionEnter.
  */
-DECLHIDDEN(void) rtLockValidatorSerializeDetectionLeave(void)
+DECLINLINE(void) rtLockValidatorSerializeDetectionLeave(void)
 {
     RTSEMXROADS hXRoads = g_hLockValidatorXRoads;
     if (hXRoads != NIL_RTSEMXROADS)
@@ -3384,7 +3384,7 @@ RTDECL(int) RTLockValidatorRecExclCheckBlocking(PRTLOCKVALRECEXCL pRec, RTTHREAD
      */
     else if (   pRecU->Excl.hClass != NIL_RTLOCKVALCLASS
              && (   pRecU->Excl.hClass->cMsMinDeadlock > cMillies
-                 || pRecU->Excl.hClass->cMsMinDeadlock > RT_INDEFINITE_WAIT))
+                 || pRecU->Excl.hClass->cMsMinDeadlock == RT_INDEFINITE_WAIT))
         rc = VINF_SUCCESS;
     else if (!rtLockValidatorIsSimpleNoDeadlockCase(pRecU))
         rc = rtLockValidatorDeadlockDetection(pRecU, pThreadSelf, pSrcPos);

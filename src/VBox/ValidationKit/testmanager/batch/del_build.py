@@ -41,7 +41,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 155955 $"
 
 # Standard python imports
 import sys
@@ -83,9 +83,8 @@ def markBuildsDeleted():
             if oConfig.fQuiet:
                 sys.exit(1);
             raise;
-        else:
-            if not oConfig.fQuiet:
-                print("del_build.py: Marked %u builds associated with '%s' as deleted." % (cBuilds, sBuildBin,));
+        if not oConfig.fQuiet:
+            print("del_build.py: Marked %u builds associated with '%s' as deleted." % (cBuilds, sBuildBin,));
 
     oDb.close()
     return 0;

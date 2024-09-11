@@ -392,10 +392,10 @@ DECLINLINE(void) pdmacFileEpTaskInit(PPDMASYNCCOMPLETIONTASK pTask, size_t cbTra
     ASMAtomicWriteS32(&pTaskFile->rc, VINF_SUCCESS);
 }
 
-int pdmacFileEpTaskInitiate(PPDMASYNCCOMPLETIONTASK pTask,
-                            PPDMASYNCCOMPLETIONENDPOINT pEndpoint, RTFOFF off,
-                            PCRTSGSEG paSegments, size_t cSegments,
-                            size_t cbTransfer, PDMACTASKFILETRANSFER enmTransfer)
+static int pdmacFileEpTaskInitiate(PPDMASYNCCOMPLETIONTASK pTask,
+                                   PPDMASYNCCOMPLETIONENDPOINT pEndpoint, RTFOFF off,
+                                   PCRTSGSEG paSegments, size_t cSegments,
+                                   size_t cbTransfer, PDMACTASKFILETRANSFER enmTransfer)
 {
     PPDMASYNCCOMPLETIONENDPOINTFILE pEpFile = (PPDMASYNCCOMPLETIONENDPOINTFILE)pEndpoint;
     PPDMASYNCCOMPLETIONTASKFILE pTaskFile = (PPDMASYNCCOMPLETIONTASKFILE)pTask;
@@ -419,7 +419,11 @@ int pdmacFileEpTaskInitiate(PPDMASYNCCOMPLETIONTASK pTask,
         /* Send it off to the I/O manager. */
         pdmacFileEpAddTask(pEpFile, pIoTask);
         off        += paSegments[i].cbSeg;
+#ifdef RT_STRICT
         cbTransfer -= paSegments[i].cbSeg;
+#else
+        RT_NOREF(cbTransfer);
+#endif
     }
 
     AssertMsg(!cbTransfer, ("Incomplete transfer %u bytes left\n", cbTransfer));

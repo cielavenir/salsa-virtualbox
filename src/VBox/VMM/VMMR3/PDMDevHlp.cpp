@@ -141,6 +141,25 @@ static DECLCALLBACK(uint32_t) pdmR3DevHlp_IoPortGetMappingAddress(PPDMDEVINS pDe
 }
 
 
+/** @interface_method_impl{PDMDEVHLPR3,pfnIoPortRead} */
+static DECLCALLBACK(VBOXSTRICTRC) pdmR3DevHlp_IoPortRead(PPDMDEVINS pDevIns, RTIOPORT Port, uint32_t *pu32Value, size_t cbValue)
+{
+    PDMDEV_ASSERT_DEVINS(pDevIns);
+    LogFlow(("pdmR3DevHlp_IoPortRead: caller='%s'/%d:\n", pDevIns->pReg->szName, pDevIns->iInstance));
+    PVM pVM = pDevIns->Internal.s.pVMR3;
+    VM_ASSERT_EMT_RETURN(pVM, VERR_VM_THREAD_NOT_EMT);
+
+    PVMCPU pVCpu = VMMGetCpu(pVM);
+    AssertPtrReturn(pVCpu, VERR_ACCESS_DENIED);
+
+    VBOXSTRICTRC rcStrict = IOMIOPortRead(pVM, pVCpu, Port, pu32Value, cbValue);
+
+    LogFlow(("pdmR3DevHlp_IoPortRead: caller='%s'/%d: returns %Rrc\n",
+             pDevIns->pReg->szName, pDevIns->iInstance, VBOXSTRICTRC_VAL(rcStrict)));
+    return rcStrict;
+}
+
+
 /** @interface_method_impl{PDMDEVHLPR3,pfnIoPortWrite} */
 static DECLCALLBACK(VBOXSTRICTRC) pdmR3DevHlp_IoPortWrite(PPDMDEVINS pDevIns, RTIOPORT Port, uint32_t u32Value, size_t cbValue)
 {
@@ -198,10 +217,12 @@ static DECLCALLBACK(int) pdmR3DevHlp_MmioMap(PPDMDEVINS pDevIns, IOMMMIOHANDLE h
 {
     PDMDEV_ASSERT_DEVINS(pDevIns);
     LogFlow(("pdmR3DevHlp_MmioMap: caller='%s'/%d: hRegion=%#x GCPhys=%#RGp\n", pDevIns->pReg->szName, pDevIns->iInstance, hRegion, GCPhys));
-    PVM pVM = pDevIns->Internal.s.pVMR3;
-    VM_ASSERT_EMT_RETURN(pVM, VERR_VM_THREAD_NOT_EMT);
 
-    int rc = IOMR3MmioMap(pVM, pDevIns, hRegion, GCPhys);
+    PVM    const pVM   = pDevIns->Internal.s.pVMR3;
+    PVMCPU const pVCpu = VMMGetCpu(pVM);
+    AssertReturn(pVCpu, VERR_VM_THREAD_NOT_EMT);
+
+    int rc = IOMR3MmioMap(pVM, pVCpu, pDevIns, hRegion, GCPhys);
 
     LogFlow(("pdmR3DevHlp_MmioMap: caller='%s'/%d: returns %Rrc\n", pDevIns->pReg->szName, pDevIns->iInstance, rc));
     return rc;
@@ -213,10 +234,12 @@ static DECLCALLBACK(int) pdmR3DevHlp_MmioUnmap(PPDMDEVINS pDevIns, IOMMMIOHANDLE
 {
     PDMDEV_ASSERT_DEVINS(pDevIns);
     LogFlow(("pdmR3DevHlp_MmioUnmap: caller='%s'/%d: hRegion=%#x\n", pDevIns->pReg->szName, pDevIns->iInstance, hRegion));
-    PVM pVM = pDevIns->Internal.s.pVMR3;
-    VM_ASSERT_EMT_RETURN(pVM, VERR_VM_THREAD_NOT_EMT);
 
-    int rc = IOMR3MmioUnmap(pVM, pDevIns, hRegion);
+    PVM    const pVM   = pDevIns->Internal.s.pVMR3;
+    PVMCPU const pVCpu = VMMGetCpu(pVM);
+    AssertReturn(pVCpu, VERR_VM_THREAD_NOT_EMT);
+
+    int rc = IOMR3MmioUnmap(pVM, pVCpu, pDevIns, hRegion);
 
     LogFlow(("pdmR3DevHlp_MmioUnmap: caller='%s'/%d: returns %Rrc\n", pDevIns->pReg->szName, pDevIns->iInstance, rc));
     return rc;
@@ -265,11 +288,7 @@ static DECLCALLBACK(int) pdmR3DevHlp_Mmio2Create(PPDMDEVINS pDevIns, PPDMPCIDEV 
     *phRegion   = NIL_PGMMMIO2HANDLE;
     AssertReturn(!pPciDev || pPciDev->Int.s.pDevInsR3 == pDevIns, VERR_INVALID_PARAMETER);
 
-    PVM pVM = pDevIns->Internal.s.pVMR3;
-    VM_ASSERT_EMT0_RETURN(pVM, VERR_VM_THREAD_NOT_EMT);
-    AssertMsgReturn(   pVM->enmVMState == VMSTATE_CREATING
-                    || pVM->enmVMState == VMSTATE_LOADING,
-                    ("state %s, expected CREATING or LOADING\n", VMGetStateName(pVM->enmVMState)), VERR_VM_INVALID_VM_STATE);
+    PVM const pVM = pDevIns->Internal.s.pVMR3;
 
     AssertReturn(!(iPciRegion & UINT16_MAX), VERR_INVALID_PARAMETER); /* not implemented. */
 
@@ -290,12 +309,6 @@ static DECLCALLBACK(int) pdmR3DevHlp_Mmio2Destroy(PPDMDEVINS pDevIns, PGMMMIO2HA
     PDMDEV_ASSERT_DEVINS(pDevIns);
     VM_ASSERT_EMT(pDevIns->Internal.s.pVMR3);
     LogFlow(("pdmR3DevHlp_Mmio2Destroy: caller='%s'/%d: hRegion=%#RX64\n", pDevIns->pReg->szName, pDevIns->iInstance, hRegion));
-
-    PVM pVM = pDevIns->Internal.s.pVMR3;
-    VM_ASSERT_EMT_RETURN(pVM, VERR_VM_THREAD_NOT_EMT);
-    AssertMsgReturn(   pVM->enmVMState == VMSTATE_DESTROYING
-                    || pVM->enmVMState == VMSTATE_LOADING,
-                    ("state %s, expected DESTROYING or LOADING\n", VMGetStateName(pVM->enmVMState)), VERR_VM_INVALID_VM_STATE);
 
     int rc = PGMR3PhysMmio2Deregister(pDevIns->Internal.s.pVMR3, pDevIns, hRegion);
 
@@ -1176,6 +1189,21 @@ static DECLCALLBACK(int) pdmR3DevHlp_PhysChangeMemBalloon(PPDMDEVINS pDevIns, bo
 }
 
 
+/** @interface_method_impl{PDMDEVHLPR3,pfnCpuGetGuestArch} */
+static DECLCALLBACK(CPUMARCH) pdmR3DevHlp_CpuGetGuestArch(PPDMDEVINS pDevIns)
+{
+    PDMDEV_ASSERT_DEVINS(pDevIns);
+    PVM pVM = pDevIns->Internal.s.pVMR3;
+    LogFlow(("pdmR3DevHlp_CpuGetGuestArch: caller='%s'/%d\n",
+             pDevIns->pReg->szName, pDevIns->iInstance));
+
+    CPUMARCH enmArch = CPUMGetGuestArch(pVM);
+
+    Log(("pdmR3DevHlp_CpuGetGuestArch: caller='%s'/%d: returns %u\n", pDevIns->pReg->szName, pDevIns->iInstance, enmArch));
+    return enmArch;
+}
+
+
 /** @interface_method_impl{PDMDEVHLPR3,pfnCpuGetGuestMicroarch} */
 static DECLCALLBACK(CPUMMICROARCH) pdmR3DevHlp_CpuGetGuestMicroarch(PPDMDEVINS pDevIns)
 {
@@ -1214,7 +1242,13 @@ static DECLCALLBACK(uint64_t) pdmR3DevHlp_CpuGetGuestScalableBusFrequency(PPDMDE
     LogFlow(("pdmR3DevHlp_CpuGetGuestScalableBusFrequency: caller='%s'/%d\n",
              pDevIns->pReg->szName, pDevIns->iInstance));
 
+#if defined(VBOX_VMM_TARGET_ARMV8)
+    uint64_t u64Fsb = 0;
+    AssertReleaseFailed();
+    RT_NOREF(pDevIns);
+#else
     uint64_t u64Fsb = CPUMGetGuestScalableBusFrequency(pDevIns->Internal.s.pVMR3);
+#endif
 
     Log(("pdmR3DevHlp_CpuGetGuestScalableBusFrequency: caller='%s'/%d: returns %#RX64\n", pDevIns->pReg->szName, pDevIns->iInstance, u64Fsb));
     return u64Fsb;
@@ -1484,8 +1518,8 @@ static DECLCALLBACK(int) pdmR3DevHlp_VMReqPriorityCallWaitV(PPDMDEVINS pDevIns, 
              pDevIns->pReg->szName, pDevIns->iInstance, idDstCpu, pfnFunction, cArgs));
 
     PVMREQ pReq;
-    int rc = VMR3ReqCallVU(pDevIns->Internal.s.pVMR3->pUVM, idDstCpu, &pReq, RT_INDEFINITE_WAIT, VMREQFLAGS_VBOX_STATUS | VMREQFLAGS_PRIORITY,
-                           pfnFunction, cArgs, Args);
+    int rc = VMR3ReqCallVU(pDevIns->Internal.s.pVMR3->pUVM, idDstCpu, &pReq, RT_INDEFINITE_WAIT,
+                           VMREQFLAGS_VBOX_STATUS | VMREQFLAGS_PRIORITY, pfnFunction, cArgs, Args);
     if (RT_SUCCESS(rc))
         rc = pReq->iStatus;
     VMR3ReqFree(pReq);
@@ -2520,7 +2554,9 @@ static DECLCALLBACK(void) pdmR3DevHlp_ISASetIrq(PPDMDEVINS pDevIns, int iIrq, in
     /*
      * Validate input.
      */
+#ifndef VBOX_VMM_TARGET_ARMV8
     Assert(iIrq < 16);
+#endif
     Assert((uint32_t)iLevel <= PDM_IRQ_LEVEL_FLIP_FLOP);
 
     PVM pVM = pDevIns->Internal.s.pVMR3;
@@ -4610,7 +4646,12 @@ static DECLCALLBACK(void) pdmR3DevHlp_A20Set(PPDMDEVINS pDevIns, bool fEnable)
     PDMDEV_ASSERT_DEVINS(pDevIns);
     VM_ASSERT_EMT(pDevIns->Internal.s.pVMR3);
     LogFlow(("pdmR3DevHlp_A20Set: caller='%s'/%d: fEnable=%d\n", pDevIns->pReg->szName, pDevIns->iInstance, fEnable));
+#ifdef VBOX_VMM_TARGET_ARMV8
+    AssertReleaseFailed();
+    RT_NOREF(pDevIns, fEnable);
+#else
     PGMR3PhysSetA20(VMMGetCpu(pDevIns->Internal.s.pVMR3), fEnable);
+#endif
 }
 
 
@@ -4625,7 +4666,12 @@ static DECLCALLBACK(void) pdmR3DevHlp_GetCpuId(PPDMDEVINS pDevIns, uint32_t iLea
              pDevIns->pReg->szName, pDevIns->iInstance, iLeaf, pEax, pEbx, pEcx, pEdx));
     AssertPtr(pEax); AssertPtr(pEbx); AssertPtr(pEcx); AssertPtr(pEdx);
 
+#ifdef VBOX_VMM_TARGET_ARMV8
+    RT_NOREF(pDevIns, iLeaf, pEax, pEbx, pEcx, pEdx);
+    AssertReleaseFailed();
+#else
     CPUMGetGuestCpuId(VMMGetCpu(pDevIns->Internal.s.pVMR3), iLeaf, 0 /*iSubLeaf*/, -1 /*f64BitMode*/, pEax, pEbx, pEcx, pEdx);
+#endif
 
     LogFlow(("pdmR3DevHlp_GetCpuId: caller='%s'/%d: returns void - *pEax=%#x *pEbx=%#x *pEcx=%#x *pEdx=%#x\n",
              pDevIns->pReg->szName, pDevIns->iInstance, *pEax, *pEbx, *pEcx, *pEdx));
@@ -4826,6 +4872,7 @@ const PDMDEVHLPR3 g_pdmR3DevHlpTrusted =
     pdmR3DevHlp_IoPortMap,
     pdmR3DevHlp_IoPortUnmap,
     pdmR3DevHlp_IoPortGetMappingAddress,
+    pdmR3DevHlp_IoPortRead,
     pdmR3DevHlp_IoPortWrite,
     pdmR3DevHlp_MmioCreateEx,
     pdmR3DevHlp_MmioMap,
@@ -5160,6 +5207,7 @@ const PDMDEVHLPR3 g_pdmR3DevHlpTrusted =
     pdmR3DevHlp_PhysBulkGCPhys2CCPtr,
     pdmR3DevHlp_PhysBulkGCPhys2CCPtrReadOnly,
     pdmR3DevHlp_PhysBulkReleasePageMappingLocks,
+    pdmR3DevHlp_CpuGetGuestArch,
     pdmR3DevHlp_CpuGetGuestMicroarch,
     pdmR3DevHlp_CpuGetGuestAddrWidths,
     pdmR3DevHlp_CpuGetGuestScalableBusFrequency,
@@ -5223,7 +5271,8 @@ const PDMDEVHLPR3 g_pdmR3DevHlpTracing =
     pdmR3DevHlpTracing_IoPortMap,
     pdmR3DevHlpTracing_IoPortUnmap,
     pdmR3DevHlp_IoPortGetMappingAddress,
-    pdmR3DevHlp_IoPortWrite,
+    pdmR3DevHlp_IoPortRead,  /** @todo Needs tracing variants for ARM now. */
+    pdmR3DevHlp_IoPortWrite, /** @todo Needs tracing variants for ARM now. */
     pdmR3DevHlpTracing_MmioCreateEx,
     pdmR3DevHlpTracing_MmioMap,
     pdmR3DevHlpTracing_MmioUnmap,
@@ -5557,6 +5606,7 @@ const PDMDEVHLPR3 g_pdmR3DevHlpTracing =
     pdmR3DevHlp_PhysBulkGCPhys2CCPtr,
     pdmR3DevHlp_PhysBulkGCPhys2CCPtrReadOnly,
     pdmR3DevHlp_PhysBulkReleasePageMappingLocks,
+    pdmR3DevHlp_CpuGetGuestArch,
     pdmR3DevHlp_CpuGetGuestMicroarch,
     pdmR3DevHlp_CpuGetGuestAddrWidths,
     pdmR3DevHlp_CpuGetGuestScalableBusFrequency,
@@ -5940,6 +5990,7 @@ const PDMDEVHLPR3 g_pdmR3DevHlpUnTrusted =
     pdmR3DevHlp_IoPortMap,
     pdmR3DevHlp_IoPortUnmap,
     pdmR3DevHlp_IoPortGetMappingAddress,
+    pdmR3DevHlp_IoPortRead,
     pdmR3DevHlp_IoPortWrite,
     pdmR3DevHlp_MmioCreateEx,
     pdmR3DevHlp_MmioMap,
@@ -6274,6 +6325,7 @@ const PDMDEVHLPR3 g_pdmR3DevHlpUnTrusted =
     pdmR3DevHlp_PhysBulkGCPhys2CCPtr,
     pdmR3DevHlp_PhysBulkGCPhys2CCPtrReadOnly,
     pdmR3DevHlp_PhysBulkReleasePageMappingLocks,
+    pdmR3DevHlp_CpuGetGuestArch,
     pdmR3DevHlp_CpuGetGuestMicroarch,
     pdmR3DevHlp_CpuGetGuestAddrWidths,
     pdmR3DevHlp_CpuGetGuestScalableBusFrequency,

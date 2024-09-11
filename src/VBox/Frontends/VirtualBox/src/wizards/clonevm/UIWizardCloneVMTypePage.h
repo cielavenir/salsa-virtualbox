@@ -52,13 +52,13 @@ public:
 private slots:
 
     void sltCloneTypeChanged(bool fIsFullClone);
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
-    void retranslateUi();
-    void initializePage();
+    void initializePage() RT_OVERRIDE RT_FINAL;
     void prepare();
-    bool validatePage();
+    bool validatePage() RT_OVERRIDE RT_FINAL;
 
     QIRichTextLabel *m_pLabel;
     bool m_fAdditionalInfo;

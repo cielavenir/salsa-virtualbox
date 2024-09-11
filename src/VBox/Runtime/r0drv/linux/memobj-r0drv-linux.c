@@ -151,6 +151,35 @@ typedef struct RTR0MEMOBJLNX
 typedef RTR0MEMOBJLNX *PRTR0MEMOBJLNX;
 
 
+/*********************************************************************************************************************************
+*   Global Variables                                                                                                             *
+*********************************************************************************************************************************/
+/*
+ * Linux allows only a coarse selection of zones for
+ * allocations matching a particular maximum physical address.
+ *
+ * Sorted from high to low physical address!
+ */
+static const struct
+{
+    RTHCPHYS    PhysHighest;
+    gfp_t       fGfp;
+} g_aZones[] =
+{
+    { NIL_RTHCPHYS,      GFP_KERNEL },
+#if (defined(RT_ARCH_AMD64) || defined(CONFIG_X86_PAE)) && defined(GFP_DMA32)
+    { _4G - 1,           GFP_DMA32  }, /* ZONE_DMA32: 0-4GB */
+#elif defined(RT_ARCH_ARM32) || defined(RT_ARCH_ARM64)
+    { _4G - 1,           GFP_DMA    }, /* ZONE_DMA: 0-4GB */
+#endif
+#if defined(RT_ARCH_AMD64)
+    { _16M - 1,          GFP_DMA    }, /* ZONE_DMA: 0-16MB */
+#elif defined(RT_ARCH_X86)
+    { 896 * _1M - 1,     GFP_USER   }, /* ZONE_NORMAL (32-bit hosts): 0-896MB */
+#endif
+};
+
+
 static void rtR0MemObjLinuxFreePages(PRTR0MEMOBJLNX pMemLnx);
 
 
@@ -621,7 +650,7 @@ static int rtR0MemObjLinuxVMap(PRTR0MEMOBJLNX pMemLnx, bool fExecutable)
         /*
          * Use vmap - 2.4.22 and later.
          */
-#if RTLNX_VER_MIN(2,4,22)
+#if RTLNX_VER_MIN(2,4,22) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
         pgprot_t fPg;
         pgprot_val(fPg) = _PAGE_PRESENT | _PAGE_RW;
 # ifdef _PAGE_NX
@@ -984,36 +1013,52 @@ DECLHIDDEN(int) rtR0MemObjNativeAllocLow(PPRTR0MEMOBJINTERNAL ppMem, size_t cb, 
 }
 
 
-DECLHIDDEN(int) rtR0MemObjNativeAllocCont(PPRTR0MEMOBJINTERNAL ppMem, size_t cb, bool fExecutable, const char *pszTag)
+DECLHIDDEN(int) rtR0MemObjNativeAllocCont(PPRTR0MEMOBJINTERNAL ppMem, size_t cb, RTHCPHYS PhysHighest,
+                                          bool fExecutable, const char *pszTag)
 {
     IPRT_LINUX_SAVE_EFL_AC();
     PRTR0MEMOBJLNX pMemLnx;
     int rc;
+    uint32_t idxZone;
 
-#if (defined(RT_ARCH_AMD64) || defined(CONFIG_X86_PAE)) && defined(GFP_DMA32)
-    /* ZONE_DMA32: 0-4GB */
-    rc = rtR0MemObjLinuxAllocPages(&pMemLnx, RTR0MEMOBJTYPE_CONT, cb, PAGE_SIZE, GFP_DMA32,
-                                   true /* contiguous */, fExecutable, VERR_NO_CONT_MEMORY, pszTag);
-    if (RT_FAILURE(rc))
-#endif
-#ifdef RT_ARCH_AMD64
-        /* ZONE_DMA: 0-16MB */
-        rc = rtR0MemObjLinuxAllocPages(&pMemLnx, RTR0MEMOBJTYPE_CONT, cb, PAGE_SIZE, GFP_DMA,
+    /*
+     * The last zone must be able to satisfy the PhysHighest requirement or there
+     * will be no zone at all.
+     */
+    if (g_aZones[RT_ELEMENTS(g_aZones) - 1].PhysHighest > PhysHighest)
+    {
+        IPRT_LINUX_RESTORE_EFL_AC();
+        AssertMsgFailedReturn(("No zone can satisfy PhysHighest=%RHp!\n", PhysHighest),
+                              VERR_NO_CONT_MEMORY);
+    }
+
+    /* Find the first zone matching our PhysHighest requirement. */
+    idxZone = 0;
+    for (;;)
+    {
+        if (g_aZones[idxZone].PhysHighest <= PhysHighest)
+            break; /* We found a zone satisfying the requirement. */
+        idxZone++;
+    }
+
+    /* Now try to allocate pages from all the left zones until one succeeds. */
+    for (;;)
+    {
+        rc = rtR0MemObjLinuxAllocPages(&pMemLnx, RTR0MEMOBJTYPE_CONT, cb, PAGE_SIZE, g_aZones[idxZone].fGfp,
                                        true /* contiguous */, fExecutable, VERR_NO_CONT_MEMORY, pszTag);
-#else
-        /* ZONE_NORMAL (32-bit hosts): 0-896MB */
-        rc = rtR0MemObjLinuxAllocPages(&pMemLnx, RTR0MEMOBJTYPE_CONT, cb, PAGE_SIZE, GFP_USER,
-                                       true /* contiguous */, fExecutable, VERR_NO_CONT_MEMORY, pszTag);
-#endif
+        idxZone++;
+        if (RT_SUCCESS(rc) || idxZone == RT_ELEMENTS(g_aZones))
+            break;
+    }
     if (RT_SUCCESS(rc))
     {
         rc = rtR0MemObjLinuxVMap(pMemLnx, fExecutable);
         if (RT_SUCCESS(rc))
         {
-#if defined(RT_STRICT) && (defined(RT_ARCH_AMD64) || defined(CONFIG_HIGHMEM64G))
+#if defined(RT_STRICT)
             size_t iPage = pMemLnx->cPages;
             while (iPage-- > 0)
-                Assert(page_to_phys(pMemLnx->apPages[iPage]) < _4G);
+                Assert(page_to_phys(pMemLnx->apPages[iPage]) < PhysHighest);
 #endif
             pMemLnx->Core.u.Cont.Phys = page_to_phys(pMemLnx->apPages[0]);
             *ppMem = &pMemLnx->Core;
@@ -1157,6 +1202,7 @@ static int rtR0MemObjLinuxAllocPhysSub(PPRTR0MEMOBJINTERNAL ppMem, RTR0MEMOBJTYP
  */
 RTDECL(struct page *) rtR0MemObjLinuxVirtToPage(void *pv)
 {
+#if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
     unsigned long   ulAddr = (unsigned long)pv;
     unsigned long   pfn;
     struct page    *pPage;
@@ -1164,12 +1210,12 @@ RTDECL(struct page *) rtR0MemObjLinuxVirtToPage(void *pv)
     union
     {
         pgd_t       Global;
-#if RTLNX_VER_MIN(4,12,0)
+# if RTLNX_VER_MIN(4,12,0)
         p4d_t       Four;
-#endif
-#if RTLNX_VER_MIN(2,6,11)
+# endif
+# if RTLNX_VER_MIN(2,6,11)
         pud_t       Upper;
-#endif
+# endif
         pmd_t       Middle;
         pte_t       Entry;
     } u;
@@ -1182,16 +1228,16 @@ RTDECL(struct page *) rtR0MemObjLinuxVirtToPage(void *pv)
     u.Global = *pgd_offset(current->active_mm, ulAddr);
     if (RT_UNLIKELY(pgd_none(u.Global)))
         return NULL;
-#if RTLNX_VER_MIN(2,6,11)
-# if RTLNX_VER_MIN(4,12,0)
+# if RTLNX_VER_MIN(2,6,11)
+#  if RTLNX_VER_MIN(4,12,0)
     u.Four  = *p4d_offset(&u.Global, ulAddr);
     if (RT_UNLIKELY(p4d_none(u.Four)))
         return NULL;
 #   if RTLNX_VER_MIN(5,6,0)
     if (p4d_leaf(u.Four))
-#   else        
+#   else
     if (p4d_large(u.Four))
-#   endif    
+#   endif
     {
         pPage = p4d_page(u.Four);
         AssertReturn(pPage, NULL);
@@ -1201,17 +1247,17 @@ RTDECL(struct page *) rtR0MemObjLinuxVirtToPage(void *pv)
         return pfn_to_page(pfn);
     }
     u.Upper = *pud_offset(&u.Four, ulAddr);
-# else /* < 4.12 */
+#  else /* < 4.12 */
     u.Upper = *pud_offset(&u.Global, ulAddr);
-# endif /* < 4.12 */
+#  endif /* < 4.12 */
     if (RT_UNLIKELY(pud_none(u.Upper)))
         return NULL;
-# if RTLNX_VER_MIN(2,6,25)
+#  if RTLNX_VER_MIN(2,6,25)
 #   if RTLNX_VER_MIN(5,6,0)
     if (pud_leaf(u.Upper))
 #   else
     if (pud_large(u.Upper))
-#   endif    
+#   endif
     {
         pPage = pud_page(u.Upper);
         AssertReturn(pPage, NULL);
@@ -1219,19 +1265,19 @@ RTDECL(struct page *) rtR0MemObjLinuxVirtToPage(void *pv)
         pfn += (ulAddr >> PAGE_SHIFT) & ((UINT32_C(1) << (PUD_SHIFT - PAGE_SHIFT)) - 1);
         return pfn_to_page(pfn);
     }
-# endif
+#  endif
     u.Middle = *pmd_offset(&u.Upper, ulAddr);
-#else  /* < 2.6.11 */
+# else  /* < 2.6.11 */
     u.Middle = *pmd_offset(&u.Global, ulAddr);
-#endif /* < 2.6.11 */
+# endif /* < 2.6.11 */
     if (RT_UNLIKELY(pmd_none(u.Middle)))
         return NULL;
-#if RTLNX_VER_MIN(2,6,0)
+# if RTLNX_VER_MIN(2,6,0)
 #  if RTLNX_VER_MIN(5,6,0)
     if (pmd_leaf(u.Middle))
 #  else
     if (pmd_large(u.Middle))
-#  endif    
+#  endif
     {
         pPage = pmd_page(u.Middle);
         AssertReturn(pPage, NULL);
@@ -1239,25 +1285,32 @@ RTDECL(struct page *) rtR0MemObjLinuxVirtToPage(void *pv)
         pfn += (ulAddr >> PAGE_SHIFT) & ((UINT32_C(1) << (PMD_SHIFT - PAGE_SHIFT)) - 1);
         return pfn_to_page(pfn);
     }
-#endif
+# endif
 
-#if RTLNX_VER_MIN(6,5,0) || RTLNX_RHEL_RANGE(9,4, 9,99)
+# if RTLNX_VER_MIN(6,5,0) || RTLNX_RHEL_RANGE(9,4, 9,99)
     pEntry = __pte_map(&u.Middle, ulAddr);
-#elif RTLNX_VER_MIN(2,5,5) || defined(pte_offset_map) /* As usual, RHEL 3 had pte_offset_map earlier. */
+# elif RTLNX_VER_MIN(2,5,5) || defined(pte_offset_map) /* As usual, RHEL 3 had pte_offset_map earlier. */
     pEntry = pte_offset_map(&u.Middle, ulAddr);
-#else
+# else
     pEntry = pte_offset(&u.Middle, ulAddr);
-#endif
+# endif
     if (RT_UNLIKELY(!pEntry))
         return NULL;
     u.Entry = *pEntry;
-#if RTLNX_VER_MIN(2,5,5) || defined(pte_offset_map)
+# if RTLNX_VER_MIN(2,5,5) || defined(pte_offset_map)
     pte_unmap(pEntry);
-#endif
+# endif
 
     if (RT_UNLIKELY(!pte_present(u.Entry)))
         return NULL;
     return pte_page(u.Entry);
+#else /* !defined(RT_ARCH_AMD64) && !defined(RT_ARCH_X86) */
+
+    if (is_vmalloc_addr(pv))
+        return vmalloc_to_page(pv);
+
+    return virt_to_page(pv);
+#endif
 }
 RT_EXPORT_SYMBOL(rtR0MemObjLinuxVirtToPage);
 
@@ -2123,5 +2176,34 @@ DECLHIDDEN(RTHCPHYS) rtR0MemObjNativeGetPagePhysAddr(PRTR0MEMOBJINTERNAL pMem, s
         case RTR0MEMOBJTYPE_RES_VIRT:
             return NIL_RTHCPHYS;
     }
+}
+
+
+DECLHIDDEN(int) rtR0MemObjNativeZeroInitWithoutMapping(PRTR0MEMOBJINTERNAL pMem)
+{
+    PRTR0MEMOBJLNX const pMemLnx = (PRTR0MEMOBJLNX)pMem;
+    size_t const         cPages  = pMemLnx->Core.cb >> PAGE_SHIFT;
+    size_t               iPage;
+    /** @todo optimize this. */
+    for (iPage = 0; iPage < cPages; iPage++)
+    {
+        void          *pvPage;
+
+        /* Get the physical address of the page. */
+        RTHCPHYS const HCPhys = rtR0MemObjNativeGetPagePhysAddr(&pMemLnx->Core, iPage);
+        AssertReturn(HCPhys != NIL_RTHCPHYS, VERR_INTERNAL_ERROR_3);
+        Assert(!(HCPhys & PAGE_OFFSET_MASK));
+
+        /* Would've like to use valid_phys_addr_range for this test, but it isn't exported. */
+        AssertReturn((HCPhys | PAGE_OFFSET_MASK) < __pa(high_memory), VERR_INTERNAL_ERROR_3);
+
+        /* Map it. */
+        pvPage = phys_to_virt(HCPhys);
+        AssertPtrReturn(pvPage, VERR_INTERNAL_ERROR_3);
+
+        /* Zero it. */
+        RT_BZERO(pvPage, PAGE_SIZE);
+    }
+    return VINF_SUCCESS;
 }
 

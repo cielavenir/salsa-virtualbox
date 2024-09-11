@@ -72,10 +72,8 @@ private:
     HRESULT setGraphicsControllerType(GraphicsControllerType_T aGraphicsControllerType);
     HRESULT getVRAMSize(ULONG *aVRAMSize);
     HRESULT setVRAMSize(ULONG aVRAMSize);
-    HRESULT getAccelerate3DEnabled(BOOL *aAccelerate3DEnabled);
-    HRESULT setAccelerate3DEnabled(BOOL aAccelerate3DEnabled);
-    HRESULT getAccelerate2DVideoEnabled(BOOL *aAccelerate2DVideoEnabled);
-    HRESULT setAccelerate2DVideoEnabled(BOOL aAccelerate2DVideoEnabled);
+    HRESULT setFeature(GraphicsFeature_T aFeature, BOOL aEnabled);
+    HRESULT isFeatureEnabled(GraphicsFeature_T aFeature, BOOL *aEnabled);
     HRESULT getMonitorCount(ULONG *aMonitorCount);
     HRESULT setMonitorCount(ULONG aMonitorCount);
 

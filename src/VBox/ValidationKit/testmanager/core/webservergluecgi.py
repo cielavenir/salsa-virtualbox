@@ -36,14 +36,14 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 157516 $"
 
 
 # Standard python imports.
-import cgitb;
+import cgi;     # pylint: disable=deprecated-module ## @todo these will be retired in python 3.13!
+import cgitb;   # pylint: disable=deprecated-module ## @todo these will be retired in python 3.13!
 import os;
 import sys;
-import cgi;
 
 # Validation Kit imports.
 from testmanager.core.webservergluebase import WebServerGlueBase;

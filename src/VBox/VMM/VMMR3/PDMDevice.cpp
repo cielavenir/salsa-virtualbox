@@ -33,7 +33,11 @@
 #define PDMPCIDEV_INCLUDE_PRIVATE  /* Hack to get pdmpcidevint.h included at the right point. */
 #include "PDMInternal.h"
 #include <VBox/vmm/pdm.h>
-#include <VBox/vmm/apic.h>
+#if defined(VBOX_VMM_TARGET_ARMV8)
+# include <VBox/vmm/gic.h>
+#else
+# include <VBox/vmm/apic.h>
+#endif
 #include <VBox/vmm/cfgm.h>
 #include <VBox/vmm/dbgf.h>
 #include <VBox/vmm/hm.h>
@@ -674,11 +678,25 @@ static int pdmR3DevLoadModules(PVM pVM)
     RegCB.pVM              = pVM;
     RegCB.pCfgNode         = NULL;
 
+#if defined(VBOX_VMM_TARGET_ARMV8)
+    /*
+     * Register the internal VMM GIC device.
+     */
+    int rc = pdmR3DevReg_Register(&RegCB.Core, &g_DeviceGIC);
+    AssertRCReturn(rc, rc);
+
+    /*
+     * Register the internal VMM GIC device, NEM variant.
+     */
+    rc = pdmR3DevReg_Register(&RegCB.Core, &g_DeviceGICNem);
+    AssertRCReturn(rc, rc);
+#else
     /*
      * Register the internal VMM APIC device.
      */
     int rc = pdmR3DevReg_Register(&RegCB.Core, &g_DeviceAPIC);
     AssertRCReturn(rc, rc);
+#endif
 
     /*
      * Load the builtin module.

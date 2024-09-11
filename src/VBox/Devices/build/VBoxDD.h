@@ -137,7 +137,12 @@ extern const PDMDRVREG g_DrvVDE;
 #endif
 extern const PDMDRVREG g_DrvIntNet;
 extern const PDMDRVREG g_DrvDedicatedNic;
+#ifndef VBOX_WITH_LIBSLIRP
 extern const PDMDRVREG g_DrvNAT;
+#endif
+#ifdef VBOX_WITH_LIBSLIRP
+extern const PDMDRVREG g_DrvNATlibslirp;
+#endif
 #ifdef VBOX_WITH_NETSHAPER
 extern const PDMDRVREG g_DrvNetShaper;
 #endif /* VBOX_WITH_NETSHAPER */
@@ -227,6 +232,19 @@ extern const PDMDEVREG g_DeviceIommuAmd;
 #endif
 #ifdef VBOX_WITH_IOMMU_INTEL
 extern const PDMDEVREG g_DeviceIommuIntel;
+#endif
+
+#ifdef VBOX_WITH_VIRT_ARMV8
+extern const PDMDEVREG g_DeviceEfiArmV8;
+extern const PDMDEVREG g_DevicePl011;
+extern const PDMDEVREG g_DevicePl031Rtc;
+extern const PDMDEVREG g_DevicePl061Gpio;
+extern const PDMDEVREG g_DeviceFlashCFI;
+extern const PDMDEVREG g_DevicePciGenericEcam;
+extern const PDMDEVREG g_DevicePciGenericEcamBridge;
+extern const PDMDEVREG g_DevicePlatform;
+
+extern const PDMDRVREG g_DrvGpioButton;
 #endif
 
 /* VBoxAcpi.cpp */

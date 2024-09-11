@@ -31,22 +31,23 @@
 # pragma once
 #endif
 
-/* Qt includes: */
-#include <QWidget>
-
 /* GUI includes: */
-#include "QIWithRetranslateUI.h"
-#include "UILibraryDefs.h"
+#include "UIEditor.h"
 
 /* Forward declarations: */
 class QGridLayout;
 class QLabel;
 class UIFilePathSelector;
 
-/** QWidget subclass used as a default machine folder editor. */
-class SHARED_LIBRARY_STUFF UIDefaultMachineFolderEditor : public QIWithRetranslateUI<QWidget>
+/** UIEditor sub-class used as a default machine folder editor. */
+class SHARED_LIBRARY_STUFF UIDefaultMachineFolderEditor : public UIEditor
 {
     Q_OBJECT;
+
+signals:
+
+    /** Notify listeners about @a strPath changed. */
+    void sigPathChanged(const QString &strPath);
 
 public:
 
@@ -63,10 +64,10 @@ public:
     /** Defines minimum layout @a iIndent. */
     void setMinimumLayoutIndent(int iIndent);
 
-protected:
+private slots:
 
     /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 

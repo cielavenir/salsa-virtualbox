@@ -229,9 +229,6 @@ static CPUMDBENTRY const * const g_apCpumDbEntries[] =
 #ifdef VBOX_CPUDB_Intel_Pentium_4_3_00GHz_h
     &g_Entry_Intel_Pentium_4_3_00GHz,
 #endif
-#ifdef VBOX_CPUDB_Intel_Pentium_4_3_00GHz_h
-    &g_Entry_Intel_Pentium_4_3_00GHz,
-#endif
 /** @todo pentium, pentium mmx, pentium pro, pentium II, pentium III */
 #ifdef VBOX_CPUDB_Intel_80486_h
     &g_Entry_Intel_80486,
@@ -307,7 +304,7 @@ VMMR3DECL(uint32_t)         CPUMR3DbGetEntries(void)
  */
 VMMR3DECL(PCCPUMDBENTRY)    CPUMR3DbGetEntryByIndex(uint32_t idxCpuDb)
 {
-    AssertReturn(idxCpuDb <= RT_ELEMENTS(g_apCpumDbEntries), NULL);
+    AssertReturn(idxCpuDb < RT_ELEMENTS(g_apCpumDbEntries), NULL);
     return g_apCpumDbEntries[idxCpuDb];
 }
 

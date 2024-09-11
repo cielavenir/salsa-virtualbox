@@ -31,16 +31,13 @@
 # pragma once
 #endif
 
-/* Qt includes: */
-#include <QWidget>
-
 /* GUI includes: */
-#include "QIWithRetranslateUI.h"
-#include "UILibraryDefs.h"
+#include "UIEditor.h"
 #include "UIPortForwardingTable.h"
 
 /* COM includes: */
-#include "COMEnums.h"
+#include "KAudioControllerType.h"
+#include "KAudioDriverType.h"
 
 /* Forward declarations: */
 class QCheckBox;
@@ -48,8 +45,8 @@ class UIAudioControllerEditor;
 class UIAudioFeaturesEditor;
 class UIAudioHostDriverEditor;
 
-/** QWidget subclass used as a audio settings editor. */
-class SHARED_LIBRARY_STUFF UIAudioSettingsEditor : public QIWithRetranslateUI<QWidget>
+/** UIEditor sub-class used as a audio settings editor. */
+class SHARED_LIBRARY_STUFF UIAudioSettingsEditor : public UIEditor
 {
     Q_OBJECT;
 
@@ -109,13 +106,15 @@ public:
 
 protected:
 
-    /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
+    /** Handles filter change. */
+    virtual void handleFilterChange() RT_OVERRIDE;
 
 private slots:
 
     /** Handles feature toggling. */
     void sltHandleFeatureToggled();
+    /** Handles translation event. */
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
@@ -128,6 +127,8 @@ private:
 
     /** Updates feature availability. */
     void updateFeatureAvailability();
+    /** Updates minimum layout hint. */
+    void updateMinimumLayoutHint();
 
     /** @name Values
      * @{ */

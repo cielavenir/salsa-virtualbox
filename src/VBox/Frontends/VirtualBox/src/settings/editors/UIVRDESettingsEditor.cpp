@@ -38,7 +38,7 @@
 
 
 UIVRDESettingsEditor::UIVRDESettingsEditor(QWidget *pParent /* = 0 */)
-    : QIWithRetranslateUI<QWidget>(pParent)
+    : UIEditor(pParent)
     , m_fFeatureEnabled(false)
     , m_enmAuthType(KAuthType_Max)
     , m_fMultipleConnectionsAllowed(false)
@@ -151,7 +151,7 @@ bool UIVRDESettingsEditor::isMultipleConnectionsAllowed() const
     return m_pCheckboxMultipleConnections ? m_pCheckboxMultipleConnections->isChecked() : m_fMultipleConnectionsAllowed;
 }
 
-void UIVRDESettingsEditor::retranslateUi()
+void UIVRDESettingsEditor::sltRetranslateUI()
 {
     if (m_pCheckboxFeature)
     {
@@ -211,7 +211,7 @@ void UIVRDESettingsEditor::prepare()
     prepareConnections();
 
     /* Apply language settings: */
-    retranslateUi();
+    sltRetranslateUI();
 }
 
 void UIVRDESettingsEditor::prepareWidgets()

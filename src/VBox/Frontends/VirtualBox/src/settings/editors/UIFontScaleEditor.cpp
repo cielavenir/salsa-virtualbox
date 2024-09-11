@@ -60,7 +60,7 @@ UIFontScaleFactorSpinBox::UIFontScaleFactorSpinBox(QWidget *pParent /* = 0*/)
 }
 
 UIFontScaleEditor::UIFontScaleEditor(QWidget *pParent)
-    : QIWithRetranslateUI<QWidget>(pParent)
+    : UIEditor(pParent, true /* show in basic mode? */)
     , m_pLayout(0)
     , m_pLabel(0)
     , m_pScaleSlider(0)
@@ -89,7 +89,7 @@ void UIFontScaleEditor::setMinimumLayoutIndent(int iIndent)
         m_pLayout->setColumnMinimumWidth(0, iIndent);
 }
 
-void UIFontScaleEditor::retranslateUi()
+void UIFontScaleEditor::sltRetranslateUI()
 {
     if (m_pLabel)
         m_pLabel->setText(tr("F&ont Scaling:"));
@@ -158,9 +158,8 @@ void UIFontScaleEditor::prepare()
             if (m_pLabel)
                 m_pLabel->setBuddy(m_pScaleSlider);
             m_pScaleSlider->setSnappingEnabled(true);
-            connect(m_pScaleSlider, static_cast<void(QIAdvancedSlider::*)(int)>(&QIAdvancedSlider::valueChanged),
+            connect(m_pScaleSlider, &QIAdvancedSlider::valueChanged,
                     this, &UIFontScaleEditor::sltScaleSliderValueChanged);
-
             m_pLayout->addWidget(m_pScaleSlider, 0, 1, 1, 4);
         }
 
@@ -169,7 +168,7 @@ void UIFontScaleEditor::prepare()
         {
             setFocusProxy(m_pScaleSpinBox);
             m_pScaleSpinBox->setSuffix("%");
-            connect(m_pScaleSpinBox ,static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+            connect(m_pScaleSpinBox, &QSpinBox::valueChanged,
                     this, &UIFontScaleEditor::sltScaleSpinBoxValueChanged);
             m_pLayout->addWidget(m_pScaleSpinBox, 0, 5);
         }
@@ -184,7 +183,7 @@ void UIFontScaleEditor::prepare()
     }
 
     prepareScaleFactorMinMax();
-    retranslateUi();
+    sltRetranslateUI();
 }
 
 void UIFontScaleEditor::prepareScaleFactorMinMax()
@@ -205,9 +204,6 @@ void UIFontScaleEditor::prepareScaleFactorMinMax()
 
     m_pScaleSpinBox->setMinimum(iMinimum);
     m_pScaleSpinBox->setMaximum(iMaximum);
-
-    QLineEdit *pLineEdit = new QLineEdit;
-    pLineEdit->setReadOnly(true);
 
     m_pScaleSlider->blockSignals(false);
     m_pScaleSpinBox->blockSignals(false);
@@ -232,4 +228,3 @@ void UIFontScaleEditor::setSpinBoxValue(int iValue)
         m_pScaleSpinBox->blockSignals(false);
     }
 }
-
