@@ -25,12 +25,15 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+/* Qt includes: */
+#include <QApplication>
+
 /* GUI includes: */
 #include "QIMessageBox.h"
-#include "UICommon.h"
 #include "UIErrorString.h"
 #include "UIExtraDataManager.h"
 #include "UIHostComboEditor.h"
+#include "UILoggingDefs.h"
 #include "UIPopupCenter.h"
 #include "UIPopupStack.h"
 

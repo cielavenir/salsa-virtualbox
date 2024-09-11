@@ -80,11 +80,14 @@ public:
 
 protected:
 
-    virtual void populatePages() /* final override */;
+    virtual void populatePages() RT_OVERRIDE RT_FINAL;
+
+private slots:
+
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
-    void retranslateUi();
     void prepare();
 
     CMachine  m_machine;

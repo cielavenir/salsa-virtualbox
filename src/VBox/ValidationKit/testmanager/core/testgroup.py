@@ -36,7 +36,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 155955 $"
 
 
 # Standard python imports.
@@ -366,8 +366,7 @@ class TestGroupDataEx(TestGroupData):
                 asErrors.append(str(dErrors));
 
         if not asErrors:
-            for i, _ in enumerate(aoNewMembers):
-                idTestCase = aoNewMembers[i];
+            for i, idTestCase in enumerate(aoNewMembers):
                 for j in range(i + 1, len(aoNewMembers)):
                     if aoNewMembers[j].idTestCase == idTestCase:
                         asErrors.append('Duplicate testcase #%d!' % (idTestCase, ));

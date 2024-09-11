@@ -35,7 +35,7 @@
 
 
 UIAutoCaptureKeyboardEditor::UIAutoCaptureKeyboardEditor(QWidget *pParent /* = 0 */)
-    : QIWithRetranslateUI<QWidget>(pParent)
+    : UIEditor(pParent)
     , m_fValue(false)
     , m_pLabel(0)
     , m_pCheckBox(0)
@@ -60,7 +60,7 @@ bool UIAutoCaptureKeyboardEditor::value() const
     return m_pCheckBox ? m_pCheckBox->checkState() == Qt::Checked : m_fValue;
 }
 
-void UIAutoCaptureKeyboardEditor::retranslateUi()
+void UIAutoCaptureKeyboardEditor::sltRetranslateUI()
 {
     if (m_pLabel)
         m_pLabel->setText(tr("Extended Features:"));
@@ -93,5 +93,5 @@ void UIAutoCaptureKeyboardEditor::prepare()
     }
 
     /* Apply language settings: */
-    retranslateUi();
+    sltRetranslateUI();
 }

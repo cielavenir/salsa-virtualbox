@@ -31,23 +31,19 @@
 # pragma once
 #endif
 
-/* Qt includes: */
-#include <QWidget>
-
 /* GUI includes: */
-#include "QIWithRetranslateUI.h"
-#include "UILibraryDefs.h"
+#include "UIEditor.h"
 
 /* COM includes: */
-#include "COMEnums.h"
+#include "KParavirtProvider.h"
 
 /* Forward declarations: */
 class QComboBox;
 class QGridLayout;
 class QLabel;
 
-/** QWidget subclass used as an paravirtualization provider editor. */
-class SHARED_LIBRARY_STUFF UIParavirtProviderEditor : public QIWithRetranslateUI<QWidget>
+/** UIEditor sub-class used as an paravirtualization provider editor. */
+class SHARED_LIBRARY_STUFF UIParavirtProviderEditor : public UIEditor
 {
     Q_OBJECT;
 
@@ -71,8 +67,13 @@ public:
 
 protected:
 
+    /** Handles filter change. */
+    virtual void handleFilterChange() RT_OVERRIDE;
+
+private slots:
+
     /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 

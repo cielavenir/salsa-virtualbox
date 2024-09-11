@@ -44,6 +44,7 @@
 
 #include <iprt/assert.h>
 #include <iprt/asm.h>
+#include <iprt/asm-mem.h>
 #include <iprt/dbg.h>
 #include <iprt/err.h>
 #include <iprt/latin1.h>
@@ -4241,6 +4242,10 @@ static int rtldrPEValidateFileHeader(PIMAGE_FILE_HEADER pFileHdr, uint32_t fFlag
         case IMAGE_FILE_MACHINE_AMD64:
             cbOptionalHeader = sizeof(IMAGE_OPTIONAL_HEADER64);
             *penmArch = RTLDRARCH_AMD64;
+            break;
+        case IMAGE_FILE_MACHINE_ARM64:
+            cbOptionalHeader = sizeof(IMAGE_OPTIONAL_HEADER64);
+            *penmArch = RTLDRARCH_ARM64;
             break;
 
         default:

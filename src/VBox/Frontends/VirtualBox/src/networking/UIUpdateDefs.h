@@ -39,9 +39,8 @@
 #include "UIVersion.h"
 
 /* COM includes: */
-#include "COMEnums.h"
 #include "CHost.h"
-
+#include "KUpdateChannel.h"
 
 /** Update period types. */
 enum UpdatePeriodType
@@ -94,7 +93,7 @@ public:
     static QStringList list();
 
     /** Constructs update description on the basis of passed @a strData. */
-    VBoxUpdateData(const QString &strData = QString());
+    VBoxUpdateData(const QString &strData = QString("never"));
     /** Constructs update description on the basis of passed @a fCheckEnabled, @a enmUpdatePeriod and @a enmUpdateChannel. */
     VBoxUpdateData(bool fCheckEnabled, UpdatePeriodType enmUpdatePeriod, KUpdateChannel enmUpdateChannel);
 

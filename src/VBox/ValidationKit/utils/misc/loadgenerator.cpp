@@ -291,7 +291,7 @@ int main(int argc, char **argv)
                 return 1;
 
             case 'V':
-                RTPrintf("$Revision: 155244 $\n");
+                RTPrintf("$Revision: 161567 $\n");
                 return 0;
 
             case VINF_GETOPT_NOT_OPTION:

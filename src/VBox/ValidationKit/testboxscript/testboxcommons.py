@@ -39,7 +39,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 155955 $"
 
 
 # Standard python imports.
@@ -76,7 +76,7 @@ def log2(sMessage, sCaller = None, sTsPrf = None):
     """
     Debug logging, will later be disabled by default.
     """
-    if True is True:                    # pylint: disable=comparison-with-itself
+    if True is True:                    # pylint: disable=comparison-with-itself,comparison-of-constants
         if sTsPrf is None: sTsPrf = utils.getTimePrefix();
         print('[%s] %s' % (sTsPrf, sMessage,));
         sys.stdout.flush()

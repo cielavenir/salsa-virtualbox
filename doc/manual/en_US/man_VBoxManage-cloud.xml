@@ -30,7 +30,7 @@
 ]>
 <refentry id="vboxmanage-cloud" lang="en">
   <refentryinfo>
-    <pubdate>$Date: 2023-05-16 18:12:21 +0200 (Tue, 16 May 2023) $</pubdate>
+    <pubdate>$Date: 2023-11-15 11:21:46 +0100 (Wed, 15 Nov 2023) $</pubdate>
     <title>VBoxManage cloud</title>
   </refentryinfo>
 
@@ -49,155 +49,176 @@
   <refsynopsisdiv>
     <!-- Cloud list -->
     <!-- The 'id' is mandatory and must start with 'synopsis-'. -->
-    <cmdsynopsis id="synopsis-vboxmanage-cloudlist-instances">
+    <cmdsynopsis id="synopsis-vboxmanage-cloud-list-instances">
       <command>VBoxManage cloud</command>
         <arg choice="req">--provider=<replaceable>name</replaceable></arg>
         <arg choice="req">--profile=<replaceable>name</replaceable></arg>
         <sbr/>
-        <arg choice="plain">list</arg>
-        <arg choice="plain">instances</arg>
+        <arg choice="plain">list instances</arg>
         <arg>--state=<replaceable>string</replaceable></arg>
         <arg>--compartment-id=<replaceable>string</replaceable></arg>
     </cmdsynopsis>
-    <cmdsynopsis id="synopsis-vboxmanage-cloudlist-images">
+    <cmdsynopsis id="synopsis-vboxmanage-cloud-list-images">
       <command>VBoxManage cloud</command>
       <arg choice="req">--provider=<replaceable>name</replaceable></arg>
       <arg choice="req">--profile=<replaceable>name</replaceable></arg>
       <sbr/>
-      <arg choice="plain">list</arg>
-      <arg choice="plain">images</arg>
+      <arg choice="plain">list images</arg>
       <arg choice="req">--compartment-id=<replaceable>string</replaceable></arg>
       <arg>--state=<replaceable>string</replaceable></arg>
     </cmdsynopsis>
-    <cmdsynopsis id="synopsis-vboxmanage-cloudlist-vnicattachments">
+    <cmdsynopsis id="synopsis-vboxmanage-cloud-list-vnicattachments">
       <command>VBoxManage cloud</command>
       <arg choice="req">--provider=<replaceable>name</replaceable></arg>
       <arg choice="req">--profile=<replaceable>name</replaceable></arg>
       <sbr/>
-      <arg choice="plain">list</arg>
-      <arg choice="plain">vnicattachments</arg>
+      <arg choice="plain">list vnicattachments</arg>
       <arg choice="req">--compartment-id=<replaceable>string</replaceable></arg>
-      <arg>--filter=<replaceable>string</replaceable></arg>
+      <arg rep="repeat">--filter=<group choice="plain">
+          <arg choice="plain">instanceId</arg>
+          <arg choice="plain">vnicId</arg>
+          <arg choice="plain">availabilityDomain</arg>
+          </group>=<replaceable>value</replaceable></arg>
     </cmdsynopsis>
 
     <!-- Cloud instance commands -->
-      <cmdsynopsis id="synopsis-vboxmanage-cloudinstance-create" sepchar=" ">
+      <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-create" sepchar=" ">
        <command moreinfo="none">VBoxManage cloud</command>
        <arg choice="req">--provider=<replaceable>name</replaceable></arg>
        <arg choice="req">--profile=<replaceable>name</replaceable></arg>
        <sbr/>
-       <arg choice="plain">instance</arg>
-       <arg choice="plain">create</arg>
+       <arg choice="plain">instance create</arg>
        <arg choice="req">--domain-name=<replaceable>name</replaceable></arg>
        <group choice="req">
-           <arg choice="req">--image-id=<replaceable>id</replaceable></arg>
-           <arg choice="req">--boot-volume-id=<replaceable>id</replaceable></arg>
+           <arg choice="plain">--image-id=<replaceable>id</replaceable></arg>
+           <arg choice="plain">--boot-volume-id=<replaceable>id</replaceable></arg>
        </group>
        <arg choice="req">--display-name=<replaceable>name</replaceable></arg>
        <arg choice="req">--shape=<replaceable>type</replaceable></arg>
        <arg choice="req">--subnet=<replaceable>id</replaceable></arg>
        <arg>--boot-disk-size=<replaceable>size in GB</replaceable></arg>
-       <arg>--publicip=<replaceable>true/false</replaceable></arg>
+       <arg>--publicip=<group choice="plain"><arg choice="plain">true</arg><arg choice="plain">false</arg></group></arg>
        <arg>--privateip=<replaceable>IP address</replaceable></arg>
        <arg rep="repeat">--public-ssh-key=<replaceable>key string</replaceable></arg>
-       <arg>--launch-mode=<replaceable>NATIVE/EMULATED/PARAVIRTUALIZED</replaceable></arg>
+       <arg>--launch-mode=<group choice="plain">
+           <arg choice="plain">NATIVE</arg>
+           <arg choice="plain">EMULATED</arg>
+           <arg choice="plain">PARAVIRTUALIZED</arg>
+         </group></arg>
        <arg>--cloud-init-script-path=<replaceable>path to a script</replaceable></arg>
      </cmdsynopsis>
-     <cmdsynopsis id="synopsis-vboxmanage-cloudinstance-info" sepchar=" ">
+     <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-info" sepchar=" ">
        <command moreinfo="none">VBoxManage cloud</command>
        <arg choice="req">--provider=<replaceable>name</replaceable></arg>
        <arg choice="req">--profile=<replaceable>name</replaceable></arg>
        <sbr/>
-       <arg choice="plain">instance</arg>
-       <arg choice="plain">info</arg>
+       <arg choice="plain">instance info</arg>
        <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
      </cmdsynopsis>
-     <cmdsynopsis id="synopsis-vboxmanage-cloudinstance-terminate" sepchar=" ">
+     <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-terminate" sepchar=" ">
        <command moreinfo="none">VBoxManage cloud</command>
        <arg choice="req">--provider=<replaceable>name</replaceable></arg>
        <arg choice="req">--profile=<replaceable>name</replaceable></arg>
        <sbr/>
-       <arg choice="plain">instance</arg>
-       <arg choice="plain">terminate</arg>
+       <arg choice="plain">instance terminate</arg>
        <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
      </cmdsynopsis>
-     <cmdsynopsis id="synopsis-vboxmanage-cloudinstance-start" sepchar=" ">
+     <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-start" sepchar=" ">
        <command moreinfo="none">VBoxManage cloud</command>
        <arg choice="req">--provider=<replaceable>name</replaceable></arg>
        <arg choice="req">--profile=<replaceable>name</replaceable></arg>
        <sbr/>
-       <arg choice="plain">instance</arg>
-       <arg choice="plain">start</arg>
+       <arg choice="plain">instance start</arg>
        <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
      </cmdsynopsis>
-     <cmdsynopsis id="synopsis-vboxmanage-cloudinstance-pause" sepchar=" ">
+     <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-pause" sepchar=" ">
        <command moreinfo="none">VBoxManage cloud</command>
        <arg choice="req">--provider=<replaceable>name</replaceable></arg>
        <arg choice="req">--profile=<replaceable>name</replaceable></arg>
        <sbr/>
-       <arg choice="plain">instance</arg>
-       <arg choice="plain">pause</arg>
+       <arg choice="plain">instance pause</arg>
        <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
      </cmdsynopsis>
-     <cmdsynopsis id="synopsis-vboxmanage-cloudinstance-reset" sepchar=" ">
+     <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-reset" sepchar=" ">
        <command moreinfo="none">VBoxManage cloud</command>
        <arg choice="req">--provider=<replaceable>name</replaceable></arg>
        <arg choice="req">--profile=<replaceable>name</replaceable></arg>
        <sbr/>
-       <arg choice="plain">instance</arg>
-       <arg choice="plain">reset</arg>
+       <arg choice="plain">instance reset</arg>
        <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
+     </cmdsynopsis>
+     <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-clone" sepchar=" ">
+       <command moreinfo="none">VBoxManage cloud</command>
+       <arg choice="req">--provider=<replaceable>name</replaceable></arg>
+       <arg choice="req">--profile=<replaceable>name</replaceable></arg>
+       <sbr/>
+       <arg choice="plain">instance clone</arg>
+       <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
+       <arg>--clone-name=<replaceable>name for a clone instance</replaceable></arg>
+     </cmdsynopsis>
+     <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-metriclist" sepchar=" ">
+       <command moreinfo="none">VBoxManage cloud</command>
+       <arg choice="req">--provider=<replaceable>name</replaceable></arg>
+       <arg choice="req">--profile=<replaceable>name</replaceable></arg>
+       <sbr/>
+       <arg choice="plain">instance metriclist</arg>
+       <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
+     </cmdsynopsis>
+     <cmdsynopsis id="synopsis-vboxmanage-cloud-instance-metricdata" sepchar=" ">
+       <command moreinfo="none">VBoxManage cloud</command>
+       <arg choice="req">--provider=<replaceable>name</replaceable></arg>
+       <arg choice="req">--profile=<replaceable>name</replaceable></arg>
+       <sbr/>
+       <arg choice="plain">instance metricdata</arg>
+       <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
+       <arg choice="req">--metric-name=<replaceable>metric name</replaceable></arg>
+       <arg choice="req">--metric-points=<replaceable>number of history metric points</replaceable></arg>
      </cmdsynopsis>
 
      <!-- Cloud image commands -->
-      <cmdsynopsis id="synopsis-vboxmanage-cloudimage-create" sepchar=" "> <!-- The 'id' is mandatory and must start with 'synopsis-'. -->
+      <cmdsynopsis id="synopsis-vboxmanage-cloud-image-create" sepchar=" "> <!-- The 'id' is mandatory and must start with 'synopsis-'. -->
         <command>VBoxManage cloud</command>
           <arg choice="req">--provider=<replaceable>name</replaceable></arg>
           <arg choice="req">--profile=<replaceable>name</replaceable></arg>
           <sbr/>
-          <arg choice="plain">image</arg>
-          <arg choice="plain">create</arg>
+          <arg choice="plain">image create</arg>
           <arg choice="req">--display-name=<replaceable>name</replaceable></arg>
           <arg>--bucket-name=<replaceable>name</replaceable></arg>
           <arg>--object-name=<replaceable>name</replaceable></arg>
           <arg>--instance-id=<replaceable>unique id</replaceable></arg>
       </cmdsynopsis>
-      <cmdsynopsis id="synopsis-vboxmanage-cloudimage-info" sepchar=" ">
+      <cmdsynopsis id="synopsis-vboxmanage-cloud-image-info" sepchar=" ">
         <command>VBoxManage cloud</command>
         <arg choice="req">--provider=<replaceable>name</replaceable></arg>
         <arg choice="req">--profile=<replaceable>name</replaceable></arg>
         <sbr/>
-        <arg choice="plain">image</arg>
-        <arg choice="plain">info</arg>
+        <arg choice="plain">image info</arg>
         <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
       </cmdsynopsis>
-      <cmdsynopsis id="synopsis-vboxmanage-cloudimage-delete" sepchar=" ">
+      <cmdsynopsis id="synopsis-vboxmanage-cloud-image-delete" sepchar=" ">
         <command>VBoxManage cloud</command>
         <arg choice="req">--provider=<replaceable>name</replaceable></arg>
         <arg choice="req">--profile=<replaceable>name</replaceable></arg>
         <sbr/>
-        <arg choice="plain">image</arg>
-        <arg choice="plain">delete</arg>
+        <arg choice="plain">image delete</arg>
         <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
       </cmdsynopsis>
-      <cmdsynopsis id="synopsis-vboxmanage-cloudimage-import" sepchar=" ">
+      <cmdsynopsis id="synopsis-vboxmanage-cloud-image-import" sepchar=" ">
         <command>VBoxManage cloud</command>
         <arg choice="req">--provider=<replaceable>name</replaceable></arg>
         <arg choice="req">--profile=<replaceable>name</replaceable></arg>
         <sbr/>
-        <arg choice="plain">image</arg>
-        <arg choice="plain">import</arg>
+        <arg choice="plain">image import</arg>
         <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
         <arg>--bucket-name=<replaceable>name</replaceable></arg>
         <arg>--object-name=<replaceable>name</replaceable></arg>
       </cmdsynopsis>
-      <cmdsynopsis id="synopsis-vboxmanage-cloudimage-export" sepchar=" ">
+      <cmdsynopsis id="synopsis-vboxmanage-cloud-image-export" sepchar=" ">
         <command>VBoxManage cloud</command>
         <arg choice="req">--provider=<replaceable>name</replaceable></arg>
         <arg choice="req">--profile=<replaceable>name</replaceable></arg>
         <sbr/>
-        <arg choice="plain">image</arg>
-        <arg choice="plain">export</arg>
+        <arg choice="plain">image export</arg>
         <arg choice="req">--id=<replaceable>unique id</replaceable></arg>
         <arg choice="req">--display-name=<replaceable>name</replaceable></arg>
         <arg>--bucket-name=<replaceable>name</replaceable></arg>
@@ -242,18 +263,16 @@
       </group>
     </cmdsynopsis>
     <cmdsynopsis id="synopsis-vboxmanage-cloud-network-delete">
-      <command>VBoxManage cloud</command>
-      <arg choice="plain">network delete</arg>
+      <command>VBoxManage cloud network delete</command>
       <arg choice="req">--name=<replaceable>string</replaceable></arg>
     </cmdsynopsis>
     <cmdsynopsis id="synopsis-vboxmanage-cloud-network-info">
-      <command>VBoxManage cloud</command>
-      <arg choice="plain">network info</arg>
+      <command>VBoxManage cloud >network info</command>
       <arg choice="req">--name=<replaceable>string</replaceable></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
-  <refsect1>
+  <refsect1 id="vboxmanage-cloud-image-description">
     <title>Description</title>
 
     <!-- Cloud commands common options  -->
@@ -275,7 +294,7 @@
     </refsect2>
 
     <!-- Cloud list commands -->
-    <refsect2 id="vboxmanage-cloudlist-instances">
+    <refsect2 id="vboxmanage-cloud-list-instances">
       <title>cloud list instances</title>
       <remark role="help-copy-synopsis"/>
       <para>
@@ -301,7 +320,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudlist-images">
+    <refsect2 id="vboxmanage-cloud-list-images">
       <title>cloud list images</title>
       <remark role="help-copy-synopsis"/>
       <para>
@@ -309,9 +328,10 @@
       </para>
       <variablelist>
         <varlistentry>
-          <term>--state<replaceable>"available/disabled/deleted"</replaceable></term>
+          <term>--state=available|disabled|deleted</term>
           <listitem>
-            <para>The state of cloud image. The possible states are "available/disabled/deleted" at moment.
+            <para>The state of cloud image. The possible states are <literal>available</literal>,
+            <literal>disabled</literal> and <literal>deleted</literal> at moment.
             If the state isn't provided the list of images with all possible states is returned.
             </para>
           </listitem>
@@ -327,7 +347,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudlist-vnicattachments">
+    <refsect2 id="vboxmanage-cloud-list-vnicattachments">
       <title>cloud list vnic attachments</title>
       <remark role="help-copy-synopsis"/>
       <para>
@@ -335,12 +355,13 @@
       </para>
       <variablelist>
         <varlistentry>
-          <term>--filter<replaceable>"instanceId/vnicId/domainName=string"</replaceable></term>
+          <term>--filter={instanceId|vnicId|domainName}=<replaceable>string</replaceable></term>
           <listitem>
+<!-- @todo r=bird: Use more markup. This'll all be put jumbled together into a single paragraph -->
             <para>Filters are used to narrow down the set of Vnic attachments of interest.
             This parameter is repeatible.
-            The possible filters are "instanceId" or "vnicId" or "availabilityDomain" at moment.
-            The form is "instanceId/vnicId/domainName=[string value]" and can be repeated.
+            The possible filter types are "instanceId" or "vnicId" or "availabilityDomain" at moment.
+            The form is "type=[value]" and can be repeated.
             In instance, "--filter instanceId=ocid1.instance.oc1.iad.anuwcl...js6
                           --filter vnicId=ocid1.vnic.oc1.iad.abuwcl...jsm
                           --filter domainName=ergw:US-ASHBURN-AD-2".
@@ -361,10 +382,11 @@
     </refsect2>
 
     <!-- Cloud instance commands -->
-    <refsect2 id="vboxmanage-cloudinstance-create">
+    <refsect2 id="vboxmanage-cloud-instance-create">
       <title>cloud instance create</title>
       <remark role="help-copy-synopsis"/>
       <para>
+<!-- @todo r=bird: Use more markup. This'll all be put jumbled together into a single paragraph -->
         Creates new instance in the Cloud.
         There are two standard ways to create an instance in the Cloud:
          1. Create an instance from an existing custom image.
@@ -407,6 +429,7 @@
             <listitem>
               <para>Public SSH key used to connect to the instance via SSH.
                 This parameter may be repeated if you plan to use more than one key as:
+<!-- @todo r=bird: Markup rather than quoting -->
                 "--public-ssh-key=firstSSHKey --public-ssh-key=secondSSHKey".
               </para>
             </listitem>
@@ -420,7 +443,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudinstance-info">
+    <refsect2 id="vboxmanage-cloud-instance-info">
       <title>cloud instance info</title>
       <para>
         Display information about a cloud instance with a specified id.
@@ -432,7 +455,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudinstance-terminate">
+    <refsect2 id="vboxmanage-cloud-instance-terminate">
       <title>cloud instance termination</title>
       <para>
         Delete a cloud instance with a specified id.
@@ -444,7 +467,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudinstance-start">
+    <refsect2 id="vboxmanage-cloud-instance-start">
       <title>cloud instance start</title>
       <para>
         Start a cloud instance with a specified id.
@@ -456,7 +479,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudinstance-pause">
+    <refsect2 id="vboxmanage-cloud-instance-pause">
       <title>cloud instance pause</title>
       <para>
         Pause a cloud instance with a specified id.
@@ -468,7 +491,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudinstance-reset">
+    <refsect2 id="vboxmanage-cloud-instance-reset">
       <title>cloud instance reset</title>
       <para>
         Force reset a cloud instance with a specified id.
@@ -480,8 +503,66 @@
       </variablelist>
     </refsect2>
 
+    <refsect2 id="vboxmanage-cloud-instance-clone">
+      <title>cloud instance clone</title>
+      <para>
+        Clone a cloud instance with a specified id. Only works for the instances accessible through VirtualBox.
+        I.e. Not every instance in the cloud may be cloned.
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><option>--id</option></term><listitem><para>Unique identifier which fully identify the instance in the Cloud.</para></listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><option>--clone-name</option></term><listitem><para>Name for a clone instance</para></listitem>
+        </varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="vboxmanage-cloud-instance-metriclist">
+      <title>available list of metrics for cloud instances</title>
+      <remark role="help-copy-synopsis"/>
+      <para>
+        Displays the list of the available metrics for the instance.
+        The returned names must be used with the command "VBoxManage cloud instance metricdata".
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><option>--id</option></term><listitem><para>Unique identifier which fully identify the instance in the Cloud.</para></listitem>
+        </varlistentry>
+      </variablelist>
+    </refsect2>
+
+    <refsect2 id="vboxmanage-cloud-instance-metricdata">
+      <title>Displays cloud instance metric data</title>
+      <remark role="help-copy-synopsis"/>
+      <para>
+        Displays the metric data with the resolution 1 minute for the requested cloud instances.
+        The timestamps are returned in the format Rfc2822.
+      </para>
+      <variablelist>
+        <varlistentry>
+          <term><option>--id</option></term><listitem><para>Unique identifier which fully identify the instance in the Cloud.</para></listitem>
+        </varlistentry>
+        <varlistentry>
+            <term><option>--metric-name</option></term><listitem><para>Metric name</para></listitem>
+        </varlistentry>
+        <varlistentry>
+            <term><option>--metric-points</option></term>
+            <listitem>
+                <para>
+                    History metric point numbers start at 1 and can go backwards as long as history exists.
+                    Points are counted from the current time to the past. If user only wants the last actual value
+                    he passes the value "1". If 2 values need to be returned (last and second to last),
+                    the user passes "2", etc.
+                </para>
+            </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsect2>
+
     <!-- Cloud image commands -->
-    <refsect2 id="vboxmanage-cloudimage-create">
+    <refsect2 id="vboxmanage-cloud-image-create">
       <title>cloud image create</title>
       <remark role="help-copy-synopsis"/>
       <para>
@@ -513,7 +594,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudimage-info">
+    <refsect2 id="vboxmanage-cloud-image-info">
       <title>cloud image info</title>
       <remark role="help-copy-synopsis"/>
       <para>
@@ -526,7 +607,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudimage-delete">
+    <refsect2 id="vboxmanage-cloud-image-delete">
       <title>cloud image delete</title>
       <remark role="help-copy-synopsis"/>
       <para>
@@ -539,7 +620,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudimage-import">
+    <refsect2 id="vboxmanage-cloud-image-import">
       <title>cloud image import</title>
       <remark role="help-copy-synopsis"/>
       <para>
@@ -571,7 +652,7 @@
       </variablelist>
     </refsect2>
 
-    <refsect2 id="vboxmanage-cloudimage-export">
+    <refsect2 id="vboxmanage-cloud-image-export">
       <title>cloud image export</title>
       <remark role="help-copy-synopsis"/>
       <para>

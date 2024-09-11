@@ -35,7 +35,7 @@
 
 
 UIDisplayScreenFeaturesEditor::UIDisplayScreenFeaturesEditor(QWidget *pParent /* = 0 */)
-    : QIWithRetranslateUI<QWidget>(pParent)
+    : UIEditor(pParent)
     , m_fEnable3DAcceleration(false)
     , m_pLabel(0)
     , m_pCheckBoxEnable3DAcceleration(0)
@@ -75,7 +75,7 @@ void UIDisplayScreenFeaturesEditor::setMinimumLayoutIndent(int iIndent)
         m_pLayout->setColumnMinimumWidth(0, iIndent);
 }
 
-void UIDisplayScreenFeaturesEditor::retranslateUi()
+void UIDisplayScreenFeaturesEditor::sltRetranslateUI()
 {
     if (m_pLabel)
         m_pLabel->setText(tr("Extended Features:"));
@@ -114,5 +114,5 @@ void UIDisplayScreenFeaturesEditor::prepare()
             this, &UIDisplayScreenFeaturesEditor::sig3DAccelerationFeatureStatusChange);
 
     /* Apply language settings: */
-    retranslateUi();
+    sltRetranslateUI();
 }

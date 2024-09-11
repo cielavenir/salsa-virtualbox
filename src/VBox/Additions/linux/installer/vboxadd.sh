@@ -1,7 +1,7 @@
 #! /bin/sh
 # $Id: vboxadd.sh $
 ## @file
-# Linux Additions kernel module init script ($Revision: 158810 $)
+# Linux Additions kernel module init script ($Revision: 158762 $)
 #
 
 #

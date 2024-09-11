@@ -37,7 +37,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 155955 $"
 
 
 # Standard python imports.
@@ -246,9 +246,9 @@ class ModelDataBase(ModelBase): # pylint: disable=too-few-public-methods
         #
         elif isinstance(oValue, list) and oValue and isinstance(oValue[0], ModelDataBase):
             oValue = copy.copy(oValue);
-            for i, _ in enumerate(oValue):
-                assert isinstance(oValue[i], ModelDataBase);
-                oValue[i] = copy.copy(oValue[i]);
+            for i, oSubValue in enumerate(oValue):
+                assert isinstance(oSubValue, ModelDataBase);
+                oValue[i] = copy.copy(oSubValue);
                 oValue[i].convertFromParamNull();
 
         elif isinstance(oValue, ModelDataBase):
@@ -282,9 +282,9 @@ class ModelDataBase(ModelBase): # pylint: disable=too-few-public-methods
         #
         elif isinstance(oValue, list) and oValue and isinstance(oValue[0], ModelDataBase):
             oValue = copy.copy(oValue);
-            for i, _ in enumerate(oValue):
-                assert isinstance(oValue[i], ModelDataBase);
-                oValue[i] = copy.copy(oValue[i]);
+            for i, oSubValue in enumerate(oValue):
+                assert isinstance(oSubValue, ModelDataBase);
+                oValue[i] = copy.copy(oSubValue);
                 oValue[i].convertToParamNull();
 
         elif isinstance(oValue, ModelDataBase):

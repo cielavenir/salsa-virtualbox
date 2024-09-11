@@ -35,7 +35,6 @@
 #include <QDialog>
 
 /* GUI includes: */
-#include "QIWithRetranslateUI.h"
 #include "UILibraryDefs.h"
 
 /* Forward declarations: */
@@ -43,7 +42,7 @@ class QTextBrowser;
 class QPushButton;
 
 /** QDialog subclass used to show a user license under linux. */
-class SHARED_LIBRARY_STUFF VBoxLicenseViewer : public QIWithRetranslateUI2<QDialog>
+class SHARED_LIBRARY_STUFF VBoxLicenseViewer : public QDialog
 {
     Q_OBJECT;
 
@@ -65,19 +64,19 @@ protected:
     /** Handles Qt show @a pEvent. */
     virtual void showEvent(QShowEvent *pEvent) RT_OVERRIDE;
 
-    /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
-
 private slots:
 
     /** Executes the dialog. */
-    int exec();
+    int exec() RT_OVERRIDE;
 
     /** Handles scroll-bar moving by a certain @a iValue. */
     void sltHandleScrollBarMoved(int iValue);
 
     /** Uplocks buttons. */
     void sltUnlockButtons();
+
+    /** Handles translation event. */
+    void sltRetranslateUI();
 
 private:
 
@@ -91,4 +90,3 @@ private:
 };
 
 #endif /* !FEQT_INCLUDED_SRC_VBoxLicenseViewer_h */
-

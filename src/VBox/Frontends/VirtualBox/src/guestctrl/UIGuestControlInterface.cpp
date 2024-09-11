@@ -28,7 +28,6 @@
 /* GUI includes: */
 #include "UIErrorString.h"
 #include "UIGuestControlInterface.h"
-#include "UICommon.h"
 
 /* COM includes: */
 #include "CFsObjInfo.h"
@@ -558,6 +557,7 @@ bool UIGuestControlInterface::startProcess(const CommandData &commandData, CGues
     createFlags.push_back(KProcessCreateFlag_WaitForProcessStartOnly);
     CGuestProcess process = guestSession.ProcessCreate(commandData.m_strExePath,
                                                        commandData.m_arguments,
+                                                       "", /* Working directory. */
                                                        commandData.m_environmentChanges,
                                                        createFlags,
                                                        0);

@@ -35,7 +35,6 @@
 #include <QWidget>
 
 /* GUI includes: */
-#include "QIWithRetranslateUI.h"
 #include "UILibraryDefs.h"
 
 /* Forward declarations: */
@@ -50,7 +49,7 @@ typedef QList<QStringPair> QStringPairList;
 
 /** QWidget extension
   * allowing to toggle visibility for any other child widget. */
-class SHARED_LIBRARY_STUFF QIArrowSplitter : public QIWithRetranslateUI<QWidget>
+class SHARED_LIBRARY_STUFF QIArrowSplitter : public QWidget
 {
     Q_OBJECT;
 
@@ -65,7 +64,7 @@ public:
     QIArrowSplitter(QWidget *pParent = 0);
 
     /** Returns minimum size-hint. */
-    QSize minimumSizeHint() const;
+    QSize minimumSizeHint() const RT_OVERRIDE;
 
     /** Defines the @a strName for the switch-button. */
     void setName(const QString &strName);
@@ -90,10 +89,10 @@ public slots:
     /** Navigates through details-list forward. */
     void sltSwitchDetailsPageNext();
 
-protected:
+private slots:
 
     /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
+    void sltRetranslateUI();
 
 private:
 

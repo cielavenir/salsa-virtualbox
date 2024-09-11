@@ -54,7 +54,7 @@ VBoxSharedClipboard_SOURCES.darwin = \
 	VBoxSharedClipboardSvc-darwin.cpp \
 	darwin-pasteboard.cpp
 ifdef VBOX_WITH_SHARED_CLIPBOARD_TRANSFERS
- if1of ($(KBUILD_TARGET), linux)
+ ifdef VBOX_WITH_SHARED_CLIPBOARD_TRANSFERS_HTTP
   VBoxSharedClipboard_DEFS    += VBOX_WITH_SHARED_CLIPBOARD_TRANSFERS_HTTP
   VBoxSharedClipboard_SOURCES += \
   	$(PATH_ROOT)/src/VBox/GuestHost/SharedClipboard/clipboard-transfers-http.cpp
@@ -62,6 +62,7 @@ ifdef VBOX_WITH_SHARED_CLIPBOARD_TRANSFERS
  VBoxSharedClipboard_DEFS    += VBOX_WITH_SHARED_CLIPBOARD_HOST
  VBoxSharedClipboard_SOURCES += \
  	VBoxSharedClipboardSvc-transfers.cpp \
+ 	$(PATH_ROOT)/src/VBox/GuestHost/SharedClipboard/clipboard-transfers-provider-local.cpp \
  	VBoxSharedClipboardSvc-utils.cpp \
  	$(PATH_ROOT)/src/VBox/GuestHost/SharedClipboard/ClipboardPath.cpp \
  	$(PATH_ROOT)/src/VBox/GuestHost/SharedClipboard/clipboard-transfers.cpp

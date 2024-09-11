@@ -60,19 +60,18 @@ private slots:
     void sltKeepDiskNamesToggled(bool fKeepDiskNames);
     void sltKeepHardwareUUIDsToggled(bool fKeepHardwareUUIDs);
     void sltCloneTypeChanged(bool fIsFullClone);
+    /** Translation stuff. */
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
-    /** Translation stuff. */
-    void retranslateUi();
-
     /** Prepare stuff. */
-    void initializePage();
+    void initializePage() RT_OVERRIDE;
     void prepare(const QString &strOriginalName, const QString &strDefaultPath, bool fShowChildsOption);
 
     /** Validation stuff. */
-    bool isComplete() const;
-    bool validatePage();
+    bool isComplete() const RT_OVERRIDE;
+    bool validatePage() RT_OVERRIDE;
     void setCloneModeGroupBoxEnabled();
 
     UICloneVMNamePathEditor *m_pNamePathGroupBox;

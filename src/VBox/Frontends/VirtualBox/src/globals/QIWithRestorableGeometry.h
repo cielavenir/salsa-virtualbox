@@ -41,15 +41,10 @@
 #ifdef VBOX_WS_MAC
 # include "VBoxUtils-darwin.h"
 #endif
-#ifdef VBOX_WS_X11
-# include "UICommon.h"
+#ifdef VBOX_WS_NIX
 # include "UIDesktopWidgetWatchdog.h"
 #endif
 
-/* Other VBox includes: */
-#ifdef VBOX_WS_MAC
-# include "iprt/cpp/utils.h"
-#endif
 
 /** Template with geometry saving/restoring capabilities. */
 template <class Base>
@@ -70,7 +65,7 @@ protected:
         /* Call to base-class: */
         QMainWindow::moveEvent(pEvent);
 
-#ifdef VBOX_WS_X11
+#ifdef VBOX_WS_NIX
         /* Prevent further handling if fake screen detected: */
         if (UIDesktopWidgetWatchdog::isFakeScreenDetected())
             return;
@@ -95,7 +90,7 @@ protected:
         /* Call to base-class: */
         QMainWindow::resizeEvent(pEvent);
 
-#ifdef VBOX_WS_X11
+#ifdef VBOX_WS_NIX
         /* Prevent handling if fake screen detected: */
         if (UIDesktopWidgetWatchdog::isFakeScreenDetected())
             return;
@@ -137,10 +132,10 @@ protected:
     }
 
     /** Returns whether the window is currently maximized. */
-    bool isCurrentlyMaximized() const
+    bool isCurrentlyMaximized()
     {
 #ifdef VBOX_WS_MAC
-        return ::darwinIsWindowMaximized(unconst(this));
+        return ::darwinIsWindowMaximized(this);
 #else
         return this->isMaximized();
 #endif

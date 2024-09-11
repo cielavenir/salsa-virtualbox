@@ -36,11 +36,11 @@
 
 /* GUI includes: */
 #include "QIManagerDialog.h"
-#include "QIWithRetranslateUI.h"
 #include "UIMediumDefs.h"
 
 /* COM includes: */
-#include "COMEnums.h"
+#include "KMediumType.h"
+#include "KMediumVariant.h"
 
 /* Forward declarations: */
 class QAbstractButton;
@@ -184,7 +184,7 @@ struct UIDataMedium
 
 
 /** Virtual Media Manager: Virtual Media Manager details-widget. */
-class UIMediumDetailsWidget : public QIWithRetranslateUI<QWidget>
+class UIMediumDetailsWidget : public QWidget
 {
     Q_OBJECT;
 
@@ -221,11 +221,6 @@ public slots:
     /** Defines whether the options tab is @a fEnabled. */
     void setOptionsEnabled(bool fEnabled);
 
-protected:
-
-    /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
-
 private slots:
 
     /** @name Options stuff.
@@ -244,6 +239,9 @@ private slots:
         /** Handles button-box button click. */
         void sltHandleButtonBoxClick(QAbstractButton *pButton);
     /** @} */
+
+    /** Handles translation event. */
+    void sltRetranslateUI();
 
 private:
 

@@ -198,6 +198,7 @@ HRESULT GraphicsAdapter::setGraphicsControllerType(GraphicsControllerType_T aGra
         case GraphicsControllerType_VMSVGA:
         case GraphicsControllerType_VBoxSVGA:
 #endif
+        case GraphicsControllerType_QemuRamFB:
             break;
         default:
             return setError(E_INVALIDARG, tr("The graphics controller type (%d) is invalid"), aGraphicsControllerType);
@@ -227,15 +228,23 @@ HRESULT GraphicsAdapter::getVRAMSize(ULONG *aVRAMSize)
 
 HRESULT GraphicsAdapter::setVRAMSize(ULONG aVRAMSize)
 {
-    /* check VRAM limits */
-    if (aVRAMSize > SchemaDefs::MaxGuestVRAM)
-        return setError(E_INVALIDARG,
-                        tr("Invalid VRAM size: %lu MB (must be in range [%lu, %lu] MB)"),
-                        aVRAMSize, SchemaDefs::MinGuestVRAM, SchemaDefs::MaxGuestVRAM);
-
     /* the machine needs to be mutable */
     AutoMutableStateDependency adep(mParent);
     if (FAILED(adep.hrc())) return adep.hrc();
+
+    ULONG uMin, uMax;
+    HRESULT hrc = PlatformProperties::s_getSupportedVRAMRange(mData->graphicsControllerType, mData->fAccelerate3D,
+                                                              &uMin, &uMax, NULL /* aStrideSizeMB */);
+    if (FAILED(hrc))
+        return setError(hrc,
+                        tr("Error getting VRAM range for selected graphics controller"));
+
+    /* check VRAM limits */
+    if (   aVRAMSize < uMin
+        || aVRAMSize > uMax)
+        return setError(E_INVALIDARG,
+                        tr("Invalid VRAM size: %lu MB (must be in range [%lu, %lu] MB)"),
+                        aVRAMSize, uMin, uMax);
 
     AutoWriteLock alock(this COMMA_LOCKVAL_SRC_POS);
 
@@ -246,16 +255,7 @@ HRESULT GraphicsAdapter::setVRAMSize(ULONG aVRAMSize)
     return S_OK;
 }
 
-HRESULT GraphicsAdapter::getAccelerate3DEnabled(BOOL *aAccelerate3DEnabled)
-{
-    AutoReadLock alock(this COMMA_LOCKVAL_SRC_POS);
-
-    *aAccelerate3DEnabled = mData->fAccelerate3D;
-
-    return S_OK;
-}
-
-HRESULT GraphicsAdapter::setAccelerate3DEnabled(BOOL aAccelerate3DEnabled)
+HRESULT GraphicsAdapter::setFeature(GraphicsFeature_T aFeature, BOOL aEnabled)
 {
     /* the machine needs to be mutable */
     AutoMutableStateDependency adep(mParent);
@@ -263,39 +263,70 @@ HRESULT GraphicsAdapter::setAccelerate3DEnabled(BOOL aAccelerate3DEnabled)
 
     AutoWriteLock alock(this COMMA_LOCKVAL_SRC_POS);
 
-    /** @todo check validity! */
+    /* Validate if the given feature is supported by this graphics controller on the given VM platform. */
+    if (!PlatformProperties::s_isGraphicsControllerFeatureSupported(mParent->i_getPlatform()->i_getArchitecture(),
+                                                                    mData->graphicsControllerType, aFeature))
+        return setError(VBOX_E_NOT_SUPPORTED, tr("The graphics controller does not support the given feature"));
 
-    mParent->i_setModified(Machine::IsModified_GraphicsAdapter);
-    mData.backup();
-    mData->fAccelerate3D = !!aAccelerate3DEnabled;
+    bool *pfSetting = NULL;
+    switch (aFeature)
+    {
+        case GraphicsFeature_Acceleration2DVideo:
+            pfSetting = &mData->fAccelerate2DVideo;
+            break;
+
+        case GraphicsFeature_Acceleration3D:
+            pfSetting = &mData->fAccelerate3D;
+            break;
+
+        default:
+            break;
+    }
+
+    if (!pfSetting)
+        return setError(E_NOTIMPL, tr("The given feature is not implemented"));
+
+    if (*pfSetting != RT_BOOL(aEnabled))
+    {
+        mParent->i_setModified(Machine::IsModified_GraphicsAdapter);
+        mData.backup();
+
+        *pfSetting = RT_BOOL(aEnabled);
+    }
 
     return S_OK;
 }
 
-
-HRESULT GraphicsAdapter::getAccelerate2DVideoEnabled(BOOL *aAccelerate2DVideoEnabled)
+HRESULT GraphicsAdapter::isFeatureEnabled(GraphicsFeature_T aFeature, BOOL *aEnabled)
 {
     AutoReadLock alock(this COMMA_LOCKVAL_SRC_POS);
 
-    /* bugref:9691 The legacy VHWA acceleration has been disabled completely. */
-    *aAccelerate2DVideoEnabled = FALSE;
+    bool *pfSetting = NULL;
 
-    return S_OK;
-}
+    /* If we don't support a feature with this graphics controller type, skip returning
+     * what setting we have stored for it.
+     *
+     * This could happen if loading an old(er) saved state or importing a VM where this feature (formely)
+     * was supported. PlatformProperties::s_isGraphicsControllerFeatureSupported() is the single source of truth here. */
+    if (PlatformProperties::s_isGraphicsControllerFeatureSupported(mParent->i_getPlatform()->i_getArchitecture(),
+                                                                   mData->graphicsControllerType, aFeature))
+    {
+        switch (aFeature)
+        {
+            case GraphicsFeature_Acceleration2DVideo:
+                pfSetting = &mData->fAccelerate2DVideo;
+                break;
 
-HRESULT GraphicsAdapter::setAccelerate2DVideoEnabled(BOOL aAccelerate2DVideoEnabled)
-{
-    /* the machine needs to be mutable */
-    AutoMutableStateDependency adep(mParent);
-    if (FAILED(adep.hrc())) return adep.hrc();
+            case GraphicsFeature_Acceleration3D:
+                pfSetting = &mData->fAccelerate3D;
+                break;
 
-    AutoWriteLock alock(this COMMA_LOCKVAL_SRC_POS);
+            default:
+                break;
+        }
+    }
 
-    /** @todo check validity! */
-
-    mParent->i_setModified(Machine::IsModified_GraphicsAdapter);
-    mData.backup();
-    mData->fAccelerate2DVideo = !!aAccelerate2DVideoEnabled;
+    *aEnabled = pfSetting ? *pfSetting : FALSE;
 
     return S_OK;
 }

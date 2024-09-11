@@ -30,7 +30,7 @@
 ]>
 <refentry id="vboxmanage-cloudprofile" lang="en">
   <refentryinfo>
-    <pubdate>$Date: 2023-01-17 15:15:46 +0100 (Tue, 17 Jan 2023) $</pubdate>
+    <pubdate>$Date: 2023-04-21 23:59:02 +0200 (Fri, 21 Apr 2023) $</pubdate>
     <title>VBoxManage cloudprofile</title>
   </refentryinfo>
 
@@ -86,7 +86,7 @@
     </cmdsynopsis>
   </refsynopsisdiv>
 
-  <refsect1>
+  <refsect1 id="vboxmanage-cloudprofile-description">
     <title>Description</title>
 
     <refsect2 id="vboxmanage-cloudprofile-common-options">
@@ -114,25 +114,32 @@
       </para>
       <variablelist>
         <varlistentry>
-          <term><option>--clouduser</option></term><listitem><para>The name which fully identifies the user in the specified cloud provider.</para></listitem>
+          <term><option>--clouduser=<replaceable>unique id</replaceable></option></term>
+          <listitem><para>The name which fully identifies the user in the specified cloud provider.</para></listitem>
         </varlistentry>
         <varlistentry>
-          <term><option>--fingerprint</option></term><listitem><para>Fingerprint for the key pair being used.</para></listitem>
+          <term><option>--fingerprint=<replaceable>MD5 string</replaceable></option></term>
+          <listitem><para>Fingerprint for the key pair being used.</para></listitem>
         </varlistentry>
         <varlistentry>
-          <term><option>--keyfile</option></term><listitem><para>Full path and filename of the private key. </para></listitem>
+          <term><option>--keyfile=<replaceable>path</replaceable></option></term>
+          <listitem><para>Full path and filename of the private key. </para></listitem>
         </varlistentry>
         <varlistentry>
-        <term><option>--passphrase</option></term><listitem><para>Passphrase used for the key, if it is encrypted.</para></listitem>
+        <term><option>--passphrase=<replaceable>string</replaceable></option></term>
+        <listitem><para>Passphrase used for the key, if it is encrypted.</para></listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--tenancy</option></term><listitem><para>ID of your tenancy. </para></listitem>
+        <term><option>--tenancy=<replaceable>unique id</replaceable></option></term>
+        <listitem><para>ID of your tenancy. </para></listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--compartment</option></term><listitem><para>ID of your compartment.</para></listitem>
+        <term><option>--compartment=<replaceable>unique id</replaceable></option></term>
+        <listitem><para>ID of your compartment.</para></listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--region</option></term><listitem><para>Region name. Region is where you plan to deploy an application.</para></listitem>
+        <term><option>--region=<replaceable>string</replaceable></option></term>
+        <listitem><para>Region name. Region is where you plan to deploy an application.</para></listitem>
       </varlistentry>
       </variablelist>
     </refsect2>
@@ -153,25 +160,32 @@
       </para>
       <variablelist>
         <varlistentry>
-          <term><option>--clouduser</option></term><listitem><para>The name which fully identifies the user in the specified cloud provider.</para></listitem>
+          <term><option>--clouduser=<replaceable>unique id</replaceable></option></term>
+          <listitem><para>The name which fully identifies the user in the specified cloud provider.</para></listitem>
         </varlistentry>
         <varlistentry>
-          <term><option>--fingerprint</option></term><listitem><para>Fingerprint for the key pair being used.</para></listitem>
+          <term><option>--fingerprint=<replaceable>MD5 string</replaceable></option></term>
+          <listitem><para>Fingerprint for the key pair being used.</para></listitem>
         </varlistentry>
         <varlistentry>
-          <term><option>--keyfile</option></term><listitem><para>Full path and filename of the private key. </para></listitem>
+          <term><option>--keyfile=<replaceable>path</replaceable></option></term>
+          <listitem><para>Full path and filename of the private key. </para></listitem>
         </varlistentry>
         <varlistentry>
-        <term><option>--passphrase</option></term><listitem><para>Passphrase used for the key, if it is encrypted.</para></listitem>
+        <term><option>--passphrase=<replaceable>string</replaceable></option></term>
+        <listitem><para>Passphrase used for the key, if it is encrypted.</para></listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--tenancy</option></term><listitem><para>ID of your tenancy. </para></listitem>
+        <term><option>--tenancy=<replaceable>unique id</replaceable></option></term>
+        <listitem><para>ID of your tenancy. </para></listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--compartment</option></term><listitem><para>ID of your compartment.</para></listitem>
+        <term><option>--compartment=<replaceable>unique id</replaceable></option></term>
+        <listitem><para>ID of your compartment.</para></listitem>
       </varlistentry>
       <varlistentry>
-        <term><option>--region</option></term><listitem><para>Region name. Region is where you plan to deploy an application.</para></listitem>
+        <term><option>--region=<replaceable>string</replaceable></option></term>
+        <listitem><para>Region name. Region is where you plan to deploy an application.</para></listitem>
       </varlistentry>
       </variablelist>
     </refsect2>

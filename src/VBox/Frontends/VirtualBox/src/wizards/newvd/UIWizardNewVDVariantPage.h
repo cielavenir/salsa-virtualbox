@@ -50,12 +50,12 @@ public:
 private slots:
 
     void sltMediumVariantChanged(qulonglong uVariant);
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
-    void retranslateUi();
-    void initializePage();
-    bool isComplete() const;
+    void initializePage() RT_OVERRIDE RT_FINAL;
+    bool isComplete() const RT_OVERRIDE RT_FINAL;
     void prepare();
     void setWidgetVisibility(const CMediumFormat &mediumFormat);
 

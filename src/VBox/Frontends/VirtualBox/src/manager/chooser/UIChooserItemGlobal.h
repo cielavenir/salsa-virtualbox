@@ -76,9 +76,6 @@ protected:
 
     /** @name Event-handling stuff.
       * @{ */
-        /** Handles translation event. */
-        virtual void retranslateUi() RT_OVERRIDE;
-
         /** Handles show @a pEvent. */
         virtual void showEvent(QShowEvent *pEvent) RT_OVERRIDE;
 
@@ -171,6 +168,12 @@ private slots:
         void sltHandleWindowRemapped();
     /** @} */
 
+    /** @name Event handling stuff.
+     * @{ */
+       /** Handles translation event. */
+       void sltRetranslateUI();
+    /** @} */
+
 private:
 
     /** Data field types. */
@@ -230,9 +233,7 @@ private:
       * @{ */
 #ifdef VBOX_WS_MAC
         /** Holds item start default darkness. */
-        int  m_iDefaultDarknessStart;
-        /** Holds item final default darkness. */
-        int  m_iDefaultDarknessFinal;
+        int  m_iDefaultColorDeviation;
 #endif
         /** Holds item start hover lightness. */
         int  m_iHoverLightnessStart;

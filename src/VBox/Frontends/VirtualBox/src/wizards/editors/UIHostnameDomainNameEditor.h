@@ -35,17 +35,13 @@
 #include <QIcon>
 #include <QWidget>
 
-/* Local includes: */
-#include "QIWithRetranslateUI.h"
-
 /* Forward declarations: */
 class QGridLayout;
 class QLabel;
 class QILineEdit;
-class UIMarkableLineEdit;
 class UIPasswordLineEdit;
 
-class UIHostnameDomainNameEditor : public QIWithRetranslateUI<QWidget>
+class UIHostnameDomainNameEditor : public QWidget
 {
 
     Q_OBJECT;
@@ -72,24 +68,19 @@ public:
     int firstColumnWidth() const;
     void setFirstColumnWidth(int iWidth);
 
-
-protected:
-
-    void retranslateUi();
-
 private slots:
 
     void sltHostnameChanged();
     void sltDomainChanged();
+    void sltRetranslateUI();
 
 private:
 
     void prepare();
-    template<class T>
-    void addLineEdit(int &iRow, QLabel *&pLabel, T *&pLineEdit, QGridLayout *pLayout);
+    void addLineEdit(int &iRow, QLabel *&pLabel, QILineEdit *&pLineEdit, QGridLayout *pLayout);
 
-    UIMarkableLineEdit *m_pHostnameLineEdit;
-    QILineEdit         *m_pDomainNameLineEdit;
+    QILineEdit *m_pHostnameLineEdit;
+    QILineEdit *m_pDomainNameLineEdit;
 
     QLabel *m_pHostnameLabel;
     QLabel *m_pDomainNameLabel;

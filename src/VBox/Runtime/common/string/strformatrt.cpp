@@ -819,7 +819,7 @@ DECLHIDDEN(size_t) rtstrFormatRt(PFNRTSTROUTPUT pfnOutput, void *pvArgOutput, co
                             return rtStrFormatBadPointer(0, pfnOutput, pvArgOutput, cchWidth, fFlags, psz,
                                                          szBuf, RT_STR_TUPLE("!BadFnNm"));
 
-                        while ((ch = *psz) != '\0' && ch != '(')
+                        while ((ch = *psz) != '\0')
                         {
                             if (RT_C_IS_BLANK(ch))
                             {

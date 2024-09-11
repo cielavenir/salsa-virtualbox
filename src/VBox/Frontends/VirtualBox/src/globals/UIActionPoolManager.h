@@ -95,7 +95,6 @@ enum UIActionIndexMN
     UIActionIndexMN_M_Group_M_Tools_T_Activity,
     UIActionIndexMN_M_Group_M_Tools_T_FileManager,
     UIActionIndexMN_M_Group_S_Discard,
-    UIActionIndexMN_M_Group_S_ShowLogDialog,
     UIActionIndexMN_M_Group_S_Refresh,
     UIActionIndexMN_M_Group_S_ShowInFileManager,
     UIActionIndexMN_M_Group_S_CreateShortcut,
@@ -141,7 +140,6 @@ enum UIActionIndexMN
     UIActionIndexMN_M_Machine_M_Tools_T_Activity,
     UIActionIndexMN_M_Machine_M_Tools_T_FileManager,
     UIActionIndexMN_M_Machine_S_Discard,
-    UIActionIndexMN_M_Machine_S_ShowLogDialog,
     UIActionIndexMN_M_Machine_S_Refresh,
     UIActionIndexMN_M_Machine_S_ShowInFileManager,
     UIActionIndexMN_M_Machine_S_CreateShortcut,
@@ -242,6 +240,11 @@ protected:
     virtual QString shortcutsExtraDataID() const RT_OVERRIDE;
     /** Updates shortcuts. */
     virtual void updateShortcuts() RT_OVERRIDE;
+
+private slots:
+
+    /** Handles signal about settings expert mode change. */
+    void sltHandleSettingsExpertModeChange();
 
 private:
 

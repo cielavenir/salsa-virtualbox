@@ -31,7 +31,10 @@
 # pragma once
 #endif
 
-/* Local includes: */
+/* Qt includes: */
+#include <QSet>
+
+/* GUI includes: */
 #include "UINativeWizardPage.h"
 
 /* Forward declarations: */
@@ -65,15 +68,14 @@ private slots:
     void sltProductKeyChanged(const QString &strProductKey);
     void sltStartHeadlessChanged(bool fStartHeadless);
     void sltSelectedWindowsImageChanged(ulong uImageIndex);
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 
     void prepare();
     void createConnections();
-
-    void retranslateUi();
-    void initializePage();
-    bool isComplete() const;
+    void initializePage() RT_OVERRIDE;
+    bool isComplete() const RT_OVERRIDE;
     /** Returns true if we show the widgets for guest os product key. */
     bool isProductKeyWidgetEnabled() const;
     void markWidgets() const;

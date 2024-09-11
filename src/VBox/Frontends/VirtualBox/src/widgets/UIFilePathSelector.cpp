@@ -33,20 +33,21 @@
 #include <QFocusEvent>
 #include <QHBoxLayout>
 #include <QLineEdit>
+#include <QRegularExpression>
 #ifdef VBOX_WS_WIN
 # include <QListView>
 #endif
-#include <QRegExp>
 
 /* GUI includes: */
 #include "QIFileDialog.h"
 #include "QILabel.h"
 #include "QILineEdit.h"
 #include "QIToolButton.h"
-#include "UICommon.h"
 #include "UIExtraDataManager.h"
 #include "UIIconPool.h"
 #include "UIFilePathSelector.h"
+#include "UIMediumEnumerator.h"
+#include "UITranslationEventListener.h"
 
 /* Other VBox includes: */
 #include <iprt/assert.h>
@@ -67,7 +68,7 @@ static int differFrom(const QString &str1, const QString &str2)
 }
 
 UIFilePathSelector::UIFilePathSelector(QWidget *pParent /* = 0 */)
-    : QIWithRetranslateUI<QIComboBox>(pParent)
+    : QIComboBox(pParent)
     , m_enmMode(Mode_Folder)
     , m_strInitialPath(QDir::current().absolutePath())
     , m_fResetEnabled(true)
@@ -110,22 +111,25 @@ UIFilePathSelector::UIFilePathSelector(QWidget *pParent /* = 0 */)
     setMinimumWidth(200);
 
     /* Setup connections: */
-    connect(this, static_cast<void(UIFilePathSelector::*)(int)>(&UIFilePathSelector::activated), this, &UIFilePathSelector::onActivated);
+    connect(this, &UIFilePathSelector::activated, this, &UIFilePathSelector::onActivated);
     connect(m_pCopyAction, &QAction::triggered, this, &UIFilePathSelector::copyToClipboard);
-    connect(&uiCommon(), &UICommon::sigRecentMediaListUpdated, this, &UIFilePathSelector::sltRecentMediaListUpdated);
+    connect(gpMediumEnumerator, &UIMediumEnumerator::sigRecentMediaListUpdated,
+            this, &UIFilePathSelector::sltRecentMediaListUpdated);
 
     /* Editable by default: */
     setEditable(true);
 
     /* Applying language settings: */
-    retranslateUi();
+    sltRetranslateUI();
+    connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
+        this, &UIFilePathSelector::sltRetranslateUI);
 }
 
 void UIFilePathSelector::setMode(Mode enmMode)
 {
     m_enmMode = enmMode;
 
-    retranslateUi();
+    sltRetranslateUI();
 }
 
 void UIFilePathSelector::setEditable(bool fEditable)
@@ -181,7 +185,7 @@ void UIFilePathSelector::setResetEnabled(bool fEnabled)
     }
 
     sltRecentMediaListUpdated(m_enmRecentMediaListType);
-    retranslateUi();
+    sltRetranslateUI();
 }
 
 bool UIFilePathSelector::isValid() const
@@ -258,12 +262,12 @@ bool UIFilePathSelector::eventFilter(QObject *pObject, QEvent *pEvent)
     }
 
     /* Call to base-class: */
-    return QIWithRetranslateUI<QIComboBox>::eventFilter(pObject, pEvent);
+    return QIComboBox::eventFilter(pObject, pEvent);
 }
 
 void UIFilePathSelector::resizeEvent(QResizeEvent *pEvent)
 {
-    QIWithRetranslateUI<QIComboBox>::resizeEvent(pEvent);
+    QIComboBox::resizeEvent(pEvent);
     refreshText();
 }
 
@@ -278,7 +282,7 @@ void UIFilePathSelector::focusInEvent(QFocusEvent *pEvent)
         else
             refreshText();
     }
-    QIWithRetranslateUI<QIComboBox>::focusInEvent(pEvent);
+    QIComboBox::focusInEvent(pEvent);
 }
 
 void UIFilePathSelector::focusOutEvent(QFocusEvent *pEvent)
@@ -288,10 +292,10 @@ void UIFilePathSelector::focusOutEvent(QFocusEvent *pEvent)
         m_fEditableMode = false;
         refreshText();
     }
-    QIWithRetranslateUI<QIComboBox>::focusOutEvent(pEvent);
+    QIComboBox::focusOutEvent(pEvent);
 }
 
-void UIFilePathSelector::retranslateUi()
+void UIFilePathSelector::sltRetranslateUI()
 {
     /* Retranslate copy action: */
     m_pCopyAction->setText(tr("&Copy"));
@@ -494,13 +498,8 @@ QString UIFilePathSelector::shrinkText(int iWidth) const
     if (strFullText.isEmpty())
         return strFullText;
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
-    int iOldSize = fontMetrics().horizontalAdvance(strFullText);
-    int iIndentSize = fontMetrics().horizontalAdvance("x...x");
-#else
-    int iOldSize = fontMetrics().width(strFullText);
-    int iIndentSize = fontMetrics().width("x...x");
-#endif
+    const int iOldSize = fontMetrics().horizontalAdvance(strFullText);
+    const int iIndentSize = fontMetrics().horizontalAdvance("x...x");
 
     /* Compress text: */
     int iStart = 0;
@@ -508,19 +507,16 @@ QString UIFilePathSelector::shrinkText(int iWidth) const
     int iPosition = 0;
     int iTextWidth = 0;
     do {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
         iTextWidth = fontMetrics().horizontalAdvance(strFullText);
-#else
-        iTextWidth = fontMetrics().width(strFullText);
-#endif
         if (iTextWidth + iIndentSize > iWidth)
         {
             iStart = 0;
             iFinish = strFullText.length();
 
             /* Selecting remove position: */
-            QRegExp regExp("([\\\\/][^\\\\^/]+[\\\\/]?$)");
-            int iNewFinish = regExp.indexIn(strFullText);
+            const QRegularExpression re("([\\\\/][^\\\\^/]+[\\\\/]?$)");
+            const QRegularExpressionMatch mt = re.match(strFullText);
+            const int iNewFinish = mt.capturedStart();
             if (iNewFinish != -1)
                 iFinish = iNewFinish;
             iPosition = (iFinish - iStart) / 2;
@@ -533,11 +529,7 @@ QString UIFilePathSelector::shrinkText(int iWidth) const
     } while (iTextWidth + iIndentSize > iWidth);
 
     strFullText.insert(iPosition, "...");
-#if QT_VERSION >= QT_VERSION_CHECK(5, 11, 0)
-    int newSize = fontMetrics().horizontalAdvance(strFullText);
-#else
-    int newSize = fontMetrics().width(strFullText);
-#endif
+    const int newSize = fontMetrics().horizontalAdvance(strFullText);
 
     return newSize < iOldSize ? strFullText : fullPath(false);
 }

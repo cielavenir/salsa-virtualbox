@@ -35,7 +35,6 @@
 #include "UINativeWizard.h"
 
 /* COM includes: */
-#include "COMEnums.h"
 #include "CCloudClient.h"
 
 /** Add Cloud VM wizard. */
@@ -75,10 +74,10 @@ public:
 protected:
 
     /** Populates pages. */
-    virtual void populatePages() /* override final */;
+    virtual void populatePages() RT_OVERRIDE RT_FINAL;
 
     /** Handles translation event. */
-    virtual void retranslateUi() /* override final */;
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
 private:
 

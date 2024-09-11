@@ -31,13 +31,18 @@
 # pragma once
 #endif
 
+/* Qt includes: */
+#include <QUuid>
+
 /* GUI includes: */
-#include "QIWithRetranslateUI.h"
+#include "UIEditor.h"
 #include "UIMediumDefs.h"
 #include "UISettingsDefs.h"
 
 /* COM includes: */
-#include "COMEnums.h"
+#include "KChipsetType.h"
+#include "KPlatformArchitecture.h"
+#include "KStorageControllerType.h"
 
 /* Using declarations: */
 using namespace UISettingsDefs;
@@ -48,6 +53,7 @@ class QComboBox;
 class QHBoxLayout;
 class QLabel;
 class QLineEdit;
+class QMenu;
 class QSpinBox;
 class QStackedWidget;
 class QVBoxLayout;
@@ -101,9 +107,9 @@ struct UIDataStorageAttachment
     /** Holds the device type. */
     KDeviceType  m_enmDeviceType;
     /** Holds the port. */
-    LONG         m_iPort;
+    qint32       m_iPort;
     /** Holds the device. */
-    LONG         m_iDevice;
+    qint32       m_iDevice;
     /** Holds the medium ID. */
     QUuid        m_uMediumId;
     /** Holds whether the attachment being passed through. */
@@ -163,8 +169,8 @@ struct UIDataStorageController
     QString                 m_strKey;
 };
 
-/** QWidget subclass used as acceleration features editor. */
-class SHARED_LIBRARY_STUFF UIStorageSettingsEditor : public QIWithRetranslateUI<QWidget>
+/** UIEditor sub-class used as acceleration features editor. */
+class SHARED_LIBRARY_STUFF UIStorageSettingsEditor : public UIEditor
 {
     Q_OBJECT;
 
@@ -179,6 +185,9 @@ public:
     UIStorageSettingsEditor(QWidget *pParent = 0);
     /** Destructs editor. */
     virtual ~UIStorageSettingsEditor() RT_OVERRIDE;
+
+    /** Returns platform architecture. */
+    KPlatformArchitecture arch() const;
 
     /** Defines @a pActionPool. */
     void setActionPool(UIActionPool *pActionPool);
@@ -214,14 +223,16 @@ public:
 
 protected:
 
-    /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
-
     /** Handles show @a pEvent. */
     virtual void showEvent(QShowEvent *pEvent) RT_OVERRIDE;
 
+    /** Handles filter change. */
+    virtual void handleFilterChange() RT_OVERRIDE;
+
 private slots:
 
+    /** Handles translation event. */
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
     /** Handles enumeration of medium with @a uMediumId. */
     void sltHandleMediumEnumerated(const QUuid &uMediumId);
     /** Handles removing of medium with @a uMediumId. */
@@ -340,13 +351,13 @@ private:
     /** Cleanups all. */
     void cleanup();
 
+    /** Updates root and current index most suitable for this editor. */
+    void updateRootAndCurrentIndexes();
+
     /** Adds controller with @a strName, @a enmBus and @a enmType. */
     void addControllerWrapper(const QString &strName, KStorageBus enmBus, KStorageControllerType enmType);
     /** Adds attachment with @a enmDevice. */
     void addAttachmentWrapper(KDeviceType enmDevice);
-
-    /** Updates additions details according to passed @a enmType. */
-    void updateAdditionalDetails(KDeviceType enmType);
 
     /** Generates unique controller name based on passed @a strTemplate. */
     QString generateUniqueControllerName(const QString &strTemplate) const;
@@ -387,6 +398,9 @@ private:
 
         /** Holds configuration access level. */
         ConfigurationAccessLevel  m_enmConfigurationAccessLevel;
+
+        /** Holds whether we are showing full contents. */
+        bool  m_fShowFullContents;
 
         /** Holds the last mouse-press position. */
         QPoint  m_mousePressPosition;

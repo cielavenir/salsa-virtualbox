@@ -1193,7 +1193,8 @@ static DECLCALLBACK(int) utsClientWorker(RTTHREAD hThread, void *pvUser)
     }
 
     RTPollSetDestroy(hPollSet);
-
+    if (papClients)
+        RTMemFree(papClients);
     return rc;
 }
 
@@ -1560,7 +1561,7 @@ static RTEXITCODE utsParseArgv(int argc, char **argv, bool *pfExit)
             }
 
             case 'V':
-                RTPrintf("$Revision: 157380 $\n");
+                RTPrintf("$Revision: 157914 $\n");
                 *pfExit = true;
                 return RTEXITCODE_SUCCESS;
 

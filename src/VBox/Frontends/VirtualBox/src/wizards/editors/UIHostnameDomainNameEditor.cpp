@@ -37,15 +37,16 @@
 #include "QILineEdit.h"
 #include "QIRichTextLabel.h"
 #include "QIToolButton.h"
-#include "UICommon.h"
 #include "UIIconPool.h"
 #include "UIHostnameDomainNameEditor.h"
-#include "UIWizardNewVM.h"
+#include "UITranslationEventListener.h"
 
+/* Other VBox includes: */
+#include "iprt/assert.h"
 
 
 UIHostnameDomainNameEditor::UIHostnameDomainNameEditor(QWidget *pParent /*  = 0 */)
-    : QIWithRetranslateUI<QWidget>(pParent)
+    : QWidget(pParent)
     , m_pHostnameLineEdit(0)
     , m_pDomainNameLineEdit(0)
     , m_pHostnameLabel(0)
@@ -73,11 +74,13 @@ void UIHostnameDomainNameEditor::mark()
     if (m_pHostnameLineEdit)
         m_pHostnameLineEdit->mark(!m_pHostnameLineEdit->hasAcceptableInput(),
                                   tr("Hostname should be at least 2 character long. "
-                                     "Allowed characters are alphanumerics, \"-\" and \".\""));
+                                     "Allowed characters are alphanumerics, \"-\" and \".\""),
+                                  tr("Hostname is valid"));
     if (m_pDomainNameLineEdit)
         m_pDomainNameLineEdit->mark(!m_pDomainNameLineEdit->hasAcceptableInput(),
                                     tr("Domain name should be at least 2 character long. "
-                                       "Allowed characters are alphanumerics, \"-\" and \".\""));
+                                       "Allowed characters are alphanumerics, \"-\" and \".\""),
+                                    tr("Domain name is valid"));
 }
 
 void UIHostnameDomainNameEditor::setHostname(const QString &strHostname)
@@ -122,7 +125,7 @@ void UIHostnameDomainNameEditor::setFirstColumnWidth(int iWidth)
         m_pMainLayout->setColumnMinimumWidth(0, iWidth);
 }
 
-void UIHostnameDomainNameEditor::retranslateUi()
+void UIHostnameDomainNameEditor::sltRetranslateUI()
 {
     if (m_pHostnameLabel)
         m_pHostnameLabel->setText(tr("Hostna&me:"));
@@ -134,8 +137,7 @@ void UIHostnameDomainNameEditor::retranslateUi()
         m_pDomainNameLineEdit->setToolTip(tr("Holds the domain name."));
 }
 
-template<class T>
-void UIHostnameDomainNameEditor::addLineEdit(int &iRow, QLabel *&pLabel, T *&pLineEdit, QGridLayout *pLayout)
+void UIHostnameDomainNameEditor::addLineEdit(int &iRow, QLabel *&pLabel, QILineEdit *&pLineEdit, QGridLayout *pLayout)
 {
     AssertReturnVoid(pLayout);
     if (pLabel || pLineEdit)
@@ -144,17 +146,15 @@ void UIHostnameDomainNameEditor::addLineEdit(int &iRow, QLabel *&pLabel, T *&pLi
     pLabel = new QLabel;
     AssertReturnVoid(pLabel);
     pLabel->setAlignment(Qt::AlignRight);
-    //pLabel->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-
     pLayout->addWidget(pLabel, iRow, 0, 1, 1);
 
-    pLineEdit = new T;
+    pLineEdit = new QILineEdit;
     AssertReturnVoid(pLineEdit);
+    pLineEdit->setMarkable(true);
 
     pLayout->addWidget(pLineEdit, iRow, 1, 1, 3);
     pLabel->setBuddy(pLineEdit);
     ++iRow;
-    return;
 }
 
 void UIHostnameDomainNameEditor::prepare()
@@ -166,27 +166,30 @@ void UIHostnameDomainNameEditor::prepare()
         return;
     setLayout(m_pMainLayout);
     int iRow = 0;
-    addLineEdit<UIMarkableLineEdit>(iRow, m_pHostnameLabel, m_pHostnameLineEdit, m_pMainLayout);
-    addLineEdit<QILineEdit>(iRow, m_pDomainNameLabel, m_pDomainNameLineEdit, m_pMainLayout);
+    addLineEdit(iRow, m_pHostnameLabel, m_pHostnameLineEdit, m_pMainLayout);
+    addLineEdit(iRow, m_pDomainNameLabel, m_pDomainNameLineEdit, m_pMainLayout);
 
     /* Host name and domain should be strings of minimum length of 2 and composed of alpha numerics, '-', and '.'
      * Exclude strings with . at the end: */
     m_pHostnameLineEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9-.]{2,}[$a-zA-Z0-9-]"), this));
     m_pDomainNameLineEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9-.]{2,}[$a-zA-Z0-9-]"), this));
 
-    connect(m_pHostnameLineEdit, &UIMarkableLineEdit::textChanged,
+    connect(m_pHostnameLineEdit, &QILineEdit::textChanged,
             this, &UIHostnameDomainNameEditor::sltHostnameChanged);
     connect(m_pDomainNameLineEdit, &QILineEdit::textChanged,
             this, &UIHostnameDomainNameEditor::sltDomainChanged);
 
-    retranslateUi();
+    sltRetranslateUI();
+    connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
+            this, &UIHostnameDomainNameEditor::sltRetranslateUI);
 }
 
 void UIHostnameDomainNameEditor::sltHostnameChanged()
 {
     m_pHostnameLineEdit->mark(!m_pHostnameLineEdit->hasAcceptableInput(),
                               tr("Hostname should be at least 2 character long. "
-                                 "Allowed characters are alphanumerics, \"-\" and \".\""));
+                                 "Allowed characters are alphanumerics, \"-\" and \".\""),
+                              tr("Hostname is valid"));
     emit sigHostnameDomainNameChanged(hostnameDomainName(), isComplete());
 }
 
@@ -194,6 +197,7 @@ void UIHostnameDomainNameEditor::sltDomainChanged()
 {
     m_pDomainNameLineEdit->mark(!m_pDomainNameLineEdit->hasAcceptableInput(),
                                 tr("Domain name should be at least 2 character long. "
-                                   "Allowed characters are alphanumerics, \"-\" and \".\""));
+                                   "Allowed characters are alphanumerics, \"-\" and \".\""),
+                                tr("Domain name is valid"));
     emit sigHostnameDomainNameChanged(hostnameDomainName(), isComplete());
 }

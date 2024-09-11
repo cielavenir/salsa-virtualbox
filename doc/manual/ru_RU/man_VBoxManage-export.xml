@@ -30,7 +30,7 @@
 ]>
 <refentry id="vboxmanage-export" lang="en">
   <refentryinfo>
-    <pubdate>$Date: 2023-01-17 15:15:46 +0100 (Tue, 17 Jan 2023) $</pubdate>
+    <pubdate>$Date: 2024-02-29 21:47:25 +0100 (Thu, 29 Feb 2024) $</pubdate>
     <title>VBoxManage export</title>
   </refentryinfo>
 
@@ -109,7 +109,7 @@
     </cmdsynopsis>
   </refsynopsisdiv>
 
-  <refsect1>
+  <refsect1 id="vboxmanage-export-description">
     <title>Описание</title>
     <para>
       Команда <command>VBoxManage export</command> позволяет экспортировать
@@ -420,7 +420,7 @@
     </refsect2>
   </refsect1>
 
-  <refsect1>
+  <refsect1 id="vboxmanage-export-examples">
     <title>Примет</title>
     <remark role="help-scope" condition="GLOBAL"/>
     <para>

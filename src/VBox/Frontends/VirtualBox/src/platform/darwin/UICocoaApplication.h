@@ -82,6 +82,9 @@ public:
     /** Returns whether application is currently active. */
     bool isActive() const;
 
+    /** Returns whether app is in Dark mode. */
+    bool isDarkMode() const;
+
     /** Hides the application. */
     void hide();
 

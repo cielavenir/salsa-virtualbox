@@ -104,8 +104,13 @@ typedef uint64_t STAMCOUNTER;
 
 /** @name CPUM Saved State Version.
  * @{ */
-/** The current saved state version. */
-#define CPUM_SAVED_STATE_VERSION                CPUM_SAVED_STATE_VERSION_HWVIRT_VMX_3
+/** The current saved state version.
+ *  @todo When bumping to next version, add CPUMCTX::enmHwVirt to the saved
+ *        state. */
+#define CPUM_SAVED_STATE_VERSION                CPUM_SAVED_STATE_VERSION_HWVIRT_VMX_4
+/** The saved state version with u32RestoreProcCtls2 for Nested Microsoft
+ *  Hyper-V. */
+#define CPUM_SAVED_STATE_VERSION_HWVIRT_VMX_4   23
 /** The saved state version with more virtual VMCS fields (HLAT prefix size,
  *  PCONFIG-exiting bitmap, HLAT ptr, VM-exit ctls2) and a CPUMCTX field (VM-exit
  *  ctls2 MSR). */
@@ -362,7 +367,10 @@ typedef struct CPUM
     /** Indicates that a state restore is pending.
      * This is used to verify load order dependencies (PGM). */
     bool                    fPendingRestore;
-    uint8_t                 abPadding0[2];
+    /** Whether MTRR reads report valid memory types for memory regions. */
+    bool                    fMtrrRead;
+    /** Whether the guest's writes to MTRRs are implemented. */
+    bool                    fMtrrWrite;
 
     /** XSAVE/XRTOR components we can expose to the guest mask. */
     uint64_t                fXStateGuestMask;

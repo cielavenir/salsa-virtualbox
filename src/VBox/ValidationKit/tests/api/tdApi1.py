@@ -37,7 +37,7 @@ terms and conditions of either the GPL or the CDDL or both.
 
 SPDX-License-Identifier: GPL-3.0-only OR CDDL-1.0
 """
-__version__ = "$Revision: 155244 $"
+__version__ = "$Revision: 157979 $"
 
 
 # Standard Python imports.
@@ -45,7 +45,7 @@ import os
 import sys
 
 # Only the main script needs to modify the path.
-try:    __file__
+try:    __file__                            # pylint: disable=used-before-assignment
 except: __file__ = sys.argv[0]
 g_ksValidationKitDir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(g_ksValidationKitDir)
@@ -95,5 +95,7 @@ if __name__ == '__main__':
     from tdTreeDepth1    import SubTstDrvTreeDepth1;  # pylint: disable=relative-import
     from tdMoveVm1       import SubTstDrvMoveVm1;     # pylint: disable=relative-import
     from tdCloneMedium1  import SubTstDrvCloneMedium1;# pylint: disable=relative-import
+    from tdSnapshots1    import SubTstDrvNestedSnapshots1;# pylint: disable=relative-import
     sys.exit(tdApi1([SubTstDrvPython1, SubTstDrvAppliance1, SubTstDrvMoveMedium1,
-                     SubTstDrvTreeDepth1, SubTstDrvMoveVm1, SubTstDrvCloneMedium1]).main(sys.argv))
+                     SubTstDrvTreeDepth1, SubTstDrvMoveVm1, SubTstDrvCloneMedium1,
+                     SubTstDrvNestedSnapshots1]).main(sys.argv))

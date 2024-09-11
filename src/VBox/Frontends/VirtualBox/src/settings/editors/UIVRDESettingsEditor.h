@@ -32,10 +32,10 @@
 #endif
 
 /* GUI includes: */
-#include "QIWithRetranslateUI.h"
+#include "UIEditor.h"
 
 /* COM includes: */
-#include "COMEnums.h"
+#include "KAuthType.h"
 
 /* Forward declarations: */
 class QCheckBox;
@@ -44,8 +44,8 @@ class QLabel;
 class QLineEdit;
 class QWidget;
 
-/** QWidget subclass used as a VRDE settings editor. */
-class SHARED_LIBRARY_STUFF UIVRDESettingsEditor : public QIWithRetranslateUI<QWidget>
+/** UIEditor sub-class used as a VRDE settings editor. */
+class SHARED_LIBRARY_STUFF UIVRDESettingsEditor : public UIEditor
 {
     Q_OBJECT;
 
@@ -87,12 +87,11 @@ public:
     /** Returns whether multiple connections allowed. */
     bool isMultipleConnectionsAllowed() const;
 
-protected:
-
-    /** Handles translation event. */
-    virtual void retranslateUi() RT_OVERRIDE;
 
 private slots:
+
+    /** Handles translation event. */
+    virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
     /** Handles whether VRDE is @a fEnabled. */
     void sltHandleFeatureToggled(bool fEnabled);
