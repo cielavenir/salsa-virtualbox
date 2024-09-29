@@ -1,3 +1,10 @@
+virtualbox (7.1.0-dfsg-1) UNRELEASED; urgency=medium
+
+  * New upstream version 7.1.0-dfsg
+  * Refresh patches
+
+ -- Gianfranco Costamagna <locutusofborg@debian.org>  Thu, 12 Sep 2024 09:33:56 +0200
+
 virtualbox (7.0.20-dfsg-1) unstable; urgency=medium
 
   * New upstream version 7.0.20-dfsg

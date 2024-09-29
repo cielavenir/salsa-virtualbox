@@ -36,9 +36,10 @@ Build-Depends: bzip2,
                libpixman-1-dev,
                libpng-dev,
                libpulse-dev,
-               libqt5x11extras5-dev,
-               libqt5opengl5-dev,
-               qttools5-dev,
+#               libqt5x11extras5-dev,
+               libqt6opengl6-dev,
+               qt6-scxml-dev,
+               qt6-tools-dev,
                libsdl1.2-dev,
                libsdl2-dev,
                libssl-dev,
@@ -75,7 +76,7 @@ Build-Depends: bzip2,
                x11proto-xf86dri-dev,
                xserver-xorg-dev,
                xsltproc,
-               yasm,
+               yasm, ant,
                zlib1g-dev
 Standards-Version: 4.7.0
 Rules-Requires-Root: no
@@ -175,7 +176,7 @@ Package: virtualbox-guest-x11
 Section: contrib/x11
 Replaces: virtualbox-guest-x11-hwe (<< 7.0.16-dfsg-5)
 Breaks: virtualbox-guest-x11-hwe (<< 7.0.16-dfsg-5)
-Architecture: amd64 i386
+Architecture: amd64 arm64 armhf i386
 Depends: libnotify-bin,
          x11-xserver-utils,
          virtualbox-guest-utils (= ${binary:Version}),
