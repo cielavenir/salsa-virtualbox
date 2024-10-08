@@ -101,6 +101,7 @@ Package: virtualbox
 Architecture: amd64
 Depends: adduser,
          iproute2,
+         libfuse2,
          procps,
          virtualbox-dkms (>= ${source:Version}) | virtualbox-source (>= ${source:Version}) | virtualbox-modules,
          ${misc:Depends},
