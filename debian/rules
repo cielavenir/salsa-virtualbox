@@ -72,6 +72,7 @@ override_dh_auto_build:
 	    VBOX_WITH_UPDATE_REQUEST= \
 	    KBUILD_VERBOSE=2 \
 	    VBOX_WITH_EXTPACK_VBOXDTRACE= \
+	    VBOX_WITH_DOCS= \
 	    VBOX_DITA_OT_PATH=/usr/share/dita-ot  VBOX_DITA_CLASSPATH=/usr/share/dita-ot/lib/ant-launcher.jar
 
 	xsltproc --nonet --stringparam section.autolabel 1 \
