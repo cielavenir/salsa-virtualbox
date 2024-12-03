@@ -1,0 +1,15 @@
+Description: remove KMOD_SCROLL as it requires SDL 2.0.18
+
+Index: virtualbox/src/VBox/Frontends/VBoxSDL/VBoxSDL.cpp
+========================================================
+--- virtualbox.orig/src/VBox/Frontends/VBoxSDL/VBoxSDL.cpp
++++ virtualbox/src/VBox/Frontends/VBoxSDL/VBoxSDL.cpp
+@@ -715,7 +715,7 @@ static const char *keyModToStr(unsigned mod)
+         RT_CASE_RET_STR(KMOD_NUM);
+         RT_CASE_RET_STR(KMOD_CAPS);
+         RT_CASE_RET_STR(KMOD_MODE);
+-        RT_CASE_RET_STR(KMOD_SCROLL);
++        // RT_CASE_RET_STR(KMOD_SCROLL);
+         default:
+             break;
+     }
